@@ -11,6 +11,7 @@ const eslintConfig = defineConfig([
     settings: {
       "better-tailwindcss": {
         entryPoint: "app/globals.css",
+        rootFontSize: 16,
       },
     },
   },
