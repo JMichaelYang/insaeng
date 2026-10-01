@@ -44,6 +44,6 @@ next-env.d.ts
 .claude/worktrees
 
 # playwright
-/test-results/
-/playwright-report/
-/blob-report/
+test-results/
+playwright-report/
+blob-report/

@@ -9,6 +9,7 @@ export default defineConfig([
     settings: {
       "better-tailwindcss": {
         entryPoint: "src/styles/tailwind.css",
+        rootFontSize: 16,
       },
     },
   },

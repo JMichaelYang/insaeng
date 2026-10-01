@@ -5,7 +5,9 @@
     "dev": "pnpm --filter web dev",
     "build": "pnpm --recursive build",
     "lint": "pnpm --recursive lint",
-    "tokens": "pnpm --filter @insaeng/design-system tokens"
+    "tokens": "pnpm --filter @insaeng/design-system tokens",
+    "test:snapshots": "pnpm --filter web test:snapshots",
+    "test:snapshots:update": "pnpm --filter web test:snapshots:update"
   },
   "packageManager": "pnpm@12.8.1"
 }
