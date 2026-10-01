@@ -11,7 +11,6 @@ permissions:
 jobs:
   update:
     runs-on: ubuntu-latest
-    # Keep the tag in sync with @playwright/test in package.json.
     container:
       image: mcr.microsoft.com/playwright:v1.63.0-noble
       options: --ipc=host
