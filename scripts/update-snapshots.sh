@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Regenerate screenshot baselines in the same Linux image CI uses, so font
-# rendering matches. Extra args are passed to `playwright test`.
 set -euo pipefail
 
 playwright=$(node -p "require('./package.json').devDependencies['@playwright/test']")

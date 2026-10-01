@@ -16,7 +16,6 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${port}`,
   },
-  // Tailwind breakpoints are width-only; each viewport sits in its own band.
   projects: [
     {
       name: "mobile",
