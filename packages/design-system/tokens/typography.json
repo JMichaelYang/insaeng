@@ -1,0 +1,92 @@
+{
+  "font": {
+    "family": {
+      "$type": "fontFamily",
+      "sans": {
+        "$value": ["Pretendard Variable", "Pretendard", "-apple-system", "BlinkMacSystemFont", "system-ui", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "sans-serif"],
+        "$description": "UI and body text. Covers Latin and Hangul."
+      },
+      "mono": {
+        "$value": ["var(--font-geist-mono)", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+        "$description": "Code. The app loads Geist Mono with next/font and exposes it as --font-geist-mono."
+      },
+      "display": {
+        "$value": ["var(--font-pochaevsk)", "Pretendard Variable", "Pretendard", "serif"],
+        "$description": "Display headings. Pochaevsk has Latin only and a single 400 weight; Hangul falls back to Pretendard."
+      }
+    },
+    "weight": {
+      "$type": "fontWeight",
+      "normal": { "$value": 400 },
+      "medium": { "$value": 500 },
+      "semibold": { "$value": 600 },
+      "bold": { "$value": 700 }
+    },
+    "size": {
+      "$type": "dimension",
+      "xs": { "$value": "0.75rem" },
+      "sm": { "$value": "0.875rem" },
+      "base": { "$value": "1rem" },
+      "lg": { "$value": "1.125rem" },
+      "xl": { "$value": "1.25rem" },
+      "2xl": { "$value": "1.5rem" },
+      "3xl": { "$value": "1.875rem" },
+      "4xl": { "$value": "2.25rem" },
+      "5xl": { "$value": "3rem" },
+      "6xl": { "$value": "3.75rem" }
+    },
+    "line-height": {
+      "$type": "number",
+      "none": { "$value": 1 },
+      "tight": { "$value": 1.2 },
+      "snug": { "$value": 1.35 },
+      "normal": { "$value": 1.5 },
+      "relaxed": { "$value": 1.7 }
+    },
+    "letter-spacing": {
+      "$type": "dimension",
+      "tighter": { "$value": "-0.03em" },
+      "tight": { "$value": "-0.015em" },
+      "normal": { "$value": "0em" },
+      "wide": { "$value": "0.02em" },
+      "wider": { "$value": "0.06em" }
+    }
+  },
+  "typography": {
+    "$type": "typography",
+    "$description": "Composite text styles, emitted as type-* utilities.",
+    "display": {
+      "$value": { "fontFamily": "{font.family.display}", "fontSize": "{font.size.6xl}", "fontWeight": "{font.weight.normal}", "lineHeight": "{font.line-height.none}", "letterSpacing": "{font.letter-spacing.normal}" }
+    },
+    "heading-xl": {
+      "$value": { "fontFamily": "{font.family.display}", "fontSize": "{font.size.4xl}", "fontWeight": "{font.weight.normal}", "lineHeight": "{font.line-height.tight}", "letterSpacing": "{font.letter-spacing.normal}" }
+    },
+    "heading-lg": {
+      "$value": { "fontFamily": "{font.family.sans}", "fontSize": "{font.size.3xl}", "fontWeight": "{font.weight.bold}", "lineHeight": "{font.line-height.tight}", "letterSpacing": "{font.letter-spacing.tight}" }
+    },
+    "heading-md": {
+      "$value": { "fontFamily": "{font.family.sans}", "fontSize": "{font.size.2xl}", "fontWeight": "{font.weight.semibold}", "lineHeight": "{font.line-height.tight}", "letterSpacing": "{font.letter-spacing.tight}" }
+    },
+    "heading-sm": {
+      "$value": { "fontFamily": "{font.family.sans}", "fontSize": "{font.size.xl}", "fontWeight": "{font.weight.semibold}", "lineHeight": "{font.line-height.snug}", "letterSpacing": "{font.letter-spacing.normal}" }
+    },
+    "body-lg": {
+      "$value": { "fontFamily": "{font.family.sans}", "fontSize": "{font.size.lg}", "fontWeight": "{font.weight.normal}", "lineHeight": "{font.line-height.relaxed}", "letterSpacing": "{font.letter-spacing.normal}" }
+    },
+    "body-md": {
+      "$value": { "fontFamily": "{font.family.sans}", "fontSize": "{font.size.base}", "fontWeight": "{font.weight.normal}", "lineHeight": "{font.line-height.normal}", "letterSpacing": "{font.letter-spacing.normal}" }
+    },
+    "body-sm": {
+      "$value": { "fontFamily": "{font.family.sans}", "fontSize": "{font.size.sm}", "fontWeight": "{font.weight.normal}", "lineHeight": "{font.line-height.normal}", "letterSpacing": "{font.letter-spacing.normal}" }
+    },
+    "label": {
+      "$value": { "fontFamily": "{font.family.sans}", "fontSize": "{font.size.sm}", "fontWeight": "{font.weight.medium}", "lineHeight": "{font.line-height.snug}", "letterSpacing": "{font.letter-spacing.normal}" }
+    },
+    "caption": {
+      "$value": { "fontFamily": "{font.family.sans}", "fontSize": "{font.size.xs}", "fontWeight": "{font.weight.normal}", "lineHeight": "{font.line-height.normal}", "letterSpacing": "{font.letter-spacing.wide}" }
+    },
+    "code": {
+      "$value": { "fontFamily": "{font.family.mono}", "fontSize": "{font.size.sm}", "fontWeight": "{font.weight.normal}", "lineHeight": "{font.line-height.normal}", "letterSpacing": "{font.letter-spacing.normal}" }
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "@insaeng/design-system",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tailwind.css": "./src/styles/tailwind.css",
+    "./fonts.css": "./src/styles/fonts.css",
+    "./fonts/*": "./assets/fonts/*"
+  },
+  "scripts": {
+    "tokens": "node scripts/build-tokens.mjs",
+    "tokens:check": "node scripts/build-tokens.mjs && git diff --exit-code -- src/generated",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": "^19"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "pretendard": "^1.3.9",
+    "tailwind-merge": "^3.7.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "eslint": "^9.39.5",
+    "eslint-plugin-better-tailwindcss": "^4.7.0",
+    "style-dictionary": "^5.5.5",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.71.0"
+  }
+}

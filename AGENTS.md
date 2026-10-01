@@ -1,9 +1,14 @@
-<!-- BEGIN:nextjs-agent-rules -->
+# insaeng
 
-# This is NOT the Next.js you know
+pnpm monorepo.
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+- `apps/web`: the Next.js app. Read `apps/web/AGENTS.md` before changing it.
+- `packages/design-system` (`@insaeng/design-system`): design tokens, Tailwind theme, and shared components. See its README.
 
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+Run `pnpm dev`, `pnpm build`, and `pnpm lint` from the repo root.
 
-<!-- END:nextjs-agent-rules -->
+## Styling rules
+
+- Use semantic tokens (`bg-canvas`, `text-muted`, `bg-primary`, `type-heading-lg`), not palette steps or arbitrary colors. Tailwind's default palette is disabled and lint rejects unknown classes.
+- To change a token, edit `packages/design-system/tokens/*.json` and run `pnpm tokens`. Never edit `src/generated` by hand; CI fails if it is stale.
+- New shared components go in the design system's `atoms/`, `molecules/`, or `organisms/`. Page layouts stay in the app.

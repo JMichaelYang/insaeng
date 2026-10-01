@@ -1,0 +1,72 @@
+{
+  "spacing": {
+    "$type": "dimension",
+    "base": {
+      "$value": "0.25rem",
+      "$description": "4px grid. Tailwind multiplies this for p-4, gap-2, etc."
+    },
+    "inset": {
+      "$description": "Padding inside a container.",
+      "xs": { "$value": "0.25rem" },
+      "sm": { "$value": "0.5rem" },
+      "md": { "$value": "1rem" },
+      "lg": { "$value": "1.5rem" },
+      "xl": { "$value": "2rem" }
+    },
+    "stack": {
+      "$description": "Vertical gap between stacked elements.",
+      "xs": { "$value": "0.25rem" },
+      "sm": { "$value": "0.5rem" },
+      "md": { "$value": "1rem" },
+      "lg": { "$value": "1.5rem" },
+      "xl": { "$value": "2.5rem" },
+      "2xl": { "$value": "4rem" }
+    },
+    "inline": {
+      "$description": "Horizontal gap between inline elements.",
+      "xs": { "$value": "0.25rem" },
+      "sm": { "$value": "0.5rem" },
+      "md": { "$value": "0.75rem" },
+      "lg": { "$value": "1rem" }
+    }
+  },
+  "size": {
+    "$type": "dimension",
+    "control": {
+      "$description": "Heights of buttons, inputs, selects.",
+      "sm": { "$value": "2rem" },
+      "md": { "$value": "2.5rem" },
+      "lg": { "$value": "3rem" }
+    },
+    "icon": {
+      "sm": { "$value": "1rem" },
+      "md": { "$value": "1.25rem" },
+      "lg": { "$value": "1.5rem" }
+    },
+    "container": {
+      "$description": "Max widths, used by max-w-*.",
+      "3xs": { "$value": "16rem" },
+      "2xs": { "$value": "18rem" },
+      "xs": { "$value": "20rem" },
+      "sm": { "$value": "24rem" },
+      "md": { "$value": "28rem" },
+      "lg": { "$value": "32rem" },
+      "xl": { "$value": "36rem" },
+      "2xl": { "$value": "42rem" },
+      "3xl": { "$value": "48rem" },
+      "4xl": { "$value": "56rem" },
+      "5xl": { "$value": "64rem" },
+      "6xl": { "$value": "72rem" },
+      "7xl": { "$value": "80rem" },
+      "prose": { "$value": "42rem", "$description": "Comfortable reading width." }
+    }
+  },
+  "breakpoint": {
+    "$type": "dimension",
+    "sm": { "$value": "40rem" },
+    "md": { "$value": "48rem" },
+    "lg": { "$value": "64rem" },
+    "xl": { "$value": "80rem" },
+    "2xl": { "$value": "96rem" }
+  }
+}

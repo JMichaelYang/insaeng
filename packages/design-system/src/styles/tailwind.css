@@ -1,0 +1,50 @@
+/*
+ * Tailwind entry point for apps using the design system. Import this instead
+ * of "tailwindcss" directly:
+ *
+ *   @import "@insaeng/design-system/tailwind.css";
+ */
+@import "tailwindcss";
+@import "../generated/theme.css";
+@import "../generated/typography.css";
+
+/* Scan design-system components so their classes are generated in the app. */
+@source "../";
+@source not "../generated";
+
+/* Matches the token dark theme: OS preference unless data-theme overrides it. */
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    &:where(:not([data-theme="light"], [data-theme="light"] *)) {
+      @slot;
+    }
+  }
+}
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+
+  :root[data-theme="light"] {
+    color-scheme: light;
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--background-color-canvas);
+    color: var(--text-color-default);
+  }
+
+  :focus-visible {
+    outline: var(--border-width-focus) solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}

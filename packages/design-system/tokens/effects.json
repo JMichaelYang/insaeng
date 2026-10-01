@@ -1,0 +1,73 @@
+{
+  "radius": {
+    "$type": "dimension",
+    "none": { "$value": "0rem" },
+    "sm": { "$value": "0.25rem" },
+    "md": { "$value": "0.5rem" },
+    "lg": { "$value": "0.75rem" },
+    "xl": { "$value": "1rem" },
+    "2xl": { "$value": "1.5rem" },
+    "full": { "$value": "9999px" }
+  },
+  "border-width": {
+    "$type": "dimension",
+    "thin": { "$value": "1px" },
+    "thick": { "$value": "2px" },
+    "focus": { "$value": "2px", "$description": "Focus ring / outline width." }
+  },
+  "shadow": {
+    "$type": "shadow",
+    "sm": {
+      "$value": { "color": "#1B1E250F", "offsetX": "0px", "offsetY": "1px", "blur": "2px", "spread": "0px" }
+    },
+    "md": {
+      "$value": [
+        { "color": "#1B1E2514", "offsetX": "0px", "offsetY": "2px", "blur": "6px", "spread": "-1px" },
+        { "color": "#1B1E250F", "offsetX": "0px", "offsetY": "1px", "blur": "3px", "spread": "0px" }
+      ]
+    },
+    "lg": {
+      "$value": [
+        { "color": "#1B1E251A", "offsetX": "0px", "offsetY": "10px", "blur": "24px", "spread": "-6px" },
+        { "color": "#1B1E250F", "offsetX": "0px", "offsetY": "4px", "blur": "8px", "spread": "-2px" }
+      ]
+    },
+    "xl": {
+      "$value": [
+        { "color": "#1B1E2524", "offsetX": "0px", "offsetY": "24px", "blur": "48px", "spread": "-12px" },
+        { "color": "#1B1E2514", "offsetX": "0px", "offsetY": "8px", "blur": "16px", "spread": "-4px" }
+      ]
+    }
+  },
+  "opacity": {
+    "$type": "number",
+    "disabled": { "$value": 0.5 },
+    "muted": { "$value": 0.7 },
+    "overlay": { "$value": 0.6 }
+  },
+  "duration": {
+    "$type": "duration",
+    "instant": { "$value": "0ms" },
+    "fast": { "$value": "120ms" },
+    "normal": { "$value": "200ms" },
+    "slow": { "$value": "320ms" }
+  },
+  "easing": {
+    "$type": "cubicBezier",
+    "standard": { "$value": [0.2, 0, 0, 1], "$description": "Most UI transitions." },
+    "enter": { "$value": [0, 0, 0, 1], "$description": "Elements appearing." },
+    "exit": { "$value": [0.3, 0, 1, 1], "$description": "Elements leaving." }
+  },
+  "z-index": {
+    "$type": "number",
+    "base": { "$value": 0 },
+    "raised": { "$value": 10 },
+    "dropdown": { "$value": 100 },
+    "sticky": { "$value": 200 },
+    "overlay": { "$value": 300 },
+    "modal": { "$value": 400 },
+    "popover": { "$value": 500 },
+    "toast": { "$value": 600 },
+    "tooltip": { "$value": 700 }
+  }
+}
