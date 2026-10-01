@@ -3,16 +3,16 @@ import Image from "next/image";
 export default function Home() {
   return (
     <div className="
-      flex flex-1 flex-col items-center justify-center bg-canvas font-sans
+      flex flex-1 flex-col items-center justify-center bg-surface font-sans
     ">
       <main className="
         flex w-full max-w-3xl flex-1 flex-col items-center justify-between
-        bg-surface px-16 py-32
+        bg-surface-container-lowest px-16 py-32
         sm:items-start
       ">
         <Image
           className="
-            h-5 w-25
+            h-5 w-[100px]
             dark:invert
           "
           src="/next.svg"
@@ -22,30 +22,30 @@ export default function Home() {
           priority
         />
         <div className="
-          flex flex-col items-center gap-stack-lg text-center
+          flex flex-col items-center gap-6 text-center
           sm:items-start sm:text-left
         ">
-          <h1 className="max-w-xs type-heading-lg text-strong">
+          <h1 className="max-w-xs type-heading-lg text-on-surface">
             To get started, edit the{" "}
             <code className="
-              rounded-sm bg-surface-sunken px-1.5 py-0.5 font-mono text-[0.9em]
+              rounded-sm bg-surface-container px-1 py-0.5 font-mono text-[0.9em]
             ">
               page.tsx
             </code>{" "}
             file.
           </h1>
-          <p className="max-w-md type-body-lg text-muted">
+          <p className="max-w-md type-body-lg text-on-surface-variant">
             Looking for a starting point or more instructions? Head over to{" "}
             <a
               href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-strong"
+              className="font-medium text-on-surface"
             >
               Templates
             </a>{" "}
             or the{" "}
             <a
               href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-strong"
+              className="font-medium text-on-surface"
             >
               Learning
             </a>{" "}
@@ -53,23 +53,21 @@ export default function Home() {
           </p>
         </div>
         <div className="
-          flex flex-col gap-stack-md type-label
+          flex flex-col gap-4 type-label
           sm:flex-row
         ">
           <a
             className="
-              flex h-control-lg w-full items-center justify-center gap-inline-sm
-              rounded-full bg-primary px-5 text-on-primary transition-colors
-              duration-fast ease-standard
-              hover:bg-primary-hover
-              md:w-39.5
+              state-layer flex h-control-lg w-full items-center justify-center
+              gap-2 rounded-full bg-primary px-5 text-on-primary
+              md:w-[158px]
             "
             href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
             target="_blank"
             rel="noopener noreferrer"
           >
             <Image
-              className="h-3.5 w-4 invert"
+              className="h-[14px] w-4"
               src="/vercel.svg"
               alt="Vercel logomark"
               width={16}
@@ -79,11 +77,10 @@ export default function Home() {
           </a>
           <a
             className="
-              flex h-control-lg w-full items-center justify-center rounded-full
-              border border-solid border-strong px-5 text-default
-              transition-colors duration-fast ease-standard
-              hover:bg-surface-sunken
-              md:w-39.5
+              state-layer flex h-control-lg w-full items-center justify-center
+              rounded-full border border-solid border-outline px-5
+              text-on-surface
+              md:w-[158px]
             "
             href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
             target="_blank"

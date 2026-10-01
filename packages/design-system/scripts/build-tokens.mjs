@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import StyleDictionary from "style-dictionary";
@@ -39,17 +39,9 @@ function themeVar([group, ...rest]) {
   const name = rest.join("-");
   switch (group) {
     case "palette":
+      return null;
+    case "color":
       return `--color-${name}`;
-    case "color": {
-      const [kind, variant] = rest;
-      if (kind === "bg") return `--background-color-${variant}`;
-      if (kind === "text") return `--text-color-${variant}`;
-      if (kind === "border") return `--border-color-${variant}`;
-      if (variant === "default") return `--color-${kind}`;
-      if (variant === "on") return `--color-on-${kind}`;
-      if (variant.startsWith("on-")) return `--color-on-${kind}-${variant.slice(3)}`;
-      return `--color-${kind}-${variant}`;
-    }
     case "font": {
       const [kind, variant] = rest;
       if (kind === "family") return `--font-${variant}`;
@@ -60,11 +52,11 @@ function themeVar([group, ...rest]) {
       break;
     }
     case "spacing":
-      return rest[0] === "base" ? "--spacing" : `--spacing-${name}`;
+      return `--spacing-${name}`;
     case "size":
       return rest[0] === "container"
         ? `--container-${rest[1]}`
-        : `--spacing-${name}`;
+        : `--size-${name}`;
     case "breakpoint":
       return `--breakpoint-${name}`;
     case "radius":
@@ -88,6 +80,8 @@ function themeVar([group, ...rest]) {
 }
 
 const RESETS = [
+  "--spacing",
+  "--spacing-*",
   "--color-*",
   "--font-*",
   "--font-weight-*",
@@ -101,8 +95,21 @@ const RESETS = [
   "--ease-*",
 ];
 
-const decl = (t) => `  ${themeVar(t.path)}: ${t.$value};`;
+const paletteRef = /^\{palette\.([^}]+)\}$/;
+const value = (t) => {
+  const ref = typeof t.original.$value === "string" && t.original.$value.match(paletteRef);
+  return ref ? `var(--palette-${ref[1].replaceAll(".", "-")})` : t.$value;
+};
+const roleVar = (t) => `--role-${t.path.slice(1).join("-")}`;
+const isRole = (t) => t.path[0] === "color";
+const decl = (t) =>
+  isRole(t)
+    ? `  ${themeVar(t.path)}: var(${roleVar(t)});`
+    : `  ${themeVar(t.path)}: ${t.$value};`;
+const roleDecl = (indent) => (t) => `${indent}${roleVar(t)}: ${value(t)};`;
 const themed = base.filter((t) => themeVar(t.path));
+const palette = base.filter((t) => t.path[0] === "palette");
+const roles = base.filter(isRole);
 
 const themeCss = `@theme {
 ${RESETS.map((r) => `  ${r}: initial;`).join("\n")}
@@ -111,21 +118,32 @@ ${themed.map(decl).join("\n")}
 }
 
 @layer theme {
+  :root {
+${palette.map((t) => `    --palette-${t.path.slice(1).join("-")}: ${t.$value};`).join("\n")}
+
+${roles.map(roleDecl("    ")).join("\n")}
+  }
+
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-${dark.map((t) => `    ${decl(t)}`).join("\n")}
+${dark.map(roleDecl("      ")).join("\n")}
     }
   }
 
   :root[data-theme="dark"] {
-${dark.map(decl).join("\n")}
+${dark.map(roleDecl("    ")).join("\n")}
   }
 }
 `;
 
 const fontFamily = (v) => (Array.isArray(v) ? v.join(", ") : v);
 const typography = base.filter((t) => t.path[0] === "typography");
-const typographyCss = `${typography
+const sizeNames = (kind) =>
+  base
+    .filter((t) => t.path[0] === "size" && t.path[1] === kind)
+    .map((t) => t.path[2]);
+
+const utilitiesCss = `${typography
   .map(({ path: p, $value: v }) => `@utility type-${p.slice(1).join("-")} {
   font-family: ${fontFamily(v.fontFamily)};
   font-size: ${v.fontSize};
@@ -134,6 +152,19 @@ const typographyCss = `${typography
   letter-spacing: ${v.letterSpacing};
 }`)
   .join("\n\n")}
+
+@utility h-control-* {
+  height: --value(--size-control-*);
+}
+
+@utility min-h-control-* {
+  min-height: --value(--size-control-*);
+}
+
+@utility size-icon-* {
+  width: --value(--size-icon-*);
+  height: --value(--size-icon-*);
+}
 `;
 
 const keys = (prefix) =>
@@ -148,7 +179,7 @@ const themeNames = {
   text: keys("--text-").filter((k) => !k.startsWith("color-")),
   leading: keys("--leading-"),
   tracking: keys("--tracking-"),
-  spacing: keys("--spacing-"),
+  spacing: keys("--spacing-").map((k) => k.replace("_", ".")),
   container: keys("--container-"),
   breakpoint: keys("--breakpoint-"),
   radius: keys("--radius-"),
@@ -156,10 +187,9 @@ const themeNames = {
   ease: keys("--ease-"),
 };
 const semantic = {
-  bg: keys("--background-color-"),
-  text: keys("--text-color-"),
-  border: keys("--border-color-"),
   type: typography.map((t) => t.path.slice(1).join("-")),
+  control: sizeNames("control"),
+  icon: sizeNames("icon"),
 };
 const namesTs = `export const themeNames = ${JSON.stringify(themeNames, null, 2)} as const;
 
@@ -169,7 +199,8 @@ export const semanticNames = ${JSON.stringify(semantic, null, 2)} as const;
 await mkdir(outDir, { recursive: true });
 await Promise.all([
   writeFile(path.join(outDir, "theme.css"), themeCss),
-  writeFile(path.join(outDir, "typography.css"), typographyCss),
+  writeFile(path.join(outDir, "utilities.css"), utilitiesCss),
   writeFile(path.join(outDir, "theme-names.ts"), namesTs),
+  rm(path.join(outDir, "typography.css"), { force: true }),
 ]);
 console.log(`Wrote ${themed.length} theme variables, ${dark.length} dark overrides, ${typography.length} text styles to src/generated`);

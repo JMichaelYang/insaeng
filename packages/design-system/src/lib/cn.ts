@@ -11,9 +11,9 @@ const twMerge = extendTailwindMerge<"type">({
   },
   extend: {
     classGroups: {
-      "bg-color": [{ bg: [...semanticNames.bg] }],
-      "text-color": [{ text: [...semanticNames.text] }],
-      "border-color": [{ border: [...semanticNames.border] }],
+      h: [{ h: semanticNames.control.map((n) => `control-${n}`) }],
+      "min-h": [{ "min-h": semanticNames.control.map((n) => `control-${n}`) }],
+      size: [{ size: semanticNames.icon.map((n) => `icon-${n}`) }],
       type: [{ type: [...semanticNames.type] }],
     },
     conflictingClassGroups: {

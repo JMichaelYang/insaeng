@@ -41,9 +41,13 @@
   },
   "opacity": {
     "$type": "number",
-    "disabled": { "$value": 0.5 },
-    "muted": { "$value": 0.7 },
-    "overlay": { "$value": 0.6 }
+    "state-hover": { "$value": 0.08, "$description": "M3 state layer over content color." },
+    "state-focus": { "$value": 0.1 },
+    "state-pressed": { "$value": 0.1 },
+    "state-dragged": { "$value": 0.16 },
+    "disabled-container": { "$value": 0.12, "$description": "M3 disabled container: on-surface at this opacity." },
+    "disabled-content": { "$value": 0.38, "$description": "M3 disabled content: on-surface at this opacity." },
+    "scrim": { "$value": 0.32 }
   },
   "duration": {
     "$type": "duration",

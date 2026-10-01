@@ -85,3 +85,16 @@
   line-height: 1.5;
   letter-spacing: 0em;
 }
+
+@utility h-control-* {
+  height: --value(--size-control-*);
+}
+
+@utility min-h-control-* {
+  min-height: --value(--size-control-*);
+}
+
+@utility size-icon-* {
+  width: --value(--size-icon-*);
+  height: --value(--size-icon-*);
+}
