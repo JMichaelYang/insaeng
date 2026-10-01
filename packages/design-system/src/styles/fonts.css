@@ -1,10 +1,1 @@
-/*
- * Pretendard (font.family.sans), split into unicode-range subsets so pages
- * only download the Hangul glyphs they use. Import from JS in the app root:
- *
- *   import "@insaeng/design-system/fonts.css";
- *
- * Geist Mono and Pochaevsk are loaded by the app with next/font, which
- * exposes them as --font-geist-mono and --font-pochaevsk.
- */
 @import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";

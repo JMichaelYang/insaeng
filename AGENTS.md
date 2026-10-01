@@ -3,9 +3,13 @@
 pnpm monorepo.
 
 - `apps/web`: the Next.js app. Read `apps/web/AGENTS.md` before changing it.
-- `packages/design-system` (`@insaeng/design-system`): design tokens, Tailwind theme, and shared components. See its README.
+- `packages/design-system` (`@insaeng/design-system`): design tokens, Tailwind theme, and shared components.
 
 Run `pnpm dev`, `pnpm build`, and `pnpm lint` from the repo root.
+
+## Code rules
+
+- NO CODE COMMENTS. Do not add comments to code, including generated code.
 
 ## Styling rules
 
