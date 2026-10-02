@@ -3,14 +3,14 @@ import Image from "next/image";
 
 import { NotchedPanel } from "./_components/notched-panel";
 
-const mobileNotch = { radius: 80, fillet: 8, offset: 6 };
+const mobileNotch = { radius: 80, fillet: 8, offset: 4 };
 const desktopNotch = { radius: 156, fillet: 12, offset: 6 };
 
 export default function Home() {
   return (
     <main className="
-      relative flex flex-1 flex-col gap-3 p-4
-      lg:flex-row lg:p-8
+      relative flex flex-1 flex-col gap-2 p-3
+      lg:flex-row lg:gap-3 lg:p-6
     ">
       <NotchedPanel
         mobile={{ side: "bottom", notch: mobileNotch }}
