@@ -7,7 +7,7 @@ export function Avatar({ className, ...props }: ComponentProps<"span">) {
     <span
       className={cn(
         `
-          block shrink-0 overflow-hidden rounded-full border border-outline
+          block shrink-0 overflow-hidden rounded-full border-2 border-outline
           bg-surface-container
           *:size-full *:object-cover
         `,
