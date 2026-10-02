@@ -1,10 +1,8 @@
-import { Avatar } from "@insaeng/design-system";
+import { Avatar, NotchedPanel } from "@insaeng/design-system";
 import Image from "next/image";
 
-import { NotchedPanel } from "./_components/notched-panel";
-
 const mobileNotch = { radius: 80, fillet: 12, offset: 4 };
-const desktopNotch = { radius: 156, fillet: 12, offset: 6 };
+const desktopNotch = { radius: 156, fillet: 16, offset: 6 };
 
 export default function Home() {
   return (
@@ -13,6 +11,7 @@ export default function Home() {
       lg:flex-row lg:gap-3 lg:p-6
     ">
       <NotchedPanel
+        className="grow basis-0"
         mobile={{ side: "bottom", notch: mobileNotch }}
         desktop={{ side: "right", notch: desktopNotch }}
       >
@@ -24,6 +23,7 @@ export default function Home() {
         </div>
       </NotchedPanel>
       <NotchedPanel
+        className="grow basis-0"
         mobile={{ side: "top", notch: mobileNotch }}
         desktop={{ side: "left", notch: desktopNotch }}
       >

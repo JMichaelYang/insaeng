@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
 
-type Side = "top" | "right" | "bottom" | "left";
+import { cn } from "../lib/cn";
 
-type Notch = {
+export type NotchSide = "top" | "right" | "bottom" | "left";
+
+export type Notch = {
   radius: number;
   fillet: number;
   offset: number;
@@ -42,14 +44,14 @@ function notchShape({ radius, fillet, offset }: Notch) {
   };
 }
 
-const transforms: Record<Side, (w: number) => string> = {
+const transforms: Record<NotchSide, (w: number) => string> = {
   right: () => "matrix(1 0 0 1 0 0)",
   left: (w) => `matrix(-1 0 0 1 ${w} 0)`,
   bottom: () => "matrix(0 1 1 0 0 0)",
   top: (w) => `matrix(0 -1 1 0 0 ${w})`,
 };
 
-function NotchStrip({ side, notch }: { side: Side; notch: Notch }) {
+function NotchStrip({ side, notch }: { side: NotchSide; notch: Notch }) {
   const { width, height, fill, stroke } = notchShape(notch);
   const vertical = side === "left" || side === "right";
   const [w, h] = vertical ? [width, height] : [height, width];
@@ -74,7 +76,7 @@ function NotchStrip({ side, notch }: { side: Side; notch: Notch }) {
 }
 
 const layouts: Record<
-  Side,
+  NotchSide,
   { root: string; main: string; strip: string; before: string; after: string }
 > = {
   right: {
@@ -112,7 +114,7 @@ function NotchedBackground({
   notch,
   className,
 }: {
-  side: Side;
+  side: NotchSide;
   notch: Notch;
   className: string;
 }) {
@@ -149,14 +151,16 @@ function NotchedBackground({
 export function NotchedPanel({
   mobile,
   desktop,
+  className,
   children,
 }: {
-  mobile: { side: Side; notch: Notch };
-  desktop: { side: Side; notch: Notch };
+  mobile: { side: NotchSide; notch: Notch };
+  desktop: { side: NotchSide; notch: Notch };
+  className?: string;
   children: ReactNode;
 }) {
   return (
-    <section className="relative grow basis-0">
+    <section className={cn("relative", className)}>
       <NotchedBackground
         {...mobile}
         className="
