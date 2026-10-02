@@ -1,3 +1,4 @@
+import { Avatar } from "@insaeng/design-system";
 import Image from "next/image";
 
 export default function Home() {
@@ -28,18 +29,19 @@ export default function Home() {
         border-outline bg-surface p-3
         lg:p-5
       ">
-        <Image
-          className="
-            size-[9rem] rounded-full border border-outline object-cover
-            lg:size-[18rem]
-          "
-          src="/headshot.jpg"
-          alt="Jaewon Yang"
-          width={720}
-          height={720}
-          sizes="(min-width: 64rem) 18rem, 9rem"
-          preload
-        />
+        <Avatar className="
+          size-[9rem]
+          lg:size-[18rem]
+        ">
+          <Image
+            src="/headshot.jpg"
+            alt="Jaewon Yang"
+            width={720}
+            height={720}
+            sizes="(min-width: 64rem) 18rem, 9rem"
+            preload
+          />
+        </Avatar>
       </div>
     </main>
   );
