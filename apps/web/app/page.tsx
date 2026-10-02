@@ -1,14 +1,14 @@
 import { Avatar, NotchedPanel } from "@insaeng/design-system";
 import Image from "next/image";
 
-const mobileNotch = { radius: 80, fillet: 12, offset: 4 };
+const mobileNotch = { radius: 88, fillet: 12, offset: 4 };
 const desktopNotch = { radius: 156, fillet: 16, offset: 6 };
 
 export default function Home() {
   return (
     <main className="
-      relative flex flex-1 flex-col gap-2 p-3
-      lg:flex-row lg:gap-3 lg:p-6
+      relative flex flex-1 flex-col gap-2 p-2
+      lg:flex-row lg:gap-3 lg:p-5
     ">
       <NotchedPanel
         className="grow basis-0"
@@ -35,7 +35,7 @@ export default function Home() {
         </div>
       </NotchedPanel>
       <Avatar className="
-        absolute top-1/2 left-1/2 size-[9rem] -translate-1/2
+        absolute top-1/2 left-1/2 size-[10rem] -translate-1/2
         lg:size-[18rem]
       ">
         <Image
@@ -43,7 +43,7 @@ export default function Home() {
           alt="Jaewon Yang"
           width={720}
           height={720}
-          sizes="(min-width: 64rem) 18rem, 9rem"
+          sizes="(min-width: 64rem) 18rem, 10rem"
           preload
         />
       </Avatar>
