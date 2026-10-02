@@ -17,4 +17,7 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Check generated design tokens are up to date
+        run: pnpm --filter @insaeng/design-system tokens:check
+      - run: pnpm --filter @insaeng/design-system typecheck
       - run: pnpm build

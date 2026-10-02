@@ -1,0 +1,128 @@
+{
+  "color": {
+    "$type": "color",
+    "primary": {
+      "$value": "{palette.primary.300}"
+    },
+    "on-primary": {
+      "$value": "{palette.primary.950}"
+    },
+    "primary-container": {
+      "$value": "{palette.primary.800}"
+    },
+    "on-primary-container": {
+      "$value": "{palette.primary.100}"
+    },
+    "tertiary": {
+      "$value": "{palette.tertiary.300}"
+    },
+    "on-tertiary": {
+      "$value": "{palette.tertiary.950}"
+    },
+    "tertiary-container": {
+      "$value": "{palette.tertiary.800}"
+    },
+    "on-tertiary-container": {
+      "$value": "{palette.tertiary.100}"
+    },
+    "error": {
+      "$value": "{palette.error.300}"
+    },
+    "on-error": {
+      "$value": "{palette.error.950}"
+    },
+    "error-container": {
+      "$value": "{palette.error.800}"
+    },
+    "on-error-container": {
+      "$value": "{palette.error.100}"
+    },
+    "warning": {
+      "$value": "{palette.warning.300}"
+    },
+    "on-warning": {
+      "$value": "{palette.warning.950}"
+    },
+    "warning-container": {
+      "$value": "{palette.warning.800}"
+    },
+    "on-warning-container": {
+      "$value": "{palette.warning.100}"
+    },
+    "success": {
+      "$value": "{palette.success.300}"
+    },
+    "on-success": {
+      "$value": "{palette.success.950}"
+    },
+    "success-container": {
+      "$value": "{palette.success.800}"
+    },
+    "on-success-container": {
+      "$value": "{palette.success.100}"
+    },
+    "info": {
+      "$value": "{palette.info.300}"
+    },
+    "on-info": {
+      "$value": "{palette.info.950}"
+    },
+    "info-container": {
+      "$value": "{palette.info.800}"
+    },
+    "on-info-container": {
+      "$value": "{palette.info.100}"
+    },
+    "secondary": {
+      "$value": "{palette.secondary.200}"
+    },
+    "on-secondary": {
+      "$value": "{palette.neutral.900}"
+    },
+    "secondary-container": {
+      "$value": "{palette.secondary.800}"
+    },
+    "on-secondary-container": {
+      "$value": "{palette.secondary.100}"
+    },
+    "surface": {
+      "$value": "{palette.neutral.900}"
+    },
+    "surface-container-lowest": {
+      "$value": "{palette.neutral.950}"
+    },
+    "surface-container-low": {
+      "$value": "{palette.neutral.875}"
+    },
+    "surface-container": {
+      "$value": "{palette.neutral.850}"
+    },
+    "surface-container-high": {
+      "$value": "{palette.neutral.800}"
+    },
+    "on-surface": {
+      "$value": "{palette.neutral.50}"
+    },
+    "on-surface-variant": {
+      "$value": "{palette.neutral.200}"
+    },
+    "outline": {
+      "$value": "{palette.neutral.400}"
+    },
+    "outline-variant": {
+      "$value": "{palette.neutral.700}"
+    },
+    "inverse-surface": {
+      "$value": "{palette.neutral.50}"
+    },
+    "inverse-on-surface": {
+      "$value": "{palette.neutral.900}"
+    },
+    "inverse-primary": {
+      "$value": "{palette.primary.700}"
+    },
+    "scrim": {
+      "$value": "{palette.black}"
+    }
+  }
+}

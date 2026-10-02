@@ -1,0 +1,75 @@
+@import "tailwindcss";
+@import "../generated/theme.css";
+@import "../generated/utilities.css";
+
+@source "../";
+@source not "../generated";
+
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    &:where(:not([data-theme="light"], [data-theme="light"] *)) {
+      @slot;
+    }
+  }
+}
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+
+  :root[data-theme="light"] {
+    color-scheme: light;
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-on-surface);
+  }
+
+  :focus-visible {
+    outline: var(--border-width-focus) solid var(--color-secondary);
+    outline-offset: 2px;
+  }
+}
+
+@utility state-layer {
+  position: relative;
+  isolation: isolate;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background-color: currentColor;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-duration-fast) var(--ease-standard);
+  }
+
+  &:hover::before {
+    opacity: var(--opacity-state-hover);
+  }
+
+  &:focus-visible::before {
+    opacity: var(--opacity-state-focus);
+  }
+
+  &:active::before {
+    opacity: var(--opacity-state-pressed);
+  }
+
+  &:disabled::before {
+    opacity: 0;
+  }
+}

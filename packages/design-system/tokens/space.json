@@ -1,0 +1,62 @@
+{
+  "spacing": {
+    "$type": "dimension",
+    "$description": "Strict spacing rhythm. Shared by padding, margin, gap, inset, width, and height utilities.",
+    "0": { "$value": "0rem" },
+    "px": { "$value": "1px" },
+    "0_5": { "$value": "0.125rem" },
+    "1": { "$value": "0.25rem" },
+    "2": { "$value": "0.5rem" },
+    "3": { "$value": "0.75rem" },
+    "4": { "$value": "1rem" },
+    "5": { "$value": "1.25rem" },
+    "6": { "$value": "1.5rem" },
+    "8": { "$value": "2rem" },
+    "10": { "$value": "2.5rem" },
+    "12": { "$value": "3rem" },
+    "16": { "$value": "4rem" },
+    "20": { "$value": "5rem" },
+    "24": { "$value": "6rem" },
+    "32": { "$value": "8rem" }
+  },
+  "size": {
+    "$type": "dimension",
+    "control": {
+      "$description": "Heights of buttons, inputs, selects. Used as h-control-*.",
+      "sm": { "$value": "{spacing.8}" },
+      "md": { "$value": "{spacing.10}" },
+      "lg": { "$value": "{spacing.12}" }
+    },
+    "icon": {
+      "$description": "Icon sizes. Used as size-icon-*.",
+      "sm": { "$value": "{spacing.4}" },
+      "md": { "$value": "{spacing.5}" },
+      "lg": { "$value": "{spacing.6}" }
+    },
+    "container": {
+      "$description": "Max widths, used by max-w-*.",
+      "3xs": { "$value": "16rem" },
+      "2xs": { "$value": "18rem" },
+      "xs": { "$value": "20rem" },
+      "sm": { "$value": "24rem" },
+      "md": { "$value": "28rem" },
+      "lg": { "$value": "32rem" },
+      "xl": { "$value": "36rem" },
+      "2xl": { "$value": "42rem" },
+      "3xl": { "$value": "48rem" },
+      "4xl": { "$value": "56rem" },
+      "5xl": { "$value": "64rem" },
+      "6xl": { "$value": "72rem" },
+      "7xl": { "$value": "80rem" },
+      "prose": { "$value": "42rem", "$description": "Comfortable reading width." }
+    }
+  },
+  "breakpoint": {
+    "$type": "dimension",
+    "sm": { "$value": "40rem" },
+    "md": { "$value": "48rem" },
+    "lg": { "$value": "64rem" },
+    "xl": { "$value": "80rem" },
+    "2xl": { "$value": "96rem" }
+  }
+}
