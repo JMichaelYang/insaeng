@@ -3,7 +3,7 @@ import Image from "next/image";
 
 import { NotchedPanel } from "./_components/notched-panel";
 
-const mobileNotch = { radius: 80, fillet: 8, offset: 4 };
+const mobileNotch = { radius: 80, fillet: 12, offset: 4 };
 const desktopNotch = { radius: 156, fillet: 12, offset: 6 };
 
 export default function Home() {
