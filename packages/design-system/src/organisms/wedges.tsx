@@ -26,8 +26,6 @@ type Frame = { width: number; height: number; orientation: WedgeOrientation };
 
 export type WedgeLabels = readonly [string, string];
 
-const labelStrokeWidth = 1;
-
 const rowQuery = "(min-width: 64rem)";
 
 export function Wedges({
@@ -96,7 +94,6 @@ export function Wedges({
         >
           {geometry.sides.map((side, s) => (
             <g key={s}>
-              {side.ring && <Wedge path={side.ring.path} />}
               {side.ring && labels?.[s] && (
                 <>
                   <defs>
@@ -104,12 +101,9 @@ export function Wedges({
                   </defs>
                   <text
                     className={mergeClasses(
-                      "fill-none stroke-on-surface",
-                      frame.orientation === "row"
-                        ? "type-heading-xl"
-                        : "font-display text-3xl",
+                      "fill-on-surface font-display font-bold",
+                      frame.orientation === "row" ? "text-5xl" : "text-4xl",
                     )}
-                    strokeWidth={labelStrokeWidth}
                     textAnchor="middle"
                     dominantBaseline="central"
                   >
