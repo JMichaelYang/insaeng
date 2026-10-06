@@ -146,10 +146,28 @@ function ringCutPath(source: WedgePoint[], R: number, r: number): Segment[] {
   while (inside[(m + 1) % n]) m = (m + 1) % n;
   const a0 = poly[(k - 1 + n) % n];
   const u0 = norm(sub(poly[k], a0));
-  const entry = fillet(a0, u0, point(-u0.y, u0.x), R, r);
+  const in0 = point(-u0.y, u0.x);
   const b1 = poly[(m + 1) % n];
   const u1 = norm(sub(poly[m], b1));
-  const exit = fillet(b1, u1, point(u1.y, -u1.x), R, r);
+  const in1 = point(u1.y, -u1.x);
+  const turn = (radius: number) =>
+    cross(
+      fillet(a0, u0, in0, R, radius).circle,
+      fillet(b1, u1, in1, R, radius).circle,
+    );
+  const direction = Math.sign(turn(0));
+  let rr = r;
+  if (Math.sign(turn(r)) !== direction) {
+    let lo = 0;
+    for (let i = 0; i < 30; i++) {
+      const mid = (lo + rr) / 2;
+      if (Math.sign(turn(mid)) === direction) lo = mid;
+      else rr = mid;
+    }
+    rr = lo;
+  }
+  const entry = fillet(a0, u0, in0, R, rr);
+  const exit = fillet(b1, u1, in1, R, rr);
   const outside: WedgePoint[] = [];
   for (let i = (m + 1) % n; i !== k; i = (i + 1) % n) outside.push(poly[i]);
   const segments: Segment[] = [{ type: "M", to: exit.line }];
@@ -159,17 +177,22 @@ function ringCutPath(source: WedgePoint[], R: number, r: number): Segment[] {
     segments.push(...corner(v, prev, next, r));
   });
   segments.push({ type: "L", to: entry.line });
-  if (r > 0) {
+  if (rr > 0) {
     segments.push({
       type: "A",
       to: entry.circle,
-      radius: r,
+      radius: rr,
       center: entry.center,
     });
   }
   segments.push({ type: "A", to: exit.circle, radius: R, center: origin });
-  if (r > 0) {
-    segments.push({ type: "A", to: exit.line, radius: r, center: exit.center });
+  if (rr > 0) {
+    segments.push({
+      type: "A",
+      to: exit.line,
+      radius: rr,
+      center: exit.center,
+    });
   }
   return segments;
 }
@@ -285,6 +308,9 @@ export function wedgeGeometry({
   if (!Number.isInteger(wedgesPerSide) || wedgesPerSide < 1) {
     throw new RangeError("wedgesPerSide must be a positive integer");
   }
+  if (!(spread > 0 && spread <= 1)) {
+    throw new RangeError("spread must be in (0, 1]");
+  }
   const row = orientation === "row";
   const E = (row ? width : height) / 2;
   const S = (row ? height : width) / 2;
@@ -293,6 +319,7 @@ export function wedgeGeometry({
   const outerRadius = innerRadius + ringThickness;
   const hasRing = ringThickness > 0;
   const cutRadius = hasRing ? outerRadius + relatedGap : innerRadius;
+  const fits = cutRadius + cornerRadius < Math.min(E, S);
 
   const hits =
     wedgesPerSide === 2
@@ -318,18 +345,17 @@ export function wedgeGeometry({
 
   const frames = sideFrames(orientation, center.x, center.y);
   const sides = frames.map(({ transform, labelDegrees, clockwise }, s) => {
-    const wedges = Array.from({ length: wedgesPerSide }, (_, i) => {
+    const count = fits ? wedgesPerSide : 0;
+    const wedges = phis.slice(0, count).flatMap((phi, i) => {
       const raw = expansion?.[s]?.[i] ?? 0;
       const e = Math.max(0, Math.min(1, raw));
-      const a = phis[i] * (1 - e);
-      const b = phis[i + 1] + (Math.PI - phis[i + 1]) * e;
-      const poly = wedge(a, b);
+      const next = phis[i + 1];
+      const poly = wedge(phi * (1 - e), next + (Math.PI - next) * e);
+      if (poly.length < 3) return [];
       const far = centroid(poly.filter((p) => len(p) >= cutRadius));
       const anchor = transform(mul(norm(far), (cutRadius + len(far)) / 2));
-      return {
-        path: serialize(ringCutPath(poly, cutRadius, cornerRadius), transform),
-        anchor,
-      };
+      const cut = ringCutPath(poly, cutRadius, cornerRadius);
+      return [{ path: serialize(cut, transform), anchor }];
     });
     const ring = hasRing
       ? {
