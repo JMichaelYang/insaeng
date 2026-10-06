@@ -8,4 +8,4 @@ export {
   type WedgeRing,
   type WedgeShape,
   type WedgeSide,
-} from "./wedges/geometry";
+} from "./wedges";
