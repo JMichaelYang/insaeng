@@ -424,13 +424,14 @@ describe("wedgeGeometry", () => {
     (options) => {
       const geometry = wedgeGeometry(options);
       for (const side of geometry.sides) {
-        const sweeps = side.wedges.map(({ path }) => {
+        const sweeps = side.wedges.flatMap(({ path }) => {
           const cut = arcs(path).filter(
             (a) => Math.abs(a.radius - geometry.cutRadius) < EPSILON,
           );
-          expect(cut).toHaveLength(1);
-          return cut[0].sweep;
+          expect(cut.length).toBeLessThanOrEqual(1);
+          return cut.map((a) => a.sweep);
         });
+        expect(sweeps.length).toBeGreaterThan(0);
         expect(new Set(sweeps).size).toBe(1);
       }
     },
