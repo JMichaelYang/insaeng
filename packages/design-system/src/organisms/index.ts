@@ -1,5 +1,6 @@
 export {
   wedgeGeometry,
+  Wedges,
   type WedgeGeometry,
   type WedgeGeometryOptions,
   type WedgeOrientation,
@@ -7,4 +8,5 @@ export {
   type WedgeRing,
   type WedgeShape,
   type WedgeSide,
+  type WedgesLayout,
 } from "./wedges";
