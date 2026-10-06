@@ -110,7 +110,6 @@ describe("wedgeGeometry", () => {
     const cutRadius = cutRadiusOf(options);
     const row = options.orientation === "row";
 
-    expect(geometry.center).toEqual(center);
     expect(geometry.cutRadius).toBeCloseTo(cutRadius);
     expect(geometry.sides).toHaveLength(2);
 
@@ -268,8 +267,8 @@ describe("wedgeGeometry", () => {
         points(top.path).map((p) => key({ x: p.x, y: options.height - p.y })),
       );
       expect(new Set(points(bottom.path).map(key))).toEqual(flipped);
-      expect(top.anchor.y).toBeLessThan(geometry.center.y);
-      expect(bottom.anchor.y).toBeGreaterThan(geometry.center.y);
+      expect(top.anchor.y).toBeLessThan(options.height / 2);
+      expect(bottom.anchor.y).toBeGreaterThan(options.height / 2);
     });
   });
 

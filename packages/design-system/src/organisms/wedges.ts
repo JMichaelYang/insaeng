@@ -23,7 +23,6 @@ export type WedgeRing = { path: string; textPath: string };
 export type WedgeSide = { wedges: WedgeShape[]; ring: WedgeRing | null };
 
 export type WedgeGeometry = {
-  center: WedgePoint;
   cutRadius: number;
   sides: [WedgeSide, WedgeSide];
 };
@@ -54,18 +53,6 @@ const origin = point(0, 0);
 
 const centroid = (pts: WedgePoint[]) =>
   mul(pts.reduce(add, origin), 1 / pts.length);
-
-const dirOf = (phi: number) => point(-Math.sin(phi), -Math.cos(phi));
-const phiOf = (d: WedgePoint) => Math.atan2(-d.x, -d.y);
-
-export const easeInOutCubic = (t: number) =>
-  t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
-
-function sideOf(d: WedgePoint, q: WedgePoint, h: number): Plane {
-  let p = point(-d.y, d.x);
-  if (dot(p, q) < 0) p = mul(p, -1);
-  return { n: mul(p, -1), c: -h };
-}
 
 function clip(poly: WedgePoint[], { n, c }: Plane): WedgePoint[] {
   const out: WedgePoint[] = [];
@@ -157,17 +144,12 @@ function ringCutPath(source: WedgePoint[], R: number, r: number): Segment[] {
   const k = inside.findIndex((v, i) => v && !inside[(i - 1 + n) % n]);
   let m = k;
   while (inside[(m + 1) % n]) m = (m + 1) % n;
-  const mid = centroid(poly);
-  const inwardFor = (a: WedgePoint, u: WedgePoint) => {
-    const p = point(-u.y, u.x);
-    return dot(p, sub(mid, a)) < 0 ? mul(p, -1) : p;
-  };
   const a0 = poly[(k - 1 + n) % n];
   const u0 = norm(sub(poly[k], a0));
-  const entry = fillet(a0, u0, inwardFor(a0, u0), R, r);
+  const entry = fillet(a0, u0, point(-u0.y, u0.x), R, r);
   const b1 = poly[(m + 1) % n];
   const u1 = norm(sub(poly[m], b1));
-  const exit = fillet(b1, u1, inwardFor(b1, u1), R, r);
+  const exit = fillet(b1, u1, point(u1.y, -u1.x), R, r);
   const outside: WedgePoint[] = [];
   for (let i = (m + 1) % n; i !== k; i = (i + 1) % n) outside.push(poly[i]);
   const segments: Segment[] = [{ type: "M", to: exit.line }];
@@ -320,20 +302,19 @@ export function wedgeGeometry({
           (_, k) =>
             -spread * S + (k * 2 * spread * S) / (wedgesPerSide - 2),
         );
-  const phis = [0, ...hits.map((y) => phiOf(norm(point(-E, y)))), Math.PI];
+  const phis = [0, ...hits.map((y) => Math.atan2(E, -y)), Math.PI];
   const box = [
     point(-E, -S),
     point(-centerGap / 2, -S),
     point(-centerGap / 2, S),
     point(-E, S),
   ];
-  const wedge = (a: number, b: number) => {
-    const q = dirOf((a + b) / 2);
-    return [
-      sideOf(dirOf(a), q, relatedGap / 2),
-      sideOf(dirOf(b), q, relatedGap / 2),
-    ].reduce(clip, box);
-  };
+  const halfPlane = (phi: number, sign: number): Plane => ({
+    n: point(sign * Math.cos(phi), -sign * Math.sin(phi)),
+    c: -relatedGap / 2,
+  });
+  const wedge = (a: number, b: number) =>
+    [halfPlane(a, 1), halfPlane(b, -1)].reduce(clip, box);
 
   const frames = sideFrames(orientation, center.x, center.y);
   const sides = frames.map(({ transform, labelDegrees, clockwise }, s) => {
@@ -343,8 +324,7 @@ export function wedgeGeometry({
       const a = phis[i] * (1 - e);
       const b = phis[i + 1] + (Math.PI - phis[i + 1]) * e;
       const poly = wedge(a, b);
-      const outer = poly.filter((p) => len(p) >= cutRadius);
-      const far = centroid(outer.length > 0 ? outer : poly);
+      const far = centroid(poly.filter((p) => len(p) >= cutRadius));
       const anchor = transform(mul(norm(far), (cutRadius + len(far)) / 2));
       return {
         path: serialize(ringCutPath(poly, cutRadius, cornerRadius), transform),
@@ -373,5 +353,5 @@ export function wedgeGeometry({
     return { wedges, ring };
   });
 
-  return { center, cutRadius, sides: [sides[0], sides[1]] };
+  return { cutRadius, sides: [sides[0], sides[1]] };
 }

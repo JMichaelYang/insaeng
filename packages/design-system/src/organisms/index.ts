@@ -1,5 +1,4 @@
 export {
-  easeInOutCubic,
   wedgeGeometry,
   type WedgeGeometry,
   type WedgeGeometryOptions,
