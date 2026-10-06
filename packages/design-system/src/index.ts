@@ -11,4 +11,4 @@ export {
   type WedgeRing,
   type WedgeShape,
   type WedgeSide,
-} from "./lib/wedge-geometry";
+} from "./utils/wedge-geometry";

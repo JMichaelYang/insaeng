@@ -13,7 +13,7 @@ import {
   wedgeGeometry,
   type WedgeGeometryOptions,
   type WedgeOrientation,
-} from "../lib/wedge-geometry";
+} from "../utils/wedge-geometry";
 import { Wedge } from "../molecules/wedge";
 
 export type WedgesLayout = Omit<

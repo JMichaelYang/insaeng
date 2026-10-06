@@ -5,7 +5,7 @@ import {
   type WedgeGeometryOptions,
   type WedgeOrientation,
   type WedgePoint,
-} from "../../src/lib/wedge-geometry";
+} from "../../src/utils/wedge-geometry";
 
 type Command =
   | { type: "M" | "L"; to: WedgePoint }
