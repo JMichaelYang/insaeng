@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { cn } from "../lib/cn";
+import { mergeClasses } from "../utils/merge-classes";
 
 export type NotchSide = "top" | "right" | "bottom" | "left";
 
@@ -160,7 +160,7 @@ export function NotchedPanel({
   children: ReactNode;
 }) {
   return (
-    <section className={cn("relative", className)}>
+    <section className={mergeClasses("relative", className)}>
       <NotchedBackground
         {...mobile}
         className="

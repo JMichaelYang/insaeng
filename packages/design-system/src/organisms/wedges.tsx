@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { cn } from "../lib/cn";
+import { mergeClasses } from "../utils/merge-classes";
 import {
   wedgeGeometry,
   type WedgeGeometryOptions,
@@ -76,7 +76,7 @@ export function Wedges({
   return (
     <div
       ref={ref}
-      className={cn("relative flex items-center justify-center", className)}
+      className={mergeClasses("relative flex items-center justify-center", className)}
     >
       {frame && geometry && (
         <svg

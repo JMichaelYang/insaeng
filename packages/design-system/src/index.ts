@@ -1,7 +1,7 @@
 export * from "./atoms";
 export * from "./molecules";
 export * from "./organisms";
-export { cn } from "./lib/cn";
+export { mergeClasses } from "./utils/merge-classes";
 export {
   wedgeGeometry,
   type WedgeGeometry,
