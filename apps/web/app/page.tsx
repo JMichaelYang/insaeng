@@ -2,14 +2,16 @@ import { Avatar, Wedges, type WedgesLayout } from "@insaeng/design-system";
 import Image from "next/image";
 
 const shared = {
-  ringThickness: 0,
   wedgesPerSide: 4,
   spread: 0.8,
 };
 
+const labels = ["About Me", "Career"] as const;
+
 const row: WedgesLayout = {
   ...shared,
   avatarRadius: 176,
+  ringThickness: 64,
   cornerRadius: 16,
   centerGap: 12,
   relatedGap: 8,
@@ -17,6 +19,7 @@ const row: WedgesLayout = {
 const column: WedgesLayout = {
   ...shared,
   avatarRadius: 80,
+  ringThickness: 48,
   cornerRadius: 12,
   centerGap: 8,
   relatedGap: 4,
@@ -28,7 +31,12 @@ export default function Home() {
       flex flex-1 flex-col p-2
       lg:p-5
     ">
-      <Wedges className="flex-1" row={row} column={column}>
+      <Wedges
+        className="flex-1"
+        row={row}
+        column={column}
+        labels={labels}
+      >
         <Avatar className="
           size-[10rem]
           lg:size-[22rem]

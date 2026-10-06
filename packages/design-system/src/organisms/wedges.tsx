@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useId,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -23,20 +24,27 @@ export type WedgesLayout = Omit<
 
 type Frame = { width: number; height: number; orientation: WedgeOrientation };
 
+export type WedgeLabels = readonly [string, string];
+
+const labelStrokeWidth = 1;
+
 const rowQuery = "(min-width: 64rem)";
 
 export function Wedges({
   row,
   column,
+  labels,
   className,
   children,
 }: {
   row: WedgesLayout;
   column: WedgesLayout;
+  labels?: WedgeLabels;
   className?: string;
   children?: ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const id = useId();
   const [frame, setFrame] = useState<Frame | null>(null);
 
   useLayoutEffect(() => {
@@ -89,6 +97,28 @@ export function Wedges({
           {geometry.sides.map((side, s) => (
             <g key={s}>
               {side.ring && <Wedge path={side.ring.path} />}
+              {side.ring && labels?.[s] && (
+                <>
+                  <defs>
+                    <path id={`${id}-label-${s}`} d={side.ring.textPath} />
+                  </defs>
+                  <text
+                    className={mergeClasses(
+                      "fill-none stroke-on-surface",
+                      frame.orientation === "row"
+                        ? "type-heading-xl"
+                        : "font-display text-3xl",
+                    )}
+                    strokeWidth={labelStrokeWidth}
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                  >
+                    <textPath href={`#${id}-label-${s}`} startOffset="50%">
+                      {labels[s]}
+                    </textPath>
+                  </text>
+                </>
+              )}
               {side.wedges.map((wedge, i) => (
                 <Wedge key={i} path={wedge.path} />
               ))}
