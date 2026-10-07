@@ -370,6 +370,13 @@ describe("wedgeGeometry", () => {
     }
   });
 
+  it("returns the same slot on every read", () => {
+    const [wedge] = wedgeGeometry({ ...base.row, wedgesPerSide: 4 }).sides[0]
+      .wedges;
+    expect(wedge.slot).not.toBeNull();
+    expect(wedge.slot).toBe(wedge.slot);
+  });
+
   it.each([-1, Number.NaN])("rejects slot inset %s", (slotInset) => {
     expect(() =>
       wedgeGeometry({ ...base.row, wedgesPerSide: 4, slotInset }),
