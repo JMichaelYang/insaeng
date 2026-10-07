@@ -1,4 +1,9 @@
-import { Avatar, Wedges, type WedgesLayout } from "@insaeng/design-system";
+import {
+  Avatar,
+  Wedges,
+  type WedgesContent,
+  type WedgesLayout,
+} from "@insaeng/design-system";
 import Image from "next/image";
 
 const shared = {
@@ -13,6 +18,7 @@ const row: WedgesLayout = {
   cornerRadius: 16,
   centerGap: 12,
   relatedGap: 8,
+  slotInset: 24,
 };
 const column: WedgesLayout = {
   ...shared,
@@ -20,7 +26,29 @@ const column: WedgesLayout = {
   cornerRadius: 12,
   centerGap: 8,
   relatedGap: 4,
+  slotInset: 16,
 };
+
+function Placeholder({ title }: { title: string }) {
+  return (
+    <div className="flex flex-col items-center gap-1 text-center">
+      <span className="
+        type-label text-on-surface
+        lg:type-heading-sm
+      ">{title}</span>
+      <span className="type-caption text-on-surface-variant">Coming soon</span>
+    </div>
+  );
+}
+
+const content: WedgesContent = [
+  ["One", "Two", "Three", "Four"].map((title) => (
+    <Placeholder key={title} title={title} />
+  )),
+  ["Five", "Six", "Seven", "Eight"].map((title) => (
+    <Placeholder key={title} title={title} />
+  )),
+];
 
 export default function Home() {
   return (
@@ -28,7 +56,12 @@ export default function Home() {
       flex flex-1 flex-col p-2
       lg:p-5
     ">
-      <Wedges className="flex-1" row={row} column={column}>
+      <Wedges
+        className="flex-1"
+        row={row}
+        column={column}
+        content={content}
+      >
         <Avatar className="
           size-[10rem]
           lg:size-[22rem]

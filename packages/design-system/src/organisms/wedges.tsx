@@ -21,6 +21,11 @@ export type WedgesLayout = Omit<
   "width" | "height" | "orientation" | "expansion"
 >;
 
+export type WedgesContent = readonly [
+  readonly ReactNode[],
+  readonly ReactNode[],
+];
+
 type Frame = { width: number; height: number; orientation: WedgeOrientation };
 
 const rowQuery = "(min-width: 64rem)";
@@ -28,11 +33,13 @@ const rowQuery = "(min-width: 64rem)";
 export function Wedges({
   row,
   column,
+  content,
   className,
   children,
 }: {
   row: WedgesLayout;
   column: WedgesLayout;
+  content?: WedgesContent;
   className?: string;
   children?: ReactNode;
 }) {
@@ -95,6 +102,28 @@ export function Wedges({
             </g>
           ))}
         </svg>
+      )}
+      {geometry?.sides.map((side, s) =>
+        side.wedges.map(({ slot }, i) => {
+          const node = content?.[s]?.[i];
+          if (!slot || node == null) return null;
+          return (
+            <div
+              key={`${s}-${i}`}
+              className="
+                absolute flex items-center justify-center overflow-hidden
+              "
+              style={{
+                left: slot.x,
+                top: slot.y,
+                width: slot.width,
+                height: slot.height,
+              }}
+            >
+              {node}
+            </div>
+          );
+        }),
       )}
       <div className="relative">{children}</div>
     </div>
