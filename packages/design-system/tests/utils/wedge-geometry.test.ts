@@ -82,6 +82,25 @@ function expectSlotInside(
   }
 }
 
+function expectBoundsAround(
+  bounds: WedgeRect,
+  path: string,
+  { width, height }: WedgeGeometryOptions,
+) {
+  expect(bounds.width).toBeGreaterThan(0);
+  expect(bounds.height).toBeGreaterThan(0);
+  expect(bounds.x).toBeGreaterThanOrEqual(-EPSILON);
+  expect(bounds.y).toBeGreaterThanOrEqual(-EPSILON);
+  expect(bounds.x + bounds.width).toBeLessThanOrEqual(width + EPSILON);
+  expect(bounds.y + bounds.height).toBeLessThanOrEqual(height + EPSILON);
+  for (const p of points(path)) {
+    expect(p.x).toBeGreaterThanOrEqual(bounds.x - EPSILON);
+    expect(p.y).toBeGreaterThanOrEqual(bounds.y - EPSILON);
+    expect(p.x).toBeLessThanOrEqual(bounds.x + bounds.width + EPSILON);
+    expect(p.y).toBeLessThanOrEqual(bounds.y + bounds.height + EPSILON);
+  }
+}
+
 const base: Record<
   WedgeOrientation,
   Omit<WedgeGeometryOptions, "wedgesPerSide" | "expansion">
@@ -169,8 +188,9 @@ describe("wedgeGeometry", () => {
     geometry.sides.forEach((side, s) => {
       expect(side.wedges).toHaveLength(wedgesPerSide);
 
-      side.wedges.forEach(({ path, anchor, slot }) => {
+      side.wedges.forEach(({ path, anchor, slot, bounds }) => {
         expectSlotInside(slot, path, options);
+        expectBoundsAround(bounds, path, options);
         expect(path).toMatch(/^M/);
         expect(path).toMatch(/Z$/);
         expect(path).not.toMatch(/NaN|Infinity/);
@@ -375,6 +395,37 @@ describe("wedgeGeometry", () => {
       .wedges;
     expect(wedge.slot).not.toBeNull();
     expect(wedge.slot).toBe(wedge.slot);
+  });
+
+  it.each(orientations)("grows %s bounds as the wedge expands", (o) => {
+    const wedgesPerSide = 4;
+    const at = (e: number) => {
+      const values = [0, e, 0, 0];
+      return wedgeGeometry({
+        ...base[o],
+        wedgesPerSide,
+        expansion: [values, values],
+      }).sides[0].wedges[1].bounds;
+    };
+    const rest = at(0);
+    const half = at(0.5);
+    const full = at(1);
+    for (const [inner, outer] of [
+      [rest, half],
+      [half, full],
+    ]) {
+      expect(outer.x).toBeLessThanOrEqual(inner.x + EPSILON);
+      expect(outer.y).toBeLessThanOrEqual(inner.y + EPSILON);
+      expect(outer.x + outer.width).toBeGreaterThanOrEqual(
+        inner.x + inner.width - EPSILON,
+      );
+      expect(outer.y + outer.height).toBeGreaterThanOrEqual(
+        inner.y + inner.height - EPSILON,
+      );
+      expect(outer.width * outer.height).toBeGreaterThan(
+        inner.width * inner.height,
+      );
+    }
   });
 
   it.each([-1, Number.NaN])("rejects slot inset %s", (slotInset) => {

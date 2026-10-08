@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="glow-primary" cx="0.3" cy="0.35" r="0.6">
+      <stop offset="0" stop-color="#588b8b" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#588b8b" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow-tertiary" cx="0.75" cy="0.7" r="0.55">
+      <stop offset="0" stop-color="#af7a6d" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#af7a6d" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#588b8b" stroke-opacity="0.12" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#grid)"/>
+  <rect width="1600" height="1000" fill="url(#glow-primary)"/>
+  <rect width="1600" height="1000" fill="url(#glow-tertiary)"/>
+</svg>

@@ -22,6 +22,7 @@ export type WedgeRect = { x: number; y: number; width: number; height: number };
 export type WedgeShape = {
   path: string;
   anchor: WedgePoint;
+  bounds: WedgeRect;
   slot: WedgeRect | null;
 };
 
@@ -293,6 +294,14 @@ function largestSlot(poly: WedgePoint[], R: number): Slot | null {
   return best;
 }
 
+function boundsOf(pts: WedgePoint[]): WedgeRect {
+  const xs = pts.map((p) => p.x);
+  const ys = pts.map((p) => p.y);
+  const x = Math.min(...xs);
+  const y = Math.min(...ys);
+  return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
+}
+
 function slotRect(slot: Slot | null, transform: Transform): WedgeRect | null {
   if (!slot) return null;
   const a = transform(slot.min);
@@ -444,11 +453,18 @@ export function wedgeGeometry({
       const far = centroid(poly.filter((p) => len(p) >= cutRadius));
       const anchor = transform(mul(norm(far), (cutRadius + len(far)) / 2));
       const cut = ringCutPath(poly, cutRadius, cornerRadius);
+      const bounds = boundsOf(
+        [
+          ...poly.filter((p) => len(p) >= cutRadius),
+          ...cut.map((segment) => segment.to),
+        ].map(transform),
+      );
       let slot: WedgeRect | null | undefined;
       return [
         {
           path: serialize(cut, transform),
           anchor,
+          bounds,
           get slot() {
             if (slot === undefined) {
               slot = slotRect(

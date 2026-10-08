@@ -30,6 +30,8 @@ export type WedgesContent = readonly [
   readonly ReactNode[],
 ];
 
+export type WedgesImages = readonly [readonly string[], readonly string[]];
+
 type Frame = { width: number; height: number; orientation: WedgeOrientation };
 
 type Hold = {
@@ -105,12 +107,14 @@ export function Wedges({
   row,
   column,
   content,
+  images,
   className,
   children,
 }: {
   row: WedgesLayout;
   column: WedgesLayout;
   content?: WedgesContent;
+  images?: WedgesImages;
   className?: string;
   children?: ReactNode;
 }) {
@@ -285,6 +289,8 @@ export function Wedges({
                 >
                   <Wedge
                     path={wedge.path}
+                    image={images?.[s]?.[i]}
+                    bounds={wedge.bounds}
                     focused={focused === key}
                     className="pointer-events-auto"
                   />
