@@ -5,6 +5,7 @@ import {
   type WedgeGeometryOptions,
   type WedgeOrientation,
   type WedgePoint,
+  type WedgeRect,
 } from "../../src/utils/wedge-geometry";
 
 type Command =
@@ -34,6 +35,72 @@ const arcs = (path: string) =>
 const distance = (a: WedgePoint, b: WedgePoint) =>
   Math.hypot(a.x - b.x, a.y - b.y);
 
+const inside = (p: WedgePoint, poly: WedgePoint[]) =>
+  poly.reduce((hit, a, i) => {
+    const b = poly[(i + 1) % poly.length];
+    if (a.y > p.y === b.y > p.y) return hit;
+    const x = a.x + ((p.y - a.y) / (b.y - a.y)) * (b.x - a.x);
+    return p.x < x ? !hit : hit;
+  }, false);
+
+function expectSlotInside(
+  slot: WedgeRect | null,
+  path: string,
+  options: WedgeGeometryOptions,
+) {
+  expect(slot).not.toBeNull();
+  if (!slot) return;
+  const { width, height, slotInset } = options;
+  const center = { x: width / 2, y: height / 2 };
+  expect(slot.width).toBeGreaterThan(0);
+  expect(slot.height).toBeGreaterThan(0);
+  expect(slot.x).toBeGreaterThanOrEqual(slotInset - EPSILON);
+  expect(slot.y).toBeGreaterThanOrEqual(slotInset - EPSILON);
+  expect(slot.x + slot.width).toBeLessThanOrEqual(width - slotInset + EPSILON);
+  expect(slot.y + slot.height).toBeLessThanOrEqual(
+    height - slotInset + EPSILON,
+  );
+  const nearest = {
+    x: Math.max(slot.x, Math.min(center.x, slot.x + slot.width)),
+    y: Math.max(slot.y, Math.min(center.y, slot.y + slot.height)),
+  };
+  expect(distance(nearest, center)).toBeGreaterThanOrEqual(
+    cutRadiusOf(options) + slotInset - EPSILON,
+  );
+  const outline = points(path);
+  const steps = 8;
+  for (let k = 0; k <= steps; k++) {
+    const t = k / steps;
+    for (const p of [
+      { x: slot.x + t * slot.width, y: slot.y },
+      { x: slot.x + t * slot.width, y: slot.y + slot.height },
+      { x: slot.x, y: slot.y + t * slot.height },
+      { x: slot.x + slot.width, y: slot.y + t * slot.height },
+    ]) {
+      expect(inside(p, outline)).toBe(true);
+    }
+  }
+}
+
+function expectBoundsAround(
+  bounds: WedgeRect,
+  path: string,
+  { width, height }: WedgeGeometryOptions,
+) {
+  expect(bounds.width).toBeGreaterThan(0);
+  expect(bounds.height).toBeGreaterThan(0);
+  expect(bounds.x).toBeGreaterThanOrEqual(-EPSILON);
+  expect(bounds.y).toBeGreaterThanOrEqual(-EPSILON);
+  expect(bounds.x + bounds.width).toBeLessThanOrEqual(width + EPSILON);
+  expect(bounds.y + bounds.height).toBeLessThanOrEqual(height + EPSILON);
+  for (const p of points(path)) {
+    expect(p.x).toBeGreaterThanOrEqual(bounds.x - EPSILON);
+    expect(p.y).toBeGreaterThanOrEqual(bounds.y - EPSILON);
+    expect(p.x).toBeLessThanOrEqual(bounds.x + bounds.width + EPSILON);
+    expect(p.y).toBeLessThanOrEqual(bounds.y + bounds.height + EPSILON);
+  }
+}
+
 const base: Record<
   WedgeOrientation,
   Omit<WedgeGeometryOptions, "wedgesPerSide" | "expansion">
@@ -48,6 +115,7 @@ const base: Record<
     cornerRadius: 16,
     ringThickness: 48,
     spread: 0.8,
+    slotInset: 16,
   },
   column: {
     width: 374,
@@ -59,6 +127,7 @@ const base: Record<
     cornerRadius: 12,
     ringThickness: 32,
     spread: 0.8,
+    slotInset: 16,
   },
 };
 
@@ -119,7 +188,9 @@ describe("wedgeGeometry", () => {
     geometry.sides.forEach((side, s) => {
       expect(side.wedges).toHaveLength(wedgesPerSide);
 
-      side.wedges.forEach(({ path, anchor }) => {
+      side.wedges.forEach(({ path, anchor, slot, bounds }) => {
+        expectSlotInside(slot, path, options);
+        expectBoundsAround(bounds, path, options);
         expect(path).toMatch(/^M/);
         expect(path).toMatch(/Z$/);
         expect(path).not.toMatch(/NaN|Infinity/);
@@ -197,6 +268,16 @@ describe("wedgeGeometry", () => {
           expect(d.sweep).toBe(1 - c.sweep);
         }
       });
+      const slot = wedge.slot;
+      const twin = geometry.sides[1].wedges[i].slot;
+      if (slot && twin) {
+        const far = mirror({ x: slot.x + slot.width, y: slot.y + slot.height });
+        const near = mirror({ x: slot.x, y: slot.y });
+        expect(twin.x).toBeCloseTo(Math.min(far.x, near.x), 1);
+        expect(twin.y).toBeCloseTo(Math.min(far.y, near.y), 1);
+        expect(twin.width).toBeCloseTo(slot.width, 1);
+        expect(twin.height).toBeCloseTo(slot.height, 1);
+      }
       const anchor = mirror(wedge.anchor);
       expect(geometry.sides[1].wedges[i].anchor.x).toBeCloseTo(anchor.x, 1);
       expect(geometry.sides[1].wedges[i].anchor.y).toBeCloseTo(anchor.y, 1);
@@ -285,6 +366,72 @@ describe("wedgeGeometry", () => {
         expect(along).toEqual([...along].sort((a, b) => a - b));
       }
     }
+  });
+
+  it.each(orientations)("grows %s slots as the inset shrinks", (o) => {
+    const area = (slotInset: number) =>
+      wedgeGeometry({ ...base[o], wedgesPerSide: 4, slotInset }).sides[0].wedges.map(
+        ({ slot }) => (slot ? slot.width * slot.height : 0),
+      );
+    const loose = area(8);
+    const snug = area(32);
+    loose.forEach((a, i) => expect(a).toBeGreaterThan(snug[i]));
+  });
+
+  it("leaves no slot when the inset consumes the wedge", () => {
+    const geometry = wedgeGeometry({
+      ...base.column,
+      wedgesPerSide: 4,
+      slotInset: 400,
+    });
+    for (const side of geometry.sides) {
+      expect(side.wedges).toHaveLength(4);
+      for (const { slot } of side.wedges) expect(slot).toBeNull();
+    }
+  });
+
+  it("returns the same slot on every read", () => {
+    const [wedge] = wedgeGeometry({ ...base.row, wedgesPerSide: 4 }).sides[0]
+      .wedges;
+    expect(wedge.slot).not.toBeNull();
+    expect(wedge.slot).toBe(wedge.slot);
+  });
+
+  it.each(orientations)("grows %s bounds as the wedge expands", (o) => {
+    const wedgesPerSide = 4;
+    const at = (e: number) => {
+      const values = [0, e, 0, 0];
+      return wedgeGeometry({
+        ...base[o],
+        wedgesPerSide,
+        expansion: [values, values],
+      }).sides[0].wedges[1].bounds;
+    };
+    const rest = at(0);
+    const half = at(0.5);
+    const full = at(1);
+    for (const [inner, outer] of [
+      [rest, half],
+      [half, full],
+    ]) {
+      expect(outer.x).toBeLessThanOrEqual(inner.x + EPSILON);
+      expect(outer.y).toBeLessThanOrEqual(inner.y + EPSILON);
+      expect(outer.x + outer.width).toBeGreaterThanOrEqual(
+        inner.x + inner.width - EPSILON,
+      );
+      expect(outer.y + outer.height).toBeGreaterThanOrEqual(
+        inner.y + inner.height - EPSILON,
+      );
+      expect(outer.width * outer.height).toBeGreaterThan(
+        inner.width * inner.height,
+      );
+    }
+  });
+
+  it.each([-1, Number.NaN])("rejects slot inset %s", (slotInset) => {
+    expect(() =>
+      wedgeGeometry({ ...base.row, wedgesPerSide: 4, slotInset }),
+    ).toThrow(RangeError);
   });
 
   it("rejects a non-positive wedge count", () => {

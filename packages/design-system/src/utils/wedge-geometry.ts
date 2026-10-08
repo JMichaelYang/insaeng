@@ -13,10 +13,18 @@ export type WedgeGeometryOptions = {
   ringThickness: number;
   wedgesPerSide: number;
   spread: number;
+  slotInset: number;
   expansion?: readonly [readonly number[], readonly number[]];
 };
 
-export type WedgeShape = { path: string; anchor: WedgePoint };
+export type WedgeRect = { x: number; y: number; width: number; height: number };
+
+export type WedgeShape = {
+  path: string;
+  anchor: WedgePoint;
+  bounds: WedgeRect;
+  slot: WedgeRect | null;
+};
 
 export type WedgeRing = { path: string; textPath: string };
 
@@ -221,6 +229,88 @@ function halfRing(Ri: number, Ro: number, G: number, r: number): Segment[] {
   ];
 }
 
+function span(poly: WedgePoint[], x: number): [number, number] | null {
+  const ys = poly.flatMap((a, i) => {
+    const b = poly[(i + 1) % poly.length];
+    if (a.x === b.x) return a.x === x ? [a.y, b.y] : [];
+    const t = (x - a.x) / (b.x - a.x);
+    return t >= 0 && t <= 1 ? [a.y + t * (b.y - a.y)] : [];
+  });
+  return ys.length ? [Math.min(...ys), Math.max(...ys)] : null;
+}
+
+type Slot = { min: WedgePoint; max: WedgePoint; area: number };
+
+function slotBetween(
+  poly: WedgePoint[],
+  R: number,
+  x0: number,
+  x1: number,
+): Slot | null {
+  const s0 = span(poly, x0);
+  const s1 = span(poly, x1);
+  if (!s0 || !s1) return null;
+  let lo = Math.max(s0[0], s1[0]);
+  let hi = Math.min(s0[1], s1[1]);
+  if (Math.abs(x1) < R) {
+    const h = Math.sqrt(R * R - x1 * x1);
+    if (hi - Math.max(lo, h) >= Math.min(hi, -h) - lo) lo = Math.max(lo, h);
+    else hi = Math.min(hi, -h);
+  }
+  if (hi <= lo) return null;
+  return { min: point(x0, lo), max: point(x1, hi), area: (x1 - x0) * (hi - lo) };
+}
+
+function largestSlot(poly: WedgePoint[], R: number): Slot | null {
+  if (poly.length < 3) return null;
+  const xs = poly.map((p) => p.x);
+  const left = Math.min(...xs);
+  const right = Math.max(...xs);
+  const steps = 24;
+  let ranges = [
+    [left, right],
+    [left, right],
+  ];
+  let best: Slot | null = null;
+  for (let pass = 0; pass < 4; pass++) {
+    const [[a0, b0], [a1, b1]] = ranges;
+    for (let i = 0; i <= steps; i++) {
+      const x0 = a0 + ((b0 - a0) * i) / steps;
+      for (let j = 0; j <= steps; j++) {
+        const x1 = a1 + ((b1 - a1) * j) / steps;
+        if (x1 <= x0) continue;
+        const slot = slotBetween(poly, R, x0, x1);
+        if (slot && (!best || slot.area > best.area)) best = slot;
+      }
+    }
+    if (!best) return null;
+    const found = best;
+    ranges = ranges.map(([a, b], k) => {
+      const at = k === 0 ? found.min.x : found.max.x;
+      const reach = (b - a) / steps;
+      return [Math.max(left, at - reach), Math.min(right, at + reach)];
+    });
+  }
+  return best;
+}
+
+function boundsOf(pts: WedgePoint[]): WedgeRect {
+  const xs = pts.map((p) => p.x);
+  const ys = pts.map((p) => p.y);
+  const x = Math.min(...xs);
+  const y = Math.min(...ys);
+  return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
+}
+
+function slotRect(slot: Slot | null, transform: Transform): WedgeRect | null {
+  if (!slot) return null;
+  const a = transform(slot.min);
+  const b = transform(slot.max);
+  const x = Math.min(a.x, b.x);
+  const y = Math.min(a.y, b.y);
+  return { x, y, width: Math.abs(a.x - b.x), height: Math.abs(a.y - b.y) };
+}
+
 const fmt = (n: number) => String(Math.round(n * 100) / 100);
 const fmtPoint = (p: WedgePoint) => `${fmt(p.x)} ${fmt(p.y)}`;
 
@@ -303,6 +393,7 @@ export function wedgeGeometry({
   ringThickness,
   wedgesPerSide,
   spread,
+  slotInset,
   expansion,
 }: WedgeGeometryOptions): WedgeGeometry {
   if (!Number.isInteger(wedgesPerSide) || wedgesPerSide < 1) {
@@ -310,6 +401,9 @@ export function wedgeGeometry({
   }
   if (!(spread > 0 && spread <= 1)) {
     throw new RangeError("spread must be in (0, 1]");
+  }
+  if (!(slotInset >= 0)) {
+    throw new RangeError("slotInset must be non-negative");
   }
   const row = orientation === "row";
   const E = (row ? width : height) / 2;
@@ -330,18 +424,20 @@ export function wedgeGeometry({
             -spread * S + (k * 2 * spread * S) / (wedgesPerSide - 2),
         );
   const phis = [0, ...hits.map((y) => Math.atan2(E, -y)), Math.PI];
-  const box = [
-    point(-E, -S),
-    point(-centerGap / 2, -S),
-    point(-centerGap / 2, S),
-    point(-E, S),
+  const box = (d: number) => [
+    point(-E + d, -S + d),
+    point(-centerGap / 2 - d, -S + d),
+    point(-centerGap / 2 - d, S - d),
+    point(-E + d, S - d),
   ];
-  const halfPlane = (phi: number, sign: number): Plane => ({
+  const halfPlane = (phi: number, sign: number, d: number): Plane => ({
     n: point(sign * Math.cos(phi), -sign * Math.sin(phi)),
-    c: -relatedGap / 2,
+    c: -relatedGap / 2 - d,
   });
-  const wedge = (a: number, b: number) =>
-    [halfPlane(a, 1), halfPlane(b, -1)].reduce(clip, box);
+  const wedge = (a: number, b: number, d = 0) =>
+    -E + d < -centerGap / 2 - d && -S + d < S - d
+      ? [halfPlane(a, 1, d), halfPlane(b, -1, d)].reduce(clip, box(d))
+      : [];
 
   const frames = sideFrames(orientation, center.x, center.y);
   const sides = frames.map(({ transform, labelDegrees, clockwise }, s) => {
@@ -350,12 +446,36 @@ export function wedgeGeometry({
       const raw = expansion?.[s]?.[i] ?? 0;
       const e = Math.max(0, Math.min(1, raw));
       const next = phis[i + 1];
-      const poly = wedge(phi * (1 - e), next + (Math.PI - next) * e);
+      const from = phi * (1 - e);
+      const to = next + (Math.PI - next) * e;
+      const poly = wedge(from, to);
       if (poly.length < 3) return [];
       const far = centroid(poly.filter((p) => len(p) >= cutRadius));
       const anchor = transform(mul(norm(far), (cutRadius + len(far)) / 2));
       const cut = ringCutPath(poly, cutRadius, cornerRadius);
-      return [{ path: serialize(cut, transform), anchor }];
+      const bounds = boundsOf(
+        [
+          ...poly.filter((p) => len(p) >= cutRadius),
+          ...cut.map((segment) => segment.to),
+        ].map(transform),
+      );
+      let slot: WedgeRect | null | undefined;
+      return [
+        {
+          path: serialize(cut, transform),
+          anchor,
+          bounds,
+          get slot() {
+            if (slot === undefined) {
+              slot = slotRect(
+                largestSlot(wedge(from, to, slotInset), cutRadius + slotInset),
+                transform,
+              );
+            }
+            return slot;
+          },
+        },
+      ];
     });
     const ring = hasRing
       ? {

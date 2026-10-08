@@ -8,6 +8,7 @@ export {
   type WedgeGeometryOptions,
   type WedgeOrientation,
   type WedgePoint,
+  type WedgeRect,
   type WedgeRing,
   type WedgeShape,
   type WedgeSide,
