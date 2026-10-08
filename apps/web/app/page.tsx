@@ -2,6 +2,7 @@ import {
   Avatar,
   Wedges,
   type WedgesContent,
+  type WedgesImages,
   type WedgesLayout,
 } from "@insaeng/design-system";
 import Image from "next/image";
@@ -49,6 +50,13 @@ const content: WedgesContent = [
   )),
 ];
 
+const placeholder = "/wedges/placeholder.svg";
+
+const images: WedgesImages = [
+  Array.from({ length: 4 }, () => placeholder),
+  Array.from({ length: 4 }, () => placeholder),
+];
+
 export default function Home() {
   return (
     <main className="
@@ -60,6 +68,7 @@ export default function Home() {
         row={row}
         column={column}
         content={content}
+        images={images}
       >
         <Avatar className="
           size-[10rem]
