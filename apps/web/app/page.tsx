@@ -9,13 +9,13 @@ import Image from "next/image";
 const shared = {
   ringThickness: 0,
   wedgesPerSide: 4,
-  spread: 0.8,
+  spread: 0.9,
+  cornerRadius: 0,
 };
 
 const row: WedgesLayout = {
   ...shared,
   avatarRadius: 176,
-  cornerRadius: 16,
   centerGap: 12,
   relatedGap: 8,
   slotInset: 24,
@@ -23,7 +23,6 @@ const row: WedgesLayout = {
 const column: WedgesLayout = {
   ...shared,
   avatarRadius: 80,
-  cornerRadius: 12,
   centerGap: 8,
   relatedGap: 4,
   slotInset: 16,
