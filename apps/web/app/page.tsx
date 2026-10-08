@@ -9,7 +9,7 @@ import Image from "next/image";
 const shared = {
   ringThickness: 0,
   wedgesPerSide: 4,
-  spread: 0.9,
+  spread: 1,
   cornerRadius: 0,
 };
 
