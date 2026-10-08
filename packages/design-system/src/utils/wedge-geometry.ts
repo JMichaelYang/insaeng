@@ -444,15 +444,20 @@ export function wedgeGeometry({
       const far = centroid(poly.filter((p) => len(p) >= cutRadius));
       const anchor = transform(mul(norm(far), (cutRadius + len(far)) / 2));
       const cut = ringCutPath(poly, cutRadius, cornerRadius);
-      const slot = largestSlot(
-        wedge(from, to, slotInset),
-        cutRadius + slotInset,
-      );
+      let slot: WedgeRect | null | undefined;
       return [
         {
           path: serialize(cut, transform),
           anchor,
-          slot: slotRect(slot, transform),
+          get slot() {
+            if (slot === undefined) {
+              slot = slotRect(
+                largestSlot(wedge(from, to, slotInset), cutRadius + slotInset),
+                transform,
+              );
+            }
+            return slot;
+          },
         },
       ];
     });
