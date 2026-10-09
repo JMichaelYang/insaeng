@@ -135,6 +135,13 @@ export const themeNames = {
     "lg",
     "xl"
   ],
+  "blur": [
+    "sm",
+    "md",
+    "lg",
+    "xl",
+    "2xl"
+  ],
   "ease": [
     "standard",
     "enter",

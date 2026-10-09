@@ -11,6 +11,7 @@
   --breakpoint-*: initial;
   --radius-*: initial;
   --shadow-*: initial;
+  --blur-*: initial;
   --ease-*: initial;
 
   --color-primary: var(--role-primary);
@@ -136,6 +137,11 @@
   --shadow-md: 0px 2px 6px -1px #1B1E2514, 0px 1px 3px 0px #1B1E250F;
   --shadow-lg: 0px 10px 24px -6px #1B1E251A, 0px 4px 8px -2px #1B1E250F;
   --shadow-xl: 0px 24px 48px -12px #1B1E2524, 0px 8px 16px -4px #1B1E2514;
+  --blur-sm: 4px;
+  --blur-md: 8px;
+  --blur-lg: 16px;
+  --blur-xl: 24px;
+  --blur-2xl: 40px;
   --opacity-state-hover: 0.08;
   --opacity-state-focus: 0.1;
   --opacity-state-pressed: 0.1;

@@ -65,6 +65,8 @@ function themeVar([group, ...rest]) {
       return `--border-width-${name}`;
     case "shadow":
       return `--shadow-${name}`;
+    case "blur":
+      return `--blur-${name}`;
     case "opacity":
       return `--opacity-${name}`;
     case "duration":
@@ -92,6 +94,7 @@ const RESETS = [
   "--breakpoint-*",
   "--radius-*",
   "--shadow-*",
+  "--blur-*",
   "--ease-*",
 ];
 
@@ -184,6 +187,7 @@ const themeNames = {
   breakpoint: keys("--breakpoint-"),
   radius: keys("--radius-"),
   shadow: keys("--shadow-"),
+  blur: keys("--blur-"),
   ease: keys("--ease-"),
 };
 const semantic = {
