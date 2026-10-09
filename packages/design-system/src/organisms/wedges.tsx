@@ -18,6 +18,7 @@ import {
   type WedgeGeometryOptions,
   type WedgeOrientation,
 } from "../utils/wedge-geometry";
+import type { ImageSource } from "../atoms/cover-image";
 import { Wedge } from "../molecules/wedge";
 
 export type WedgesLayout = Omit<
@@ -30,7 +31,10 @@ export type WedgesContent = readonly [
   readonly ReactNode[],
 ];
 
-export type WedgesImages = readonly [readonly string[], readonly string[]];
+export type WedgesImages = readonly [
+  readonly ImageSource[],
+  readonly ImageSource[],
+];
 
 type Frame = { width: number; height: number; orientation: WedgeOrientation };
 
@@ -225,19 +229,10 @@ export function Wedges({
       ref={ref}
       className={mergeClasses("relative flex items-center justify-center", className)}
     >
-      {frame && geometry?.sides.some((side) => side.ring) && (
-        <svg
-          className="absolute inset-0 size-full"
-          width={frame.width}
-          height={frame.height}
-          viewBox={`0 0 ${frame.width} ${frame.height}`}
-          aria-hidden
-        >
-          {geometry.sides.map(
-            (side, s) => side.ring && <Wedge key={s} path={side.ring.path} />,
-          )}
-        </svg>
-      )}
+      {frame &&
+        geometry?.sides.map(
+          (side, s) => side.ring && <Wedge key={s} path={side.ring.path} />,
+        )}
       {frame &&
         geometry?.sides.map((side, s) =>
           side.wedges.map((wedge, i) => {
@@ -280,21 +275,13 @@ export function Wedges({
                   setFocused(release(key));
                 }}
               >
-                <svg
-                  className="absolute inset-0 size-full"
-                  width={frame.width}
-                  height={frame.height}
-                  viewBox={`0 0 ${frame.width} ${frame.height}`}
-                  aria-hidden
-                >
-                  <Wedge
-                    path={wedge.path}
-                    image={images?.[s]?.[i]}
-                    bounds={wedge.bounds}
-                    focused={focused === key}
-                    className="pointer-events-auto"
-                  />
-                </svg>
+                <Wedge
+                  path={wedge.path}
+                  image={images?.[s]?.[i]}
+                  bounds={wedge.bounds}
+                  focused={focused === key}
+                  className="pointer-events-auto"
+                />
                 {slot && node != null && (
                   <div
                     className="
