@@ -1,6 +1,6 @@
 import { useId } from "react";
 
-import { Image, type ImageSource } from "../atoms/image";
+import { Image, type ImageBlur, type ImageSource } from "../atoms/image";
 import { mergeClasses } from "../utils/merge-classes";
 import type { WedgeRect } from "../utils/wedge-geometry";
 
@@ -10,21 +10,24 @@ export function Wedge({
   path,
   image,
   bounds,
+  blur,
   focused = false,
   className,
 }: {
   path: string;
   image?: ImageSource;
   bounds?: WedgeRect;
+  blur?: ImageBlur;
   focused?: boolean;
   className?: string;
 }) {
   const id = useId();
+  const bleed = blur ? `var(--blur-${blur}) * 3` : "0px";
   return (
     <>
       <div
         className={mergeClasses(
-          "absolute inset-0 bg-surface-container-lowest",
+          "absolute inset-0 overflow-hidden bg-surface-container-lowest",
           className,
         )}
         style={{ clipPath: `path("${path}")` }}
@@ -32,14 +35,15 @@ export function Wedge({
         {image && bounds && (
           <Image
             source={image}
+            blur={blur}
             alt=""
             draggable={false}
             className="absolute max-w-none object-cover"
             style={{
-              left: bounds.x,
-              top: bounds.y,
-              width: bounds.width,
-              height: bounds.height,
+              left: `calc(${bounds.x}px - ${bleed})`,
+              top: `calc(${bounds.y}px - ${bleed})`,
+              width: `calc(${bounds.width}px + ${bleed} * 2)`,
+              height: `calc(${bounds.height}px + ${bleed} * 2)`,
             }}
           />
         )}

@@ -18,7 +18,7 @@ import {
   type WedgeGeometryOptions,
   type WedgeOrientation,
 } from "../utils/wedge-geometry";
-import type { ImageSource } from "../atoms/image";
+import type { ImageBlur, ImageSource } from "../atoms/image";
 import { Wedge } from "../molecules/wedge";
 
 export type WedgesLayout = Omit<
@@ -112,6 +112,7 @@ export function Wedges({
   column,
   content,
   images,
+  blur,
   className,
   children,
 }: {
@@ -119,6 +120,7 @@ export function Wedges({
   column: WedgesLayout;
   content?: WedgesContent;
   images?: WedgesImages;
+  blur?: ImageBlur;
   className?: string;
   children?: ReactNode;
 }) {
@@ -279,6 +281,7 @@ export function Wedges({
                   path={wedge.path}
                   image={images?.[s]?.[i]}
                   bounds={wedge.bounds}
+                  blur={blur}
                   focused={focused === key}
                   className="pointer-events-auto"
                 />

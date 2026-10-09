@@ -1,2 +1,2 @@
 export { Avatar } from "./avatar";
-export { Image, type ImageSource } from "./image";
+export { Image, type ImageBlur, type ImageSource } from "./image";

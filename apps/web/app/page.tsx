@@ -6,7 +6,7 @@ import {
   type WedgesImages,
   type WedgesLayout,
 } from "@insaeng/design-system";
-import Image from "next/image";
+import Image, { getImageProps } from "next/image";
 
 const shared = {
   ringThickness: 0,
@@ -56,8 +56,29 @@ const placeholder: ImageSource = {
   src: "/wedges/placeholder.svg",
 };
 
+function photo(src: string, width: number, height: number): ImageSource {
+  const { props } = getImageProps({
+    src,
+    width,
+    height,
+    alt: "",
+    sizes: "(min-width: 64rem) 50vw, 100vw",
+  });
+  return {
+    mode: "raster",
+    src: props.src,
+    srcSet: props.srcSet,
+    sizes: props.sizes,
+  };
+}
+
 const images: WedgesImages = [
-  Array.from({ length: 4 }, () => placeholder),
+  [
+    photo("/wedges/background.jpg", 1200, 1200),
+    photo("/wedges/sports.jpg", 1200, 1200),
+    photo("/wedges/interests.jpg", 900, 900),
+    photo("/wedges/dreams.jpg", 1200, 1200),
+  ],
   Array.from({ length: 4 }, () => placeholder),
 ];
 
@@ -73,6 +94,7 @@ export default function Home() {
         column={column}
         content={content}
         images={images}
+        blur="lg"
       >
         <Avatar className="
           size-[10rem]
