@@ -5,13 +5,13 @@ import { mergeClasses } from "../utils/merge-classes";
 import type { WedgeRect } from "../utils/wedge-geometry";
 
 const strokeWidth = 2;
-const fadeExtent = "60%";
+const fadeExtent = "100%";
 const fadeStops = [
-  [0, 100],
-  [0.2, 87],
-  [0.35, 77],
-  [0.5, 68],
-  [0.65, 60],
+  [0, 75],
+  [0.2, 69],
+  [0.35, 65],
+  [0.5, 61],
+  [0.65, 57],
   [0.8, 54],
   [1, 50],
 ] as const;
