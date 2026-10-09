@@ -12,6 +12,7 @@ describe("mergeClasses", () => {
   it("keeps the last of conflicting token classes", () => {
     expect(mergeClasses("bg-surface", "bg-primary")).toBe("bg-primary");
     expect(mergeClasses("h-control-sm", "h-control-lg")).toBe("h-control-lg");
+    expect(mergeClasses("blur-sm", "blur-2xl")).toBe("blur-2xl");
   });
 
   it("lets a type style override font size and weight", () => {
