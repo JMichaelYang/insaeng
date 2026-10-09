@@ -51,11 +51,6 @@ const content: WedgesContent = [
   )),
 ];
 
-const placeholder: ImageSource = {
-  mode: "svg",
-  src: "/wedges/placeholder.svg",
-};
-
 function photo(src: string, width: number, height: number): ImageSource {
   const { props } = getImageProps({
     src,
@@ -79,7 +74,12 @@ const images: WedgesImages = [
     photo("/wedges/interests.jpg", 900, 900),
     photo("/wedges/dreams.jpg", 1200, 1200),
   ],
-  Array.from({ length: 4 }, () => placeholder),
+  [
+    photo("/wedges/mission.jpg", 1200, 1200),
+    photo("/wedges/resume.jpg", 800, 800),
+    photo("/wedges/projects.png", 720, 720),
+    photo("/wedges/contact.jpg", 1200, 1200),
+  ],
 ];
 
 export default function Home() {
