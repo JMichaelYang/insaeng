@@ -1,4 +1,6 @@
-import type { ComponentProps } from "react";
+"use client";
+
+import { useCallback, useState, type ComponentProps } from "react";
 
 import type { themeNames } from "../generated/theme-names";
 import { mergeClasses } from "../utils/merge-classes";
@@ -22,20 +24,35 @@ export function Image({
   alt,
   blur,
   className,
+  onLoad,
   ...props
 }: { source: ImageSource; alt: string; blur?: ImageBlur } & Omit<
   ComponentProps<"img">,
   "src" | "srcSet" | "sizes" | "alt"
 >) {
   const raster = source.mode === "raster" ? source : undefined;
+  const [loaded, setLoaded] = useState(false);
+  const ref = useCallback((element: HTMLImageElement | null) => {
+    if (element?.complete && element.naturalWidth > 0) setLoaded(true);
+  }, []);
   return (
     <img
+      ref={ref}
       src={source.src}
       srcSet={raster?.srcSet}
       sizes={raster?.sizes}
       alt={alt}
       decoding="async"
-      className={mergeClasses(blur && blurClasses[blur], className)}
+      onLoad={(event) => {
+        setLoaded(true);
+        onLoad?.(event);
+      }}
+      className={mergeClasses(
+        "transition-opacity duration-slow ease-enter",
+        !loaded && "opacity-0",
+        blur && blurClasses[blur],
+        className,
+      )}
       {...props}
     />
   );

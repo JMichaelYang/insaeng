@@ -7,6 +7,7 @@ import {
   type WedgesLayout,
 } from "@insaeng/design-system";
 import Image, { getImageProps } from "next/image";
+import { preload } from "react-dom";
 
 const shared = {
   ringThickness: 0,
@@ -51,38 +52,40 @@ const content: WedgesContent = [
   )),
 ];
 
-function photo(src: string, width: number, height: number): ImageSource {
+const photoSize = 512;
+
+function photo(src: string): ImageSource {
   const { props } = getImageProps({
     src,
-    width,
-    height,
+    width: photoSize,
+    height: photoSize,
     alt: "",
-    sizes: "(min-width: 64rem) 50vw, 100vw",
   });
-  return {
-    mode: "raster",
-    src: props.src,
-    srcSet: props.srcSet,
-    sizes: props.sizes,
-  };
+  return { mode: "raster", src: props.src, srcSet: props.srcSet };
 }
 
 const images: WedgesImages = [
   [
-    photo("/wedges/background.jpg", 1200, 1200),
-    photo("/wedges/sports.jpg", 1200, 1200),
-    photo("/wedges/interests.jpg", 900, 900),
-    photo("/wedges/dreams.jpg", 1200, 1200),
+    photo("/wedges/background.jpg"),
+    photo("/wedges/sports.jpg"),
+    photo("/wedges/interests.jpg"),
+    photo("/wedges/dreams.jpg"),
   ],
   [
-    photo("/wedges/mission.jpg", 1200, 1200),
-    photo("/wedges/resume.jpg", 800, 800),
-    photo("/wedges/projects.png", 720, 720),
-    photo("/wedges/contact.jpg", 1200, 1200),
+    photo("/wedges/mission.jpg"),
+    photo("/wedges/resume.jpg"),
+    photo("/wedges/projects.png"),
+    photo("/wedges/contact.jpg"),
   ],
 ];
 
 export default function Home() {
+  for (const image of images.flat()) {
+    preload(image.src, {
+      as: "image",
+      imageSrcSet: image.mode === "raster" ? image.srcSet : undefined,
+    });
+  }
   return (
     <main className="
       flex flex-1 flex-col p-2
