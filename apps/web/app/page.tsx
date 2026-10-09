@@ -1,5 +1,6 @@
 import {
   Avatar,
+  type ImageSource,
   Wedges,
   type WedgesContent,
   type WedgesImages,
@@ -50,7 +51,10 @@ const content: WedgesContent = [
   )),
 ];
 
-const placeholder = "/wedges/placeholder.svg";
+const placeholder: ImageSource = {
+  mode: "svg",
+  src: "/wedges/placeholder.svg",
+};
 
 const images: WedgesImages = [
   Array.from({ length: 4 }, () => placeholder),
