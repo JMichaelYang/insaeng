@@ -282,6 +282,7 @@ export function Wedges({
                   image={images?.[s]?.[i]}
                   bounds={wedge.bounds}
                   blur={blur}
+                  fade={geometry.cutRadius}
                   focused={focused === key}
                   className="pointer-events-auto"
                 />
