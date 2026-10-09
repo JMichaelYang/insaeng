@@ -74,10 +74,10 @@ function photo(src: string, width: number, height: number): ImageSource {
 
 const images: WedgesImages = [
   [
-    photo("/wedges/background.jpg", 1600, 1200),
-    photo("/wedges/dreams.jpg", 1200, 1600),
-    photo("/wedges/interests.jpg", 1600, 900),
-    photo("/wedges/sports.jpg", 1600, 1200),
+    photo("/wedges/background.jpg", 1200, 1200),
+    photo("/wedges/dreams.jpg", 1200, 1200),
+    photo("/wedges/interests.jpg", 900, 900),
+    photo("/wedges/sports.jpg", 1200, 1200),
   ],
   Array.from({ length: 4 }, () => placeholder),
 ];

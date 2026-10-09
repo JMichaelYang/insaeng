@@ -27,7 +27,7 @@ export function Wedge({
     <>
       <div
         className={mergeClasses(
-          "absolute inset-0 bg-surface-container-lowest",
+          "absolute inset-0 overflow-hidden bg-surface-container-lowest",
           className,
         )}
         style={{ clipPath: `path("${path}")` }}
