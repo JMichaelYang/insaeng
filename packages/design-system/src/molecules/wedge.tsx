@@ -1,6 +1,6 @@
 import { useId } from "react";
 
-import { CoverImage, type ImageSource } from "../atoms/cover-image";
+import { Image, type ImageSource } from "../atoms/image";
 import { mergeClasses } from "../utils/merge-classes";
 import type { WedgeRect } from "../utils/wedge-geometry";
 
@@ -30,9 +30,11 @@ export function Wedge({
         style={{ clipPath: `path("${path}")` }}
       >
         {image && bounds && (
-          <CoverImage
+          <Image
             source={image}
-            className="absolute"
+            alt=""
+            draggable={false}
+            className="absolute max-w-none object-cover"
             style={{
               left: bounds.x,
               top: bounds.y,

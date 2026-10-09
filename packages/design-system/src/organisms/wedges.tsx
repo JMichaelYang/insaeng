@@ -18,7 +18,7 @@ import {
   type WedgeGeometryOptions,
   type WedgeOrientation,
 } from "../utils/wedge-geometry";
-import type { ImageSource } from "../atoms/cover-image";
+import type { ImageSource } from "../atoms/image";
 import { Wedge } from "../molecules/wedge";
 
 export type WedgesLayout = Omit<
