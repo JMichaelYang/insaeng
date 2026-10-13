@@ -8,9 +8,11 @@ export {
   type WedgeGeometry,
   type WedgeGeometryOptions,
   type WedgeOrientation,
+  type WedgeOutline,
   type WedgePoint,
   type WedgeRect,
   type WedgeRing,
   type WedgeShape,
   type WedgeSide,
+  type WedgeWobble,
 } from "./utils/wedge-geometry";

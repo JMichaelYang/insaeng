@@ -661,6 +661,89 @@ describe("wedgeGeometry with a square center", () => {
     }
   });
 
+  const wobbles = orientations.flatMap((o) =>
+    [0, 0.6, 1].map((e) => ({
+      options: square(o, {
+        wobble: { amplitude: 3, wavelength: 48 },
+        expansion: [
+          [0, e, 0, 0],
+          [0, 0, 0, 0],
+        ],
+      }),
+      label: `${o} e=${e}`,
+    })),
+  );
+
+  it.each(wobbles)(
+    "tiles the frame with wobbly edges: $label",
+    ({ options }) => {
+      const geometry = wedgeGeometry(options);
+      const rest = wedgeGeometry({ ...options, expansion: undefined });
+      expect(geometry.center).not.toBeNull();
+      const outlines = [
+        points(geometry.center?.path ?? ""),
+        ...rest.sides.flatMap((side, s) =>
+          side.wedges.map(({ path }, i) =>
+            points(
+              options.expansion?.[s][i]
+                ? geometry.sides[s].wedges[i].path
+                : path,
+            ),
+          ),
+        ),
+      ];
+      const steps = 53;
+      for (let i = 0; i < steps; i++) {
+        for (let j = 0; j < steps; j++) {
+          const p = {
+            x: ((i + 0.37) / steps) * options.width,
+            y: ((j + 0.61) / steps) * options.height,
+          };
+          const hits = outlines.filter((outline) => inside(p, outline)).length;
+          if (options.expansion?.[0][1]) {
+            expect(hits).toBeGreaterThanOrEqual(1);
+          } else {
+            expect(hits).toBe(1);
+          }
+        }
+      }
+    },
+  );
+
+  it.each(orientations)("leaves %s frame edges straight and undrawn", (o) => {
+    const options = square(o, { wobble: { amplitude: 3, wavelength: 48 } });
+    const geometry = wedgeGeometry(options);
+    for (const side of geometry.sides) {
+      for (const { path, lines } of side.wedges) {
+        expect(path).not.toMatch(/NaN|Infinity/);
+        for (const p of points(path)) {
+          expect(p.x).toBeGreaterThanOrEqual(-EPSILON);
+          expect(p.x).toBeLessThanOrEqual(options.width + EPSILON);
+          expect(p.y).toBeGreaterThanOrEqual(-EPSILON);
+          expect(p.y).toBeLessThanOrEqual(options.height + EPSILON);
+        }
+        const drawn = parse(lines);
+        expect(drawn.length).toBeGreaterThan(0);
+        const sameSide = (a: WedgePoint, b: WedgePoint) =>
+          [
+            [a.x, b.x, 0],
+            [a.x, b.x, options.width],
+            [a.y, b.y, 0],
+            [a.y, b.y, options.height],
+          ].some(
+            ([p, q, at]) =>
+              Math.abs(p - at) < EPSILON && Math.abs(q - at) < EPSILON,
+          );
+        drawn.forEach((c, i) => {
+          const prev = drawn[i - 1];
+          if (c.type !== "L" || !prev || prev.type === "Z") return;
+          if (distance(prev.to, c.to) < 1) return;
+          expect(sameSide(prev.to, c.to)).toBe(false);
+        });
+      }
+    }
+  });
+
   it("rejects a ring around a square center", () => {
     expect(() => wedgeGeometry(square("row", { ringThickness: 32 }))).toThrow(
       RangeError,

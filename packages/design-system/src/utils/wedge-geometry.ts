@@ -4,6 +4,8 @@ export type WedgeOrientation = "row" | "column";
 
 export type WedgeCenterShape = "circle" | "square";
 
+export type WedgeWobble = { amplitude: number; wavelength: number };
+
 export type WedgeGeometryOptions = {
   width: number;
   height: number;
@@ -17,13 +19,15 @@ export type WedgeGeometryOptions = {
   wedgesPerSide: number;
   spread: number;
   slotInset: number;
+  wobble?: WedgeWobble;
   expansion?: readonly [readonly number[], readonly number[]];
 };
 
 export type WedgeRect = { x: number; y: number; width: number; height: number };
 
-export type WedgeShape = {
-  path: string;
+export type WedgeOutline = { path: string; lines: string };
+
+export type WedgeShape = WedgeOutline & {
   anchor: WedgePoint;
   bounds: WedgeRect;
   slot: WedgeRect | null;
@@ -35,6 +39,7 @@ export type WedgeSide = { wedges: WedgeShape[]; ring: WedgeRing | null };
 
 export type WedgeGeometry = {
   cutRadius: number;
+  center: WedgeOutline | null;
   sides: [WedgeSide, WedgeSide];
 };
 
@@ -247,10 +252,26 @@ function splitAtSquare(poly: WedgePoint[], R: number): WedgePoint[] {
   });
 }
 
+function marksBetween(a: WedgePoint, b: WedgePoint, marks: WedgePoint[]) {
+  const d = sub(b, a);
+  const length = len(d);
+  return marks
+    .map((m) => ({ m, t: dot(sub(m, a), d) / (length * length) }))
+    .filter(
+      ({ m, t }) =>
+        t > 1e-6 &&
+        t < 1 - 1e-6 &&
+        Math.abs(cross(sub(m, a), d)) / length < 1e-6,
+    )
+    .sort((p, q) => p.t - q.t)
+    .map(({ m }) => m);
+}
+
 function squareCutPath(
   source: WedgePoint[],
   R: number,
   r: number,
+  marks: WedgePoint[] = [],
 ): Segment[] {
   const poly = splitAtSquare(source, R);
   const n = poly.length;
@@ -279,7 +300,92 @@ function squareCutPath(
         len(sub(c, exit)) > 1e-6,
     )
     .sort((a, b) => len(sub(a, entry)) - len(sub(b, entry)));
-  return roundedPoly([...outside, entry, ...corners], r);
+  const walk = [entry, ...corners, exit];
+  const boundary = walk
+    .slice(0, -1)
+    .flatMap((a, i) => [a, ...marksBetween(a, walk[i + 1], marks)]);
+  return roundedPoly([...outside, ...boundary], r);
+}
+
+function wave(cycles: number, t: number) {
+  const k = Math.floor(cycles);
+  const a = cycles - k;
+  return (
+    (1 - a) * Math.sin(2 * Math.PI * k * t) +
+    a * Math.sin(2 * Math.PI * (k + 1) * t)
+  );
+}
+
+const wobbleStep = 4;
+const wobbleHarmonic = 2.9;
+
+function wobbleLine(
+  a: WedgePoint,
+  b: WedgePoint,
+  { amplitude, wavelength }: WedgeWobble,
+): WedgePoint[] {
+  const d = sub(b, a);
+  const length = len(d);
+  if (!(amplitude > 0 && wavelength > 0 && length > 0)) return [];
+  const normal = point(-d.y / length, d.x / length);
+  const cycles = length / wavelength;
+  const taper = wavelength / 4;
+  const n = Math.ceil(length / wobbleStep);
+  return Array.from({ length: Math.max(0, n - 1) }, (_, i) => {
+    const t = (i + 1) / n;
+    const ease = Math.min(1, (Math.min(t, 1 - t) * length) / taper);
+    const offset =
+      amplitude *
+      ease *
+      (0.7 * wave(cycles, t) + 0.3 * wave(cycles * wobbleHarmonic, t));
+    return add(add(a, mul(d, t)), mul(normal, offset));
+  });
+}
+
+type Bend = (a: WedgePoint, b: WedgePoint) => WedgePoint[] | null;
+
+function outline(
+  segments: Segment[],
+  transform: Transform,
+  bend: Bend,
+): WedgeOutline {
+  if (segments.length === 0) return { path: "", lines: "" };
+  const start = transform(segments[0].to);
+  let path = `M${fmtPoint(start)}`;
+  let lines = "";
+  let current = start;
+  let drawing = false;
+  const draw = (d: string, to: WedgePoint) => {
+    if (!drawing) lines += `M${fmtPoint(current)}`;
+    lines += d;
+    drawing = true;
+    current = to;
+  };
+  const line = (p: WedgePoint) => {
+    const bent = bend(current, p);
+    const d = [...(bent ?? []), p].map((q) => `L${fmtPoint(q)}`).join("");
+    path += d;
+    if (bent) {
+      draw(d, p);
+    } else {
+      drawing = false;
+      current = p;
+    }
+  };
+  for (const segment of segments.slice(1)) {
+    const p = transform(segment.to);
+    if (segment.type === "A" && segment.radius > 0) {
+      const c = transform(segment.center);
+      const sweep = cross(sub(current, c), sub(p, c)) > 0 ? 1 : 0;
+      const d = `A${fmt(segment.radius)} ${fmt(segment.radius)} 0 0 ${sweep} ${fmtPoint(p)}`;
+      path += d;
+      draw(d, p);
+    } else {
+      line(p);
+    }
+  }
+  if (len(sub(current, start)) > 1e-9) line(start);
+  return { path: `${path}Z`, lines };
 }
 
 function halfRing(Ri: number, Ro: number, G: number, r: number): Segment[] {
@@ -477,6 +583,7 @@ export function wedgeGeometry({
   wedgesPerSide,
   spread,
   slotInset,
+  wobble,
   expansion,
 }: WedgeGeometryOptions): WedgeGeometry {
   if (!Number.isInteger(wedgesPerSide) || wedgesPerSide < 1) {
@@ -526,9 +633,55 @@ export function wedgeGeometry({
       ? [halfPlane(a, 1, d), halfPlane(b, -1, d)].reduce(clip, box(d))
       : [];
 
+  const count = fits ? wedgesPerSide : 0;
+  const near = (a: number, b: number) => Math.abs(a - b) < 1e-6;
+  const edge = (a: number, b: number, at: number) => near(a, at) && near(b, at);
+  const bend: Bend = (a, b) =>
+    edge(a.x, b.x, 0) ||
+    edge(a.x, b.x, width) ||
+    edge(a.y, b.y, 0) ||
+    edge(a.y, b.y, height)
+      ? null
+      : wobble
+        ? wobbleLine(a, b, wobble).map((p) =>
+            point(
+              Math.max(0, Math.min(width, p.x)),
+              Math.max(0, Math.min(height, p.y)),
+            ),
+          )
+        : [];
+  const marks = square
+    ? phis
+        .slice(0, count)
+        .flatMap((phi, i) =>
+          squareCutPath(wedge(phi, phis[i + 1]), cutRadius, 0),
+        )
+        .map((segment) => segment.to)
+        .filter((p) => near(chebyshev(p), cutRadius))
+    : [];
+
   const frames = sideFrames(orientation, center.x, center.y);
+  const centerOutline = (): WedgeOutline | null => {
+    if (!square || count === 0) return null;
+    const around = (p: WedgePoint) => Math.atan2(p.y - center.y, p.x - center.x);
+    const ring = frames
+      .flatMap(({ transform }) => marks.map(transform))
+      .sort((a, b) => around(a) - around(b))
+      .filter(
+        (p, i, all) =>
+          i === 0 || len(sub(p, all[i - 1])) > 1e-3,
+      );
+    if (ring.length > 1 && len(sub(ring[0], ring[ring.length - 1])) <= 1e-3) {
+      ring.pop();
+    }
+    if (ring.length < 3) return null;
+    return outline(
+      ring.map((to, i) => ({ type: i === 0 ? "M" : "L", to })),
+      (p) => p,
+      bend,
+    );
+  };
   const sides = frames.map(({ transform, labelDegrees, clockwise }, s) => {
-    const count = fits ? wedgesPerSide : 0;
     const wedges = phis.slice(0, count).flatMap((phi, i) => {
       const raw = expansion?.[s]?.[i] ?? 0;
       const e = Math.max(0, Math.min(1, raw));
@@ -540,7 +693,7 @@ export function wedgeGeometry({
       const beyond = (p: WedgePoint) =>
         (square ? chebyshev(p) : len(p)) >= cutRadius;
       const cut = square
-        ? squareCutPath(poly, cutRadius, cornerRadius)
+        ? squareCutPath(poly, cutRadius, cornerRadius, marks)
         : ringCutPath(poly, cutRadius, cornerRadius);
       if (cut.length === 0) return [];
       const far = centroid(poly.filter(beyond));
@@ -554,7 +707,7 @@ export function wedgeGeometry({
       let slot: WedgeRect | null | undefined;
       return [
         {
-          path: serialize(cut, transform),
+          ...outline(cut, transform, bend),
           anchor,
           bounds,
           get slot() {
@@ -595,5 +748,9 @@ export function wedgeGeometry({
     return { wedges, ring };
   });
 
-  return { cutRadius, sides: [sides[0], sides[1]] };
+  return {
+    cutRadius,
+    center: centerOutline(),
+    sides: [sides[0], sides[1]],
+  };
 }

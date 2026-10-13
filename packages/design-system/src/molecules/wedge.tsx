@@ -26,6 +26,7 @@ function fadeGradient(radius: number) {
 
 export function Wedge({
   path,
+  lines,
   image,
   bounds,
   blur,
@@ -34,6 +35,7 @@ export function Wedge({
   className,
 }: {
   path: string;
+  lines?: string;
   image?: ImageSource;
   bounds?: WedgeRect;
   blur?: ImageBlur;
@@ -41,8 +43,7 @@ export function Wedge({
   focused?: boolean;
   className?: string;
 }) {
-  const id = useId();
-  const bleed = blur ? `var(--blur-${blur}) * 3` : "0px";
+  const bleed =blur ? `var(--blur-${blur}) * 3` : "0px";
   return (
     <>
       <div
@@ -74,22 +75,48 @@ export function Wedge({
           />
         )}
       </div>
-      {focused && (
-        <svg
-          className="pointer-events-none absolute inset-0 size-full"
-          aria-hidden
-        >
-          <clipPath id={id}>
-            <path d={path} />
-          </clipPath>
-          <path
-            className="fill-none stroke-secondary"
-            d={path}
-            strokeWidth={strokeWidth * 2}
-            clipPath={`url(#${id})`}
-          />
-        </svg>
-      )}
+      <WedgeLines path={path} lines={lines} focused={focused} />
     </>
+  );
+}
+
+export function WedgeLines({
+  path,
+  lines,
+  focused = false,
+}: {
+  path: string;
+  lines?: string;
+  focused?: boolean;
+}) {
+  const id = useId();
+  if (!lines && !focused) return null;
+  return (
+    <svg
+      className="pointer-events-none absolute inset-0 size-full"
+      aria-hidden
+    >
+      <clipPath id={id}>
+        <path d={path} />
+      </clipPath>
+      {lines && (
+        <path
+          className="fill-none stroke-on-surface"
+          d={lines}
+          strokeWidth={strokeWidth * 2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          clipPath={`url(#${id})`}
+        />
+      )}
+      {focused && (
+        <path
+          className="fill-none stroke-secondary"
+          d={path}
+          strokeWidth={strokeWidth * 2}
+          clipPath={`url(#${id})`}
+        />
+      )}
+    </svg>
   );
 }

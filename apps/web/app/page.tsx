@@ -23,11 +23,13 @@ const row: WedgesLayout = {
   ...shared,
   avatarRadius: 192,
   slotInset: 24,
+  wobble: { amplitude: 3, wavelength: 64 },
 };
 const column: WedgesLayout = {
   ...shared,
   avatarRadius: 88,
   slotInset: 16,
+  wobble: { amplitude: 2, wavelength: 44 },
 };
 
 function Placeholder({ title }: { title: string }) {
@@ -86,10 +88,7 @@ export default function Home() {
     });
   }
   return (
-    <main className="
-      flex flex-1 flex-col p-2
-      lg:p-5
-    ">
+    <main className="flex flex-1 flex-col">
       <Wedges
         className="flex-1"
         row={row}
@@ -99,15 +98,15 @@ export default function Home() {
         blur="lg"
       >
         <Avatar shape="square" className="
-          size-[11rem]
-          lg:size-[24rem]
+          size-[11.5rem]
+          lg:size-[24.5rem]
         ">
           <Image
             src="/headshot.jpg"
             alt="Jaewon Yang"
             width={720}
             height={720}
-            sizes="(min-width: 64rem) 24rem, 11rem"
+            sizes="(min-width: 64rem) 24.5rem, 11.5rem"
             preload
           />
         </Avatar>
