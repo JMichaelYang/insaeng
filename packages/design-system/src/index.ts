@@ -4,6 +4,7 @@ export * from "./organisms";
 export { mergeClasses } from "./utils/merge-classes";
 export {
   wedgeGeometry,
+  type WedgeCenterShape,
   type WedgeGeometry,
   type WedgeGeometryOptions,
   type WedgeOrientation,

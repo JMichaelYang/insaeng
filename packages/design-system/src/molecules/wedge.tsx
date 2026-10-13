@@ -74,23 +74,22 @@ export function Wedge({
           />
         )}
       </div>
-      <svg
-        className="pointer-events-none absolute inset-0 size-full"
-        aria-hidden
-      >
-        <clipPath id={id}>
-          <path d={path} />
-        </clipPath>
-        <path
-          className={mergeClasses(
-            "fill-none",
-            focused ? "stroke-secondary" : "stroke-outline",
-          )}
-          d={path}
-          strokeWidth={strokeWidth * 2}
-          clipPath={`url(#${id})`}
-        />
-      </svg>
+      {focused && (
+        <svg
+          className="pointer-events-none absolute inset-0 size-full"
+          aria-hidden
+        >
+          <clipPath id={id}>
+            <path d={path} />
+          </clipPath>
+          <path
+            className="fill-none stroke-secondary"
+            d={path}
+            strokeWidth={strokeWidth * 2}
+            clipPath={`url(#${id})`}
+          />
+        </svg>
+      )}
     </>
   );
 }

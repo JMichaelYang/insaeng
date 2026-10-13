@@ -2,10 +2,13 @@ export type WedgePoint = { x: number; y: number };
 
 export type WedgeOrientation = "row" | "column";
 
+export type WedgeCenterShape = "circle" | "square";
+
 export type WedgeGeometryOptions = {
   width: number;
   height: number;
   orientation: WedgeOrientation;
+  centerShape?: WedgeCenterShape;
   avatarRadius: number;
   centerGap: number;
   relatedGap: number;
@@ -58,6 +61,7 @@ const cross = (a: WedgePoint, b: WedgePoint) => a.x * b.y - a.y * b.x;
 const len = (a: WedgePoint) => Math.hypot(a.x, a.y);
 const norm = (a: WedgePoint) => mul(a, 1 / len(a));
 const origin = point(0, 0);
+const chebyshev = (a: WedgePoint) => Math.max(Math.abs(a.x), Math.abs(a.y));
 
 const centroid = (pts: WedgePoint[]) =>
   mul(pts.reduce(add, origin), 1 / pts.length);
@@ -205,6 +209,79 @@ function ringCutPath(source: WedgePoint[], R: number, r: number): Segment[] {
   return segments;
 }
 
+function contains(poly: WedgePoint[], p: WedgePoint) {
+  return poly.reduce((hit, a, i) => {
+    const b = poly[(i + 1) % poly.length];
+    if (a.y > p.y === b.y > p.y) return hit;
+    const x = a.x + ((p.y - a.y) / (b.y - a.y)) * (b.x - a.x);
+    return p.x < x ? !hit : hit;
+  }, false);
+}
+
+function splitAtSquare(poly: WedgePoint[], R: number): WedgePoint[] {
+  return poly.flatMap((a, i) => {
+    const b = poly[(i + 1) % poly.length];
+    const d = sub(b, a);
+    let t0 = 0;
+    let t1 = 1;
+    for (const [p, q] of [
+      [-d.x, a.x + R],
+      [d.x, R - a.x],
+      [-d.y, a.y + R],
+      [d.y, R - a.y],
+    ]) {
+      if (p === 0) {
+        if (q < 0) return [a];
+        continue;
+      }
+      if (p < 0) t0 = Math.max(t0, q / p);
+      else t1 = Math.min(t1, q / p);
+    }
+    if (t0 >= t1) return [a];
+    return [
+      a,
+      ...[t0, t1]
+        .filter((t) => t > 1e-9 && t < 1 - 1e-9)
+        .map((t) => add(a, mul(d, t))),
+    ];
+  });
+}
+
+function squareCutPath(
+  source: WedgePoint[],
+  R: number,
+  r: number,
+): Segment[] {
+  const poly = splitAtSquare(source, R);
+  const n = poly.length;
+  const inside = poly.map(
+    (a, i) => chebyshev(mul(add(a, poly[(i + 1) % n]), 0.5)) < R - 1e-9,
+  );
+  if (inside.every(Boolean)) return [];
+  if (!inside.some(Boolean)) return roundedPoly(poly, r);
+  const k = inside.findIndex((v, i) => v && !inside[(i - 1 + n) % n]);
+  let m = k;
+  while (inside[(m + 1) % n]) m = (m + 1) % n;
+  const entry = poly[k];
+  const exit = poly[(m + 1) % n];
+  const outside: WedgePoint[] = [];
+  for (let i = (m + 1) % n; i !== k; i = (i + 1) % n) outside.push(poly[i]);
+  const corners = [
+    point(-R, -R),
+    point(-R, R),
+    point(R, -R),
+    point(R, R),
+  ]
+    .filter(
+      (c) =>
+        contains(source, c) &&
+        len(sub(c, entry)) > 1e-6 &&
+        len(sub(c, exit)) > 1e-6,
+    )
+    .sort((a, b) => len(sub(a, entry)) - len(sub(b, entry)));
+  return roundedPoly([...outside, entry, ...corners], r);
+}
+
 function halfRing(Ri: number, Ro: number, G: number, r: number): Segment[] {
   const x = -G / 2 - r;
   const at = (radius: number) =>
@@ -244,6 +321,7 @@ type Slot = { min: WedgePoint; max: WedgePoint; area: number };
 function slotBetween(
   poly: WedgePoint[],
   R: number,
+  square: boolean,
   x0: number,
   x1: number,
 ): Slot | null {
@@ -253,7 +331,7 @@ function slotBetween(
   let lo = Math.max(s0[0], s1[0]);
   let hi = Math.min(s0[1], s1[1]);
   if (Math.abs(x1) < R) {
-    const h = Math.sqrt(R * R - x1 * x1);
+    const h = square ? R : Math.sqrt(R * R - x1 * x1);
     if (hi - Math.max(lo, h) >= Math.min(hi, -h) - lo) lo = Math.max(lo, h);
     else hi = Math.min(hi, -h);
   }
@@ -261,7 +339,11 @@ function slotBetween(
   return { min: point(x0, lo), max: point(x1, hi), area: (x1 - x0) * (hi - lo) };
 }
 
-function largestSlot(poly: WedgePoint[], R: number): Slot | null {
+function largestSlot(
+  poly: WedgePoint[],
+  R: number,
+  square: boolean,
+): Slot | null {
   if (poly.length < 3) return null;
   const xs = poly.map((p) => p.x);
   const left = Math.min(...xs);
@@ -279,7 +361,7 @@ function largestSlot(poly: WedgePoint[], R: number): Slot | null {
       for (let j = 0; j <= steps; j++) {
         const x1 = a1 + ((b1 - a1) * j) / steps;
         if (x1 <= x0) continue;
-        const slot = slotBetween(poly, R, x0, x1);
+        const slot = slotBetween(poly, R, square, x0, x1);
         if (slot && (!best || slot.area > best.area)) best = slot;
       }
     }
@@ -386,6 +468,7 @@ export function wedgeGeometry({
   width,
   height,
   orientation,
+  centerShape = "circle",
   avatarRadius,
   centerGap,
   relatedGap,
@@ -404,6 +487,10 @@ export function wedgeGeometry({
   }
   if (!(slotInset >= 0)) {
     throw new RangeError("slotInset must be non-negative");
+  }
+  const square = centerShape === "square";
+  if (square && ringThickness > 0) {
+    throw new RangeError("a square center cannot have a ring");
   }
   const row = orientation === "row";
   const E = (row ? width : height) / 2;
@@ -450,12 +537,17 @@ export function wedgeGeometry({
       const to = next + (Math.PI - next) * e;
       const poly = wedge(from, to);
       if (poly.length < 3) return [];
-      const far = centroid(poly.filter((p) => len(p) >= cutRadius));
+      const beyond = (p: WedgePoint) =>
+        (square ? chebyshev(p) : len(p)) >= cutRadius;
+      const cut = square
+        ? squareCutPath(poly, cutRadius, cornerRadius)
+        : ringCutPath(poly, cutRadius, cornerRadius);
+      if (cut.length === 0) return [];
+      const far = centroid(poly.filter(beyond));
       const anchor = transform(mul(norm(far), (cutRadius + len(far)) / 2));
-      const cut = ringCutPath(poly, cutRadius, cornerRadius);
       const bounds = boundsOf(
         [
-          ...poly.filter((p) => len(p) >= cutRadius),
+          ...poly.filter(beyond),
           ...cut.map((segment) => segment.to),
         ].map(transform),
       );
@@ -468,7 +560,11 @@ export function wedgeGeometry({
           get slot() {
             if (slot === undefined) {
               slot = slotRect(
-                largestSlot(wedge(from, to, slotInset), cutRadius + slotInset),
+                largestSlot(
+                  wedge(from, to, slotInset),
+                  cutRadius + slotInset,
+                  square,
+                ),
                 transform,
               );
             }

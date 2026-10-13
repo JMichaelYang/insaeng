@@ -10,24 +10,23 @@ import Image, { getImageProps } from "next/image";
 import { preload } from "react-dom";
 
 const shared = {
+  centerShape: "square",
+  centerGap: 0,
+  relatedGap: 0,
   ringThickness: 0,
   wedgesPerSide: 4,
   spread: 1,
   cornerRadius: 0,
-};
+} as const;
 
 const row: WedgesLayout = {
   ...shared,
-  avatarRadius: 176,
-  centerGap: 12,
-  relatedGap: 8,
+  avatarRadius: 192,
   slotInset: 24,
 };
 const column: WedgesLayout = {
   ...shared,
-  avatarRadius: 80,
-  centerGap: 8,
-  relatedGap: 4,
+  avatarRadius: 88,
   slotInset: 16,
 };
 
@@ -99,16 +98,16 @@ export default function Home() {
         images={images}
         blur="lg"
       >
-        <Avatar className="
-          size-[10rem]
-          lg:size-[22rem]
+        <Avatar shape="square" className="
+          size-[11rem]
+          lg:size-[24rem]
         ">
           <Image
             src="/headshot.jpg"
             alt="Jaewon Yang"
             width={720}
             height={720}
-            sizes="(min-width: 64rem) 22rem, 10rem"
+            sizes="(min-width: 64rem) 24rem, 11rem"
             preload
           />
         </Avatar>

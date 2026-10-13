@@ -584,3 +584,86 @@ describe("wedgeGeometry", () => {
     },
   );
 });
+
+describe("wedgeGeometry with a square center", () => {
+  const square = (
+    o: WedgeOrientation,
+    overrides: Partial<WedgeGeometryOptions> = {},
+  ): WedgeGeometryOptions => ({
+    ...base[o],
+    centerShape: "square",
+    ringThickness: 0,
+    centerGap: 0,
+    relatedGap: 0,
+    cornerRadius: 0,
+    wedgesPerSide: 4,
+    spread: 1,
+    ...overrides,
+  });
+
+  const chebyshev = (p: WedgePoint, c: WedgePoint) =>
+    Math.max(Math.abs(p.x - c.x), Math.abs(p.y - c.y));
+
+  it.each(orientations)("tiles everything outside the %s square", (o) => {
+    const options = square(o);
+    const geometry = wedgeGeometry(options);
+    const R = geometry.cutRadius;
+    const center = { x: options.width / 2, y: options.height / 2 };
+    const outlines = geometry.sides.flatMap((side) =>
+      side.wedges.map(({ path }) => points(path)),
+    );
+    expect(outlines).toHaveLength(8);
+    const steps = 41;
+    for (let i = 0; i < steps; i++) {
+      for (let j = 0; j < steps; j++) {
+        const p = {
+          x: ((i + 0.5) / steps) * options.width,
+          y: ((j + 0.5) / steps) * options.height,
+        };
+        if (Math.abs(chebyshev(p, center) - R) < 1) continue;
+        const hits = outlines.filter((outline) => inside(p, outline)).length;
+        expect(hits).toBe(chebyshev(p, center) < R ? 0 : 1);
+      }
+    }
+  });
+
+  it.each(orientations)("keeps %s wedges and slots outside the square", (o) => {
+    const options = square(o, {
+      centerGap: 8,
+      relatedGap: 4,
+      cornerRadius: 12,
+    });
+    const geometry = wedgeGeometry(options);
+    const R = geometry.cutRadius;
+    const center = { x: options.width / 2, y: options.height / 2 };
+    for (const side of geometry.sides) {
+      expect(side.wedges).toHaveLength(4);
+      for (const { path, slot, bounds } of side.wedges) {
+        expect(path).not.toMatch(/NaN|Infinity/);
+        expectBoundsAround(bounds, path, options);
+        for (const p of points(path)) {
+          expect(chebyshev(p, center)).toBeGreaterThanOrEqual(R - EPSILON);
+        }
+        expect(slot).not.toBeNull();
+        if (!slot) continue;
+        const gapX = Math.max(
+          slot.x - (center.x + R),
+          center.x - R - (slot.x + slot.width),
+        );
+        const gapY = Math.max(
+          slot.y - (center.y + R),
+          center.y - R - (slot.y + slot.height),
+        );
+        expect(Math.max(gapX, gapY)).toBeGreaterThanOrEqual(
+          options.slotInset - EPSILON,
+        );
+      }
+    }
+  });
+
+  it("rejects a ring around a square center", () => {
+    expect(() => wedgeGeometry(square("row", { ringThickness: 32 }))).toThrow(
+      RangeError,
+    );
+  });
+});
