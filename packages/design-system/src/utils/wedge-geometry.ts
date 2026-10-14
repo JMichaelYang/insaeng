@@ -307,17 +307,22 @@ function squareCutPath(
   return roundedPoly([...outside, ...boundary], r);
 }
 
+const wobbleStep = 3;
+const wobbleBlend = 0.2;
+
+const smoothstep = (x: number) => {
+  const t = Math.max(0, Math.min(1, x));
+  return t * t * (3 - 2 * t);
+};
+
 function wave(cycles: number, t: number) {
   const k = Math.floor(cycles);
-  const a = cycles - k;
+  const a = smoothstep((cycles - k - 0.5) / wobbleBlend + 0.5);
   return (
     (1 - a) * Math.sin(2 * Math.PI * k * t) +
     a * Math.sin(2 * Math.PI * (k + 1) * t)
   );
 }
-
-const wobbleStep = 4;
-const wobbleHarmonic = 2.9;
 
 function wobbleLine(
   a: WedgePoint,
@@ -329,15 +334,12 @@ function wobbleLine(
   if (!(amplitude > 0 && wavelength > 0 && length > 0)) return [];
   const normal = point(-d.y / length, d.x / length);
   const cycles = length / wavelength;
-  const taper = wavelength / 4;
+  const taper = wavelength / 6;
   const n = Math.ceil(length / wobbleStep);
   return Array.from({ length: Math.max(0, n - 1) }, (_, i) => {
     const t = (i + 1) / n;
-    const ease = Math.min(1, (Math.min(t, 1 - t) * length) / taper);
-    const offset =
-      amplitude *
-      ease *
-      (0.7 * wave(cycles, t) + 0.3 * wave(cycles * wobbleHarmonic, t));
+    const ease = smoothstep((Math.min(t, 1 - t) * length) / taper);
+    const offset = amplitude * ease * wave(cycles, t);
     return add(add(a, mul(d, t)), mul(normal, offset));
   });
 }

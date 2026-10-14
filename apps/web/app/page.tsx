@@ -23,13 +23,13 @@ const row: WedgesLayout = {
   ...shared,
   avatarRadius: 192,
   slotInset: 24,
-  wobble: { amplitude: 3, wavelength: 64 },
+  wobble: { amplitude: 4.5, wavelength: 72 },
 };
 const column: WedgesLayout = {
   ...shared,
   avatarRadius: 88,
   slotInset: 16,
-  wobble: { amplitude: 2, wavelength: 44 },
+  wobble: { amplitude: 3, wavelength: 48 },
 };
 
 function Placeholder({ title }: { title: string }) {
@@ -99,14 +99,14 @@ export default function Home() {
       >
         <Avatar shape="square" className="
           size-[11.5rem]
-          lg:size-[24.5rem]
+          lg:size-[25rem]
         ">
           <Image
             src="/headshot.jpg"
             alt="Jaewon Yang"
             width={720}
             height={720}
-            sizes="(min-width: 64rem) 24.5rem, 11.5rem"
+            sizes="(min-width: 64rem) 25rem, 11.5rem"
             preload
           />
         </Avatar>
