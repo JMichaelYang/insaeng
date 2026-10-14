@@ -23,13 +23,13 @@ const row: WedgesLayout = {
   ...shared,
   avatarRadius: 192,
   slotInset: 24,
-  wobble: { amplitude: 4.5, wavelength: 72 },
+  wobble: { amplitude: 4.5, wavelength: 44 },
 };
 const column: WedgesLayout = {
   ...shared,
   avatarRadius: 88,
   slotInset: 16,
-  wobble: { amplitude: 3, wavelength: 48 },
+  wobble: { amplitude: 3, wavelength: 30 },
 };
 
 function Placeholder({ title }: { title: string }) {

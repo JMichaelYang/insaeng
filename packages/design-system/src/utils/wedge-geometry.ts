@@ -307,7 +307,7 @@ function squareCutPath(
   return roundedPoly([...outside, ...boundary], r);
 }
 
-const wobbleStep = 3;
+const wobbleStep = 2;
 const wobbleBlend = 0.2;
 
 const smoothstep = (x: number) => {
