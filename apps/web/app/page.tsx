@@ -2,22 +2,19 @@ import {
   Avatar,
   type ImageSource,
   type TextWobble,
-  type WedgesContent,
-  type WedgesImages,
   type WedgesLayout,
-  type WedgesLinks,
+  type WedgesSides,
   WobbleText,
 } from "@insaeng/design-system";
 import Image, { getImageProps } from "next/image";
 import { preload } from "react-dom";
 
 import { LinkedWedges } from "./linked-wedges";
-import { sectionHref, sections } from "./sections";
+import { type Section, sectionHref, sections } from "./sections";
 
 const shared = {
   centerGap: 0,
   relatedGap: 0,
-  wedgesPerSide: 4,
   spread: 1,
   cornerRadius: 0,
 } as const;
@@ -48,16 +45,6 @@ function WedgeTitle({ title }: { title: string }) {
   );
 }
 
-const content: WedgesContent = [
-  sections[0].map(({ slug, title }) => <WedgeTitle key={slug} title={title} />),
-  sections[1].map(({ slug, title }) => <WedgeTitle key={slug} title={title} />),
-];
-
-const hrefs: WedgesLinks["hrefs"] = [
-  sections[0].map(sectionHref),
-  sections[1].map(sectionHref),
-];
-
 const photoSize = 256;
 
 function photo(src: string): ImageSource {
@@ -70,13 +57,17 @@ function photo(src: string): ImageSource {
   return { mode: "raster", src: props.src, srcSet: props.srcSet };
 }
 
-const images: WedgesImages = [
-  sections[0].map(({ image }) => photo(image)),
-  sections[1].map(({ image }) => photo(image)),
-];
+const wedge = (section: Section) => ({
+  content: <WedgeTitle title={section.title} />,
+  image: photo(section.image),
+  href: sectionHref(section),
+});
+
+const sides: WedgesSides = [sections[0].map(wedge), sections[1].map(wedge)];
 
 export default function Home() {
-  for (const image of images.flat()) {
+  for (const { image } of sides.flat()) {
+    if (!image) continue;
     preload(image.src, {
       as: "image",
       imageSrcSet: image.mode === "raster" ? image.srcSet : undefined,
@@ -88,9 +79,7 @@ export default function Home() {
         className="flex-1"
         row={row}
         column={column}
-        content={content}
-        images={images}
-        hrefs={hrefs}
+        sides={sides}
         blur="md"
         tilt
       >
