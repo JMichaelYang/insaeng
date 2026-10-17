@@ -6,8 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./tailwind.css": "./src/styles/tailwind.css",
-    "./fonts.css": "./src/styles/fonts.css",
-    "./fonts/*": "./assets/fonts/*"
+    "./fonts.css": "./src/styles/fonts.css"
   },
   "scripts": {
     "tokens": "node scripts/build-tokens.mjs",
