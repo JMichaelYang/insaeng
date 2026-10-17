@@ -36,7 +36,11 @@ export type WedgeShape = WedgeOutline & {
 
 export type WedgeRing = { path: string; textPath: string };
 
-export type WedgeSide = { wedges: WedgeShape[]; ring: WedgeRing | null };
+export type WedgeSide = {
+  wedges: WedgeShape[];
+  ring: WedgeRing | null;
+  expandedSlot: WedgeRect | null;
+};
 
 export type WedgeGeometry = {
   cutRadius: number;
@@ -766,7 +770,27 @@ export function wedgeGeometry({
           ),
         }
       : null;
-    return { wedges, ring };
+    let expandedSlot: WedgeRect | null | undefined;
+    return {
+      wedges,
+      ring,
+      get expandedSlot() {
+        if (expandedSlot === undefined) {
+          expandedSlot =
+            count > 0
+              ? slotRect(
+                  largestSlot(
+                    wedge(0, Math.PI, slotInset),
+                    cutRadius + slotInset,
+                    square,
+                  ),
+                  transform,
+                )
+              : null;
+        }
+        return expandedSlot;
+      },
+    };
   });
 
   return {

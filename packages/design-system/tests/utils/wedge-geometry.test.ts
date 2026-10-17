@@ -392,6 +392,28 @@ describe("wedgeGeometry", () => {
     left.forEach((t, i) => expect(right[i]).toBeCloseTo(-t, 1));
   });
 
+  it.each(orientations)("matches %s expanded slots to fully expanded wedges", (o) => {
+    const options = { ...base[o], wedgesPerSide: 4 };
+    const rest = wedgeGeometry(options);
+    for (let i = 0; i < options.wedgesPerSide; i++) {
+      const full = Array.from({ length: options.wedgesPerSide }, (_, j) =>
+        j === i ? 1 : 0,
+      );
+      const geometry = wedgeGeometry({ ...options, expansion: [full, full] });
+      geometry.sides.forEach((side, s) => {
+        const expected = rest.sides[s].expandedSlot;
+        const actual = side.wedges[i].slot;
+        expect(expected).not.toBeNull();
+        expect(actual).not.toBeNull();
+        if (!expected || !actual) return;
+        expect(actual.x).toBeCloseTo(expected.x, 1);
+        expect(actual.y).toBeCloseTo(expected.y, 1);
+        expect(actual.width).toBeCloseTo(expected.width, 1);
+        expect(actual.height).toBeCloseTo(expected.height, 1);
+      });
+    }
+  });
+
   it.each(orientations)("grows %s slots as the inset shrinks", (o) => {
     const area = (slotInset: number) =>
       wedgeGeometry({ ...base[o], wedgesPerSide: 4, slotInset }).sides[0].wedges.map(
