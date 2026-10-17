@@ -1,7 +1,6 @@
 import {
   Avatar,
   type ImageSource,
-  type TextWobble,
   type WedgesLayout,
   type WedgesSides,
   WobbleText,
@@ -9,8 +8,10 @@ import {
 import Image, { getImageProps } from "next/image";
 import { preload } from "react-dom";
 
+import { headshot, headshotSizes } from "./headshot";
 import { LinkedWedges } from "./linked-wedges";
 import { type Section, sectionHref, sections } from "./sections";
+import { lgWobble, titleWobble, wobble } from "./wobble";
 
 const shared = {
   centerGap: 0,
@@ -23,16 +24,14 @@ const row: WedgesLayout = {
   ...shared,
   avatarRadius: 192,
   slotInset: 24,
-  wobble: { amplitude: 3, wavelength: 30 },
+  wobble: lgWobble,
 };
 const column: WedgesLayout = {
   ...shared,
   avatarRadius: 88,
   slotInset: 16,
-  wobble: { amplitude: 2, wavelength: 20 },
+  wobble,
 };
-
-const titleWobble: TextWobble = { amplitude: 0.035, period: 4 };
 
 function WedgeTitle({ title }: { title: string }) {
   return (
@@ -88,11 +87,9 @@ export default function Home() {
           lg:size-[25rem]
         ">
           <Image
-            src="/headshot.jpg"
+            {...headshot}
             alt="Jaewon Yang"
-            width={720}
-            height={720}
-            sizes="(min-width: 64rem) 25rem, 11.5rem"
+            sizes={headshotSizes.home}
             preload
           />
         </Avatar>
