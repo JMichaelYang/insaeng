@@ -56,7 +56,7 @@ const content: WedgesContent = [
   )),
 ];
 
-const photoSize = 512;
+const photoSize = 256;
 
 function photo(src: string): ImageSource {
   const { props } = getImageProps({
