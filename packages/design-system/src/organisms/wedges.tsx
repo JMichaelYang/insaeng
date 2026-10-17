@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type PointerEvent,
   type ReactNode,
   type RefObject,
@@ -342,7 +343,14 @@ export function Wedges({
                     }}
                   >
                     {tilt ? (
-                      <div style={{ rotate: `${angle}deg` }}>
+                      <div
+                        style={
+                          {
+                            rotate: `${angle}deg`,
+                            "--tilt": `${angle}deg`,
+                          } as CSSProperties
+                        }
+                      >
                         {node}
                       </div>
                     ) : (
