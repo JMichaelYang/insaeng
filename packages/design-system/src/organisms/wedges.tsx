@@ -37,6 +37,8 @@ export type WedgesImages = readonly [
   readonly ImageSource[],
 ];
 
+export type WedgesLinks = readonly [readonly string[], readonly string[]];
+
 type Frame = { width: number; height: number; orientation: WedgeOrientation };
 
 type Hold = {
@@ -125,6 +127,7 @@ export function Wedges({
   column,
   content,
   images,
+  links,
   blur,
   tilt = false,
   className,
@@ -134,6 +137,7 @@ export function Wedges({
   column: WedgesLayout;
   content?: WedgesContent;
   images?: WedgesImages;
+  links?: WedgesLinks;
   blur?: ImageBlur;
   tilt?: boolean;
   className?: string;
@@ -141,6 +145,7 @@ export function Wedges({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const hold = useRef<Hold | null>(null);
+  const heldClick = useRef<string | null>(null);
   const [frame, setFrame] = useState<Frame | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
   const [held, setHeld] = useState<string | null>(null);
@@ -207,6 +212,7 @@ export function Wedges({
 
   const startHold = (key: string, event: PointerEvent) => {
     cancelHold();
+    heldClick.current = null;
     const next: Hold = {
       key,
       pointerId: event.pointerId,
@@ -216,6 +222,7 @@ export function Wedges({
     };
     next.timer = window.setTimeout(() => {
       next.timer = null;
+      heldClick.current = key;
       setHeld(key);
     }, holdDelay);
     hold.current = next;
@@ -265,14 +272,26 @@ export function Wedges({
             );
             const angle = resting.tilt * (1 - e);
             const node = content?.[s]?.[i];
+            const href = links?.[s]?.[i];
+            const Element = href ? "a" : "div";
             return (
-              <div
+              <Element
                 key={key}
-                tabIndex={0}
+                href={href}
+                tabIndex={href ? undefined : 0}
+                draggable={href ? false : undefined}
                 className="
                   pointer-events-none absolute inset-0 outline-none select-none
                 "
-                style={rank < 0 ? undefined : { zIndex: rank + 1 }}
+                style={{
+                  WebkitTouchCallout: "none",
+                  zIndex: rank < 0 ? undefined : rank + 1,
+                }}
+                onClick={(event) => {
+                  if (heldClick.current !== key) return;
+                  heldClick.current = null;
+                  event.preventDefault();
+                }}
                 onPointerEnter={(event) => {
                   if (event.pointerType !== "touch") setHovered(key);
                 }}
@@ -331,7 +350,7 @@ export function Wedges({
                     )}
                   </div>
                 )}
-              </div>
+              </Element>
             );
           }),
         )}

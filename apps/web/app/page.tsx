@@ -6,10 +6,13 @@ import {
   type WedgesContent,
   type WedgesImages,
   type WedgesLayout,
+  type WedgesLinks,
   WobbleText,
 } from "@insaeng/design-system";
 import Image, { getImageProps } from "next/image";
 import { preload } from "react-dom";
+
+import { sectionHref, sections } from "./sections";
 
 const shared = {
   centerShape: "square",
@@ -48,12 +51,13 @@ function Placeholder({ title }: { title: string }) {
 }
 
 const content: WedgesContent = [
-  ["About", "Sports", "Interests", "Dreams"].map((title) => (
-    <Placeholder key={title} title={title} />
-  )),
-  ["Mission", "Resume", "Projects", "Contact"].map((title) => (
-    <Placeholder key={title} title={title} />
-  )),
+  sections[0].map(({ slug, title }) => <Placeholder key={slug} title={title} />),
+  sections[1].map(({ slug, title }) => <Placeholder key={slug} title={title} />),
+];
+
+const links: WedgesLinks = [
+  sections[0].map(sectionHref),
+  sections[1].map(sectionHref),
 ];
 
 const photoSize = 512;
@@ -69,18 +73,8 @@ function photo(src: string): ImageSource {
 }
 
 const images: WedgesImages = [
-  [
-    photo("/wedges/about.jpg"),
-    photo("/wedges/sports.jpg"),
-    photo("/wedges/interests.jpg"),
-    photo("/wedges/dreams.jpg"),
-  ],
-  [
-    photo("/wedges/mission.jpg"),
-    photo("/wedges/resume.jpg"),
-    photo("/wedges/projects.png"),
-    photo("/wedges/contact.jpg"),
-  ],
+  sections[0].map(({ image }) => photo(image)),
+  sections[1].map(({ image }) => photo(image)),
 ];
 
 export default function Home() {
@@ -98,6 +92,7 @@ export default function Home() {
         column={column}
         content={content}
         images={images}
+        links={links}
         blur="md"
         tilt
       >
