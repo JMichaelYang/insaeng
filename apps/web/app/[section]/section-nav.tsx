@@ -2,7 +2,6 @@ import {
   Avatar,
   mergeClasses,
   WobbleBox,
-  WobbleText,
 } from "@insaeng/design-system";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,7 +9,7 @@ import { ViewTransition } from "react";
 
 import { headshot, headshotSizes, headshotTransition } from "../headshot";
 import { type Section, sectionHref, sections } from "../sections";
-import { lgWobble, titleWobble, wobble } from "../wobble";
+import { lgWobble, wobble } from "../wobble";
 
 const menuId = "section-menu";
 const bottomEdge = { bottom: true };
@@ -39,11 +38,7 @@ function SectionLink({
         className,
       )}
     >
-      <WobbleText
-        text={section.title}
-        wobble={titleWobble}
-        className="translate-y-0.5"
-      />
+      <span className="translate-y-0.5">{section.title}</span>
     </Link>
   );
 }
