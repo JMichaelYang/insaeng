@@ -48,7 +48,7 @@ function Placeholder({ title }: { title: string }) {
 }
 
 const content: WedgesContent = [
-  ["Background", "Sports", "Interests", "Dreams"].map((title) => (
+  ["About", "Sports", "Interests", "Dreams"].map((title) => (
     <Placeholder key={title} title={title} />
   )),
   ["Mission", "Resume", "Projects", "Contact"].map((title) => (
@@ -70,7 +70,7 @@ function photo(src: string): ImageSource {
 
 const images: WedgesImages = [
   [
-    photo("/wedges/background.jpg"),
+    photo("/wedges/about.jpg"),
     photo("/wedges/sports.jpg"),
     photo("/wedges/interests.jpg"),
     photo("/wedges/dreams.jpg"),
