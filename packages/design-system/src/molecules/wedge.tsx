@@ -2,7 +2,7 @@ import { useId } from "react";
 
 import { Image, type ImageBlur, type ImageSource } from "../atoms/image";
 import { mergeClasses } from "../utils/merge-classes";
-import type { WedgeRect } from "../utils/wedge-geometry";
+import type { WedgeRect } from "../organisms/wedge-geometry";
 
 const strokeWidth = 2;
 const fadeExtent = "100%";

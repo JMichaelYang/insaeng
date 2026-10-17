@@ -6,7 +6,7 @@ import {
   type WedgeOrientation,
   type WedgePoint,
   type WedgeRect,
-} from "../../src/utils/wedge-geometry";
+} from "../../src/organisms/wedge-geometry";
 
 type Command =
   | { type: "M" | "L"; to: WedgePoint }

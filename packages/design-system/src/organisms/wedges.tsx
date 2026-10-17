@@ -20,7 +20,7 @@ import {
   type WedgeGeometryOptions,
   type WedgeOrientation,
   type WedgeRect,
-} from "../utils/wedge-geometry";
+} from "./wedge-geometry";
 import type { ImageBlur, ImageSource } from "../atoms/image";
 import { Wedge, WedgeLines } from "../molecules/wedge";
 
