@@ -95,7 +95,7 @@ export default function Home() {
         column={column}
         content={content}
         images={images}
-        blur="lg"
+        blur="md"
       >
         <Avatar shape="square" className="
           size-[11.5rem]
