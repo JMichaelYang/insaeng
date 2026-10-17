@@ -15,4 +15,4 @@ export {
   type WedgeShape,
   type WedgeSide,
   type WedgeWobble,
-} from "./utils/wedge-geometry";
+} from "./organisms/wedge-geometry";
