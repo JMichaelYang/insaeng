@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useId, type ReactNode } from "react";
 
 import { Image, type ImageBlur, type ImageSource } from "../atoms/image";
 import { mergeClasses } from "../utils/merge-classes";
@@ -118,5 +118,33 @@ export function WedgeLines({
         />
       )}
     </svg>
+  );
+}
+
+export function WedgeSlot({
+  slot,
+  tilt,
+  children,
+}: {
+  slot: WedgeRect;
+  tilt?: number;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className="absolute flex items-center justify-center overflow-hidden"
+      style={{
+        left: slot.x,
+        top: slot.y,
+        width: slot.width,
+        height: slot.height,
+      }}
+    >
+      {tilt === undefined ? (
+        children
+      ) : (
+        <div style={{ rotate: `${tilt}deg` }}>{children}</div>
+      )}
+    </div>
   );
 }
