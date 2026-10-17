@@ -34,7 +34,7 @@ type WedgeSide = {
   expandedSlot: WedgeRect | null;
 };
 
-type WedgeGeometry = {
+export type WedgeGeometry = {
   cutRadius: number;
   center: WedgeOutline | null;
   sides: [WedgeSide, WedgeSide];
