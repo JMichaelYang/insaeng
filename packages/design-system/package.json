@@ -11,7 +11,7 @@
   "scripts": {
     "tokens": "node scripts/build-tokens.mjs",
     "tokens:check": "node scripts/build-tokens.mjs && git diff --exit-code -- src/generated",
-    "lint": "eslint && node scripts/check-test-layout.mjs",
+    "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
