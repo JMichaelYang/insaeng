@@ -57,7 +57,7 @@
   --color-scrim: var(--role-scrim);
   --font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
-  --font-display: var(--font-pochaevsk), 'Pretendard Variable', Pretendard, serif;
+  --font-display: var(--font-dongle), 'Pretendard Variable', Pretendard, sans-serif;
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;

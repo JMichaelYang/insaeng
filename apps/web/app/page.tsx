@@ -36,8 +36,8 @@ function Placeholder({ title }: { title: string }) {
   return (
     <div className="flex flex-col items-center gap-1 text-center">
       <span className="
-        type-label text-on-surface
-        lg:type-heading-sm
+        type-title text-on-surface
+        lg:type-heading-xl
       ">{title}</span>
       <span className="type-caption text-on-surface-variant">Coming soon</span>
     </div>

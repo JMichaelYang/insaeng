@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { Geist_Mono } from "next/font/google";
-import localFont from "next/font/local";
+import { Dongle, Geist_Mono } from "next/font/google";
 import "@insaeng/design-system/fonts.css";
 import "./globals.css";
 
@@ -9,9 +8,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const pochaevsk = localFont({
-  src: "../../../packages/design-system/assets/fonts/Pochaevsk-Regular.woff2",
-  variable: "--font-pochaevsk",
+const dongle = Dongle({
+  variable: "--font-dongle",
+  subsets: ["latin"],
   weight: "400",
 });
 
@@ -26,7 +25,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`
         ${geistMono.variable}
-        ${pochaevsk.variable}
+        ${dongle.variable}
         h-full antialiased
       `}
     >

@@ -153,6 +153,7 @@ export const semanticNames = {
   "type": [
     "display",
     "heading-xl",
+    "title",
     "heading-lg",
     "heading-md",
     "heading-sm",
