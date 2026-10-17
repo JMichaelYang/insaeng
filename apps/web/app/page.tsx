@@ -12,6 +12,7 @@ import {
 import Image, { getImageProps } from "next/image";
 import { preload } from "react-dom";
 
+import ClientLink from "./client-link";
 import { sectionHref, sections } from "./sections";
 
 const shared = {
@@ -93,6 +94,7 @@ export default function Home() {
         content={content}
         images={images}
         links={links}
+        linkAs={ClientLink}
         blur="md"
         tilt
       >

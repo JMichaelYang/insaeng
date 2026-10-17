@@ -6,6 +6,8 @@ import {
   useMemo,
   useRef,
   useState,
+  type ElementType,
+  type HTMLAttributes,
   type PointerEvent,
   type ReactNode,
   type RefObject,
@@ -38,6 +40,12 @@ export type WedgesImages = readonly [
 ];
 
 export type WedgesLinks = readonly [readonly string[], readonly string[]];
+
+type WedgeTargetProps = HTMLAttributes<HTMLElement> & { href?: string };
+
+export type WedgesLinkComponent = ElementType<
+  WedgeTargetProps & { href: string }
+>;
 
 type Frame = { width: number; height: number; orientation: WedgeOrientation };
 
@@ -128,6 +136,7 @@ export function Wedges({
   content,
   images,
   links,
+  linkAs = "a",
   blur,
   tilt = false,
   className,
@@ -138,6 +147,7 @@ export function Wedges({
   content?: WedgesContent;
   images?: WedgesImages;
   links?: WedgesLinks;
+  linkAs?: WedgesLinkComponent;
   blur?: ImageBlur;
   tilt?: boolean;
   className?: string;
@@ -289,7 +299,7 @@ export function Wedges({
             const angle = resting.tilt * (1 - e);
             const node = content?.[s]?.[i];
             const href = links?.[s]?.[i];
-            const Element = href ? "a" : "div";
+            const Element = (href ? linkAs : "div") as ElementType<WedgeTargetProps>;
             return (
               <Element
                 key={key}
