@@ -146,11 +146,15 @@ export function Wedges({
   const ref = useRef<HTMLDivElement>(null);
   const hold = useRef<Hold | null>(null);
   const heldClick = useRef<string | null>(null);
+  const touched = useRef<string | null>(null);
+  const navigating = useRef<string | null>(null);
+  const transition = useRef<number | null>(null);
   const [frame, setFrame] = useState<Frame | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
   const [held, setHeld] = useState<string | null>(null);
+  const [tapped, setTapped] = useState<string | null>(null);
   const [focused, setFocused] = useState<string | null>(null);
-  const expansion = useExpansion(held ?? hovered ?? focused, ref);
+  const expansion = useExpansion(tapped ?? held ?? hovered ?? focused, ref);
 
   useLayoutEffect(() => {
     const element = ref.current;
@@ -182,9 +186,21 @@ export function Wedges({
     () => () => {
       const timer = hold.current?.timer;
       if (timer != null) window.clearTimeout(timer);
+      if (transition.current !== null) window.clearTimeout(transition.current);
     },
     [],
   );
+
+  useEffect(() => {
+    const reset = (event: PageTransitionEvent) => {
+      if (!event.persisted) return;
+      if (transition.current !== null) window.clearTimeout(transition.current);
+      transition.current = null;
+      setTapped(null);
+    };
+    window.addEventListener("pageshow", reset);
+    return () => window.removeEventListener("pageshow", reset);
+  }, []);
 
   const layout = frame?.orientation === "row" ? row : column;
 
@@ -288,9 +304,29 @@ export function Wedges({
                   zIndex: rank < 0 ? undefined : rank + 1,
                 }}
                 onClick={(event) => {
-                  if (heldClick.current !== key) return;
-                  heldClick.current = null;
+                  const tap = touched.current === key;
+                  touched.current = null;
+                  if (heldClick.current === key) {
+                    heldClick.current = null;
+                    event.preventDefault();
+                    return;
+                  }
+                  if (navigating.current === key) {
+                    navigating.current = null;
+                    return;
+                  }
+                  if (!href || !tap || !ref.current) return;
+                  const { duration } = readMotion(ref.current);
+                  if (duration <= 0) return;
                   event.preventDefault();
+                  if (transition.current !== null) return;
+                  const target = event.currentTarget;
+                  setTapped(key);
+                  transition.current = window.setTimeout(() => {
+                    transition.current = null;
+                    navigating.current = key;
+                    target.click();
+                  }, duration);
                 }}
                 onPointerEnter={(event) => {
                   if (event.pointerType !== "touch") setHovered(key);
@@ -299,6 +335,7 @@ export function Wedges({
                   if (event.pointerType !== "touch") setHovered(release(key));
                 }}
                 onPointerDown={(event) => {
+                  touched.current = event.pointerType === "touch" ? key : null;
                   if (event.pointerType === "touch") startHold(key, event);
                 }}
                 onPointerMove={moveHold}
