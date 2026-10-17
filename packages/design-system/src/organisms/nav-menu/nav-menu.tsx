@@ -12,11 +12,6 @@ import type { WedgeWobble } from "../wedges/wedge-geometry";
 
 const rightEdge = { right: true };
 
-const toggleClasses = `
-  state-layer inline-flex size-10 items-center justify-center rounded-full
-  text-on-primary-container
-`;
-
 export function NavMenu({
   label,
   items,
@@ -37,7 +32,10 @@ export function NavMenu({
         type="button"
         popoverTarget={id}
         aria-label={label}
-        className={toggleClasses}
+        className="
+          state-layer inline-flex size-10 items-center justify-center
+          rounded-full text-on-primary-container
+        "
       >
         <MenuIcon />
       </button>
@@ -63,18 +61,7 @@ export function NavMenu({
       >
         <WobbleBox wobble={wobble} edges={rightEdge} className="h-full">
           <div className="flex h-full flex-col bg-primary-container">
-            <div className="flex h-16 shrink-0 items-center px-4">
-              <button
-                type="button"
-                popoverTarget={id}
-                popoverTargetAction="hide"
-                aria-label={`Close ${label.toLowerCase()}`}
-                className={toggleClasses}
-              >
-                <MenuIcon />
-              </button>
-            </div>
-            <ul className="flex flex-col gap-1 overflow-y-auto px-4 pb-6">
+            <ul className="flex flex-col gap-1 overflow-y-auto px-4 py-6">
               {items.map((item) => (
                 <li key={item.href}>
                   <NavLink
