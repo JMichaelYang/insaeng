@@ -31,15 +31,19 @@ function SectionLink({
       aria-current={section.slug === current ? "page" : undefined}
       className={mergeClasses(
         `
-          state-layer inline-flex h-control-lg items-center rounded-full
-          border-thicker border-transparent px-4 type-heading-xl
+          state-layer inline-flex h-control-lg -translate-y-0.5 items-center
+          rounded-full border-thicker border-transparent px-4 type-heading-xl
           whitespace-nowrap text-on-primary-container
           aria-[current=page]:border-on-primary-container
         `,
         className,
       )}
     >
-      <WobbleText text={section.title} wobble={titleWobble} />
+      <WobbleText
+        text={section.title}
+        wobble={titleWobble}
+        className="translate-y-0.5"
+      />
     </Link>
   );
 }
