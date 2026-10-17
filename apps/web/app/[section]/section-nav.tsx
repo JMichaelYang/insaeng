@@ -14,6 +14,7 @@ import { lgWobble, titleWobble, wobble } from "../wobble";
 
 const menuId = "section-menu";
 const bottomEdge = { bottom: true };
+const avatarEdges = { right: true, bottom: true, left: true };
 
 function SectionLink({
   section,
@@ -152,7 +153,7 @@ export function SectionNav({ current }: { current: string }) {
         <Link
           href="/"
           aria-label="Home"
-          className="col-start-2 row-start-1 mt-2 self-start"
+          className="col-start-2 row-start-1 self-start"
         >
           <ViewTransition
             name={headshotTransition}
@@ -162,6 +163,7 @@ export function SectionNav({ current }: { current: string }) {
             <WobbleBox
               wobble={wobble}
               lgWobble={lgWobble}
+              edges={avatarEdges}
               className="
                 size-20
                 lg:size-24
