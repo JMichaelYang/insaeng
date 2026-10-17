@@ -12,6 +12,10 @@
   animation: none;
 }
 
+::view-transition-group(.morph) {
+  z-index: var(--z-index-raised);
+}
+
 @media (prefers-reduced-motion: no-preference) {
   ::view-transition-old(.fade) {
     animation: var(--transition-duration-normal) var(--ease-exit) both fade-out;
@@ -19,6 +23,11 @@
 
   ::view-transition-new(.fade) {
     animation: var(--transition-duration-normal) var(--ease-enter) both fade-in;
+  }
+
+  ::view-transition-group(.morph) {
+    animation-duration: var(--transition-duration-slow);
+    animation-timing-function: var(--ease-standard);
   }
 }
 

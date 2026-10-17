@@ -3,12 +3,19 @@ import {
   type ImageSource,
   type WedgesLayout,
   type WedgesSides,
+  WedgesCenter,
   WobbleText,
 } from "@insaeng/design-system";
 import Image, { getImageProps } from "next/image";
+import { ViewTransition } from "react";
 import { preload } from "react-dom";
 
-import { headshot, headshotSizes } from "./headshot";
+import {
+  headshot,
+  headshotSizes,
+  headshotTransition,
+  preloadHeadshot,
+} from "./headshot";
 import { LinkedWedges } from "./linked-wedges";
 import { type Section, sectionHref, sections } from "./sections";
 import { lgWobble, titleWobble, wobble } from "./wobble";
@@ -72,6 +79,7 @@ export default function Home() {
       imageSrcSet: image.mode === "raster" ? image.srcSet : undefined,
     });
   }
+  preloadHeadshot(headshotSizes.nav);
   return (
     <main className="flex flex-1 flex-col">
       <LinkedWedges
@@ -82,17 +90,21 @@ export default function Home() {
         blur="md"
         tilt
       >
-        <Avatar shape="square" className="
-          size-[11.5rem]
-          lg:size-[25rem]
-        ">
-          <Image
-            {...headshot}
-            alt="Jaewon Yang"
-            sizes={headshotSizes.home}
-            preload
-          />
-        </Avatar>
+        <ViewTransition name={headshotTransition} share="morph" default="none">
+          <WedgesCenter>
+            <Avatar shape="square" className="
+              size-[11.5rem]
+              lg:size-[25rem]
+            ">
+              <Image
+                {...headshot}
+                alt="Jaewon Yang"
+                sizes={headshotSizes.home}
+                preload
+              />
+            </Avatar>
+          </WedgesCenter>
+        </ViewTransition>
       </LinkedWedges>
     </main>
   );

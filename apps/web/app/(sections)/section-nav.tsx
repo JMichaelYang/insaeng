@@ -10,8 +10,9 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useSelectedLayoutSegment } from "next/navigation";
+import { ViewTransition } from "react";
 
-import { headshot, headshotSizes } from "../headshot";
+import { headshot, headshotSizes, headshotTransition } from "../headshot";
 import { type Section, sectionHref, sections } from "../sections";
 import { lgWobble, wobble } from "../wobble";
 
@@ -75,19 +76,25 @@ export function SectionNav() {
           aria-label="Home"
           className="col-start-2 row-start-1 self-start"
         >
-          <WobbleBox
-            wobble={wobble}
-            lgWobble={lgWobble}
-            edges={avatarEdges}
-            className="
-              size-20
-              lg:size-24
-            "
+          <ViewTransition
+            name={headshotTransition}
+            share="morph"
+            default="none"
           >
-            <Avatar shape="square" className="size-full">
-              <Image {...headshot} alt="" sizes={headshotSizes.nav} preload />
-            </Avatar>
-          </WobbleBox>
+            <WobbleBox
+              wobble={wobble}
+              lgWobble={lgWobble}
+              edges={avatarEdges}
+              className="
+                size-20
+                lg:size-24
+              "
+            >
+              <Avatar shape="square" className="size-full">
+                <Image {...headshot} alt="" sizes={headshotSizes.nav} preload />
+              </Avatar>
+            </WobbleBox>
+          </ViewTransition>
         </Link>
         <NavLinks
           items={navItems(sections[1], current)}
