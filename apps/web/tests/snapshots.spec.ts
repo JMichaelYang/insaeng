@@ -1,17 +1,39 @@
 import { readdirSync } from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { expect, test } from "@playwright/test";
 
 const appDir = path.join(__dirname, "..", "app");
+const load = createRequire(__filename);
 const isRouteGroup = (name: string) => /^\(.*\)$/.test(name);
+const isPage = (name: string) => /^page\.(tsx|ts|jsx|js|mdx)$/.test(name);
+
+type StaticParams = () => Record<string, string>[];
+
+function staticParams(dir: string): Record<string, string>[] {
+  const page = readdirSync(dir).find(isPage);
+  if (!page) return [];
+  const { generateStaticParams } = load(path.join(dir, page)) as {
+    generateStaticParams?: StaticParams;
+  };
+  return generateStaticParams?.() ?? [];
+}
 
 function discoverRoutes(dir: string, segments: string[] = []): string[] {
   const routes: string[] = [];
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const name = entry.name;
-    if (entry.isFile() && /^page\.(tsx|ts|jsx|js|mdx)$/.test(name)) {
+    if (entry.isFile() && isPage(name)) {
       routes.push("/" + segments.join("/"));
     } else if (entry.isDirectory()) {
+      const param = /^\[(\w+)\]$/.exec(name)?.[1];
+      if (param) {
+        const child = path.join(dir, name);
+        for (const params of staticParams(child)) {
+          routes.push(...discoverRoutes(child, [...segments, params[param]]));
+        }
+        continue;
+      }
       if (/^[_@.\[]/.test(name)) continue;
       if (name.startsWith("(") && !isRouteGroup(name)) continue;
       const next = isRouteGroup(name) ? segments : [...segments, name];
