@@ -1,6 +1,8 @@
 import {
   Avatar,
-  mergeClasses,
+  type NavItem,
+  NavLinks,
+  NavMenu,
   WobbleBox,
 } from "@insaeng/design-system";
 import Image from "next/image";
@@ -11,114 +13,15 @@ import { headshot, headshotSizes, headshotTransition } from "../headshot";
 import { type Section, sectionHref, sections } from "../sections";
 import { lgWobble, wobble } from "../wobble";
 
-const menuId = "section-menu";
 const bottomEdge = { bottom: true };
 const avatarEdges = { right: true, bottom: true, left: true };
 
-function SectionLink({
-  section,
-  current,
-  className,
-}: {
-  section: Section;
-  current: string;
-  className?: string;
-}) {
-  return (
-    <Link
-      href={sectionHref(section)}
-      aria-current={section.slug === current ? "page" : undefined}
-      className={mergeClasses(
-        `
-          state-layer inline-flex h-control-lg -translate-y-0.5 items-center
-          rounded-full border-thicker border-transparent px-4 type-heading-xl
-          whitespace-nowrap text-on-primary-container
-          aria-[current=page]:border-on-primary-container
-        `,
-        className,
-      )}
-    >
-      <span className="translate-y-0.5">{section.title}</span>
-    </Link>
-  );
-}
-
-function SectionLinks({
-  group,
-  current,
-  className,
-}: {
-  group: readonly Section[];
-  current: string;
-  className: string;
-}) {
-  return (
-    <ul className={className}>
-      {group.map((section) => (
-        <li key={section.slug}>
-          <SectionLink section={section} current={current} />
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function MenuIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-icon-lg" aria-hidden>
-      <path
-        d="M4 7h16M4 12h16M4 17h16"
-        className="fill-none stroke-current"
-        strokeWidth={2}
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function SectionMenu({ current }: { current: string }) {
-  return (
-    <div className="
-      col-start-1 row-start-1 flex items-center
-      lg:hidden
-    ">
-      <button
-        type="button"
-        popoverTarget={menuId}
-        aria-label="Sections"
-        className="
-          state-layer inline-flex size-10 items-center justify-center
-          rounded-full text-on-primary-container
-        "
-      >
-        <MenuIcon />
-      </button>
-      <div
-        id={menuId}
-        popover="auto"
-        className="
-          fixed inset-x-0 top-16 bottom-auto m-0 w-full border-0 bg-transparent
-          p-0 text-on-primary-container
-        "
-      >
-        <WobbleBox wobble={wobble} edges={bottomEdge}>
-          <ul className="
-            flex flex-col gap-1 bg-primary-container px-4 pt-2 pb-6
-          ">
-            {sections.flat().map((section) => (
-              <li key={section.slug}>
-                <SectionLink
-                  section={section}
-                  current={current}
-                  className="flex"
-                />
-              </li>
-            ))}
-          </ul>
-        </WobbleBox>
-      </div>
-    </div>
-  );
+function navItems(group: readonly Section[], current: string): NavItem[] {
+  return group.map((section) => ({
+    href: sectionHref(section),
+    label: section.title,
+    current: section.slug === current,
+  }));
 }
 
 export function SectionNav({ current }: { current: string }) {
@@ -143,12 +46,22 @@ export function SectionNav({ current }: { current: string }) {
           lg:px-8
         "
       >
-        <SectionMenu current={current} />
-        <SectionLinks
-          group={sections[0]}
-          current={current}
+        <NavMenu
+          label="Sections"
+          items={navItems(sections.flat(), current)}
+          wobble={wobble}
+          component={Link}
           className="
-            col-start-1 row-start-1 hidden items-center justify-evenly
+            col-start-1 row-start-1
+            lg:hidden
+          "
+          panelClassName="top-16"
+        />
+        <NavLinks
+          items={navItems(sections[0], current)}
+          component={Link}
+          className="
+            col-start-1 row-start-1 hidden justify-evenly
             lg:flex
           "
         />
@@ -177,11 +90,11 @@ export function SectionNav({ current }: { current: string }) {
             </WobbleBox>
           </ViewTransition>
         </Link>
-        <SectionLinks
-          group={sections[1]}
-          current={current}
+        <NavLinks
+          items={navItems(sections[1], current)}
+          component={Link}
           className="
-            col-start-3 row-start-1 hidden items-center justify-evenly
+            col-start-3 row-start-1 hidden justify-evenly
             lg:flex
           "
         />
