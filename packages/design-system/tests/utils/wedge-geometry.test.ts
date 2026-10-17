@@ -368,16 +368,19 @@ describe("wedgeGeometry", () => {
     }
   });
 
-  it.each(orientations)("tilts %s wedges along their axis to the center", (o) => {
+  it.each(orientations)("tilts %s wedges along the line from their slot to the center", (o) => {
     const options = { ...base[o], wedgesPerSide: 4 };
     const geometry = wedgeGeometry(options);
     const center = { x: options.width / 2, y: options.height / 2 };
     for (const side of geometry.sides) {
-      for (const { anchor, tilt } of side.wedges) {
+      for (const { anchor, slot, tilt } of side.wedges) {
         expect(tilt).toBeGreaterThanOrEqual(-90);
         expect(tilt).toBeLessThan(90);
         const radians = (tilt * Math.PI) / 180;
-        const axis = { x: anchor.x - center.x, y: anchor.y - center.y };
+        const at = slot
+          ? { x: slot.x + slot.width / 2, y: slot.y + slot.height / 2 }
+          : anchor;
+        const axis = { x: at.x - center.x, y: at.y - center.y };
         expect(
           Math.abs(axis.x * Math.sin(radians) - axis.y * Math.cos(radians)),
         ).toBeLessThan(EPSILON * Math.hypot(axis.x, axis.y));

@@ -704,8 +704,6 @@ export function wedgeGeometry({
       if (cut.length === 0) return [];
       const far = centroid(poly.filter(beyond));
       const anchor = transform(mul(norm(far), (cutRadius + len(far)) / 2));
-      const axis = sub(anchor, center);
-      const tilt = upright((Math.atan2(axis.y, axis.x) * 180) / Math.PI);
       const bounds = boundsOf(
         [
           ...poly.filter(beyond),
@@ -713,24 +711,38 @@ export function wedgeGeometry({
         ].map(transform),
       );
       let slot: WedgeRect | null | undefined;
+      const slotOf = () => {
+        if (slot === undefined) {
+          slot = slotRect(
+            largestSlot(
+              wedge(from, to, slotInset),
+              cutRadius + slotInset,
+              square,
+            ),
+            transform,
+          );
+        }
+        return slot;
+      };
+      let tilt: number | undefined;
       return [
         {
           ...outline(cut, transform, bend),
           anchor,
-          tilt,
           bounds,
           get slot() {
-            if (slot === undefined) {
-              slot = slotRect(
-                largestSlot(
-                  wedge(from, to, slotInset),
-                  cutRadius + slotInset,
-                  square,
-                ),
-                transform,
+            return slotOf();
+          },
+          get tilt() {
+            if (tilt === undefined) {
+              const at = slotOf();
+              const axis = sub(
+                at ? point(at.x + at.width / 2, at.y + at.height / 2) : anchor,
+                center,
               );
+              tilt = upright((Math.atan2(axis.y, axis.x) * 180) / Math.PI);
             }
-            return slot;
+            return tilt;
           },
         },
       ];
