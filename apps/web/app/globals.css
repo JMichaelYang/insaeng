@@ -4,6 +4,14 @@
   pointer-events: none;
 }
 
+::view-transition-old(root) {
+  display: none;
+}
+
+::view-transition-new(root) {
+  animation: none;
+}
+
 ::view-transition-group(.morph) {
   z-index: var(--z-index-raised);
 }

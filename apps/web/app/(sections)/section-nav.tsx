@@ -1,22 +1,28 @@
+"use client";
+
 import {
   Avatar,
   type NavItem,
   NavLinks,
+  NavMenu,
   WobbleBox,
 } from "@insaeng/design-system";
 import Image from "next/image";
 import Link from "next/link";
+import { useSelectedLayoutSegment } from "next/navigation";
 import { ViewTransition } from "react";
 
 import { headshot, headshotSizes, headshotTransition } from "../headshot";
 import { type Section, sectionHref, sections } from "../sections";
 import { lgWobble, wobble } from "../wobble";
-import { LinkedNavMenu } from "./linked-nav-menu";
 
 const bottomEdge = { bottom: true };
 const avatarEdges = { right: true, bottom: true, left: true };
 
-function navItems(group: readonly Section[], current: string): NavItem[] {
+function navItems(
+  group: readonly Section[],
+  current: string | null,
+): NavItem[] {
   return group.map((section) => ({
     href: sectionHref(section),
     label: section.title,
@@ -24,7 +30,8 @@ function navItems(group: readonly Section[], current: string): NavItem[] {
   }));
 }
 
-export function SectionNav({ current }: { current: string }) {
+export function SectionNav() {
+  const current = useSelectedLayoutSegment();
   return (
     <header className="
       sticky top-0 z-sticky h-16
@@ -46,10 +53,11 @@ export function SectionNav({ current }: { current: string }) {
           lg:px-8
         "
       >
-        <LinkedNavMenu
+        <NavMenu
           label="Sections"
           items={navItems(sections.flat(), current)}
           wobble={wobble}
+          component={Link}
           className="
             col-start-1 row-start-1
             lg:hidden
