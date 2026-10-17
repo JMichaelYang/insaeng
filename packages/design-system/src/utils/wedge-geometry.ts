@@ -29,13 +29,18 @@ export type WedgeOutline = { path: string; lines: string };
 
 export type WedgeShape = WedgeOutline & {
   anchor: WedgePoint;
+  tilt: number;
   bounds: WedgeRect;
   slot: WedgeRect | null;
 };
 
 export type WedgeRing = { path: string; textPath: string };
 
-export type WedgeSide = { wedges: WedgeShape[]; ring: WedgeRing | null };
+export type WedgeSide = {
+  wedges: WedgeShape[];
+  ring: WedgeRing | null;
+  expandedSlot: WedgeRect | null;
+};
 
 export type WedgeGeometry = {
   cutRadius: number;
@@ -67,6 +72,9 @@ const len = (a: WedgePoint) => Math.hypot(a.x, a.y);
 const norm = (a: WedgePoint) => mul(a, 1 / len(a));
 const origin = point(0, 0);
 const chebyshev = (a: WedgePoint) => Math.max(Math.abs(a.x), Math.abs(a.y));
+
+const upright = (degrees: number) =>
+  ((((degrees + 90) % 180) + 180) % 180) - 90;
 
 const centroid = (pts: WedgePoint[]) =>
   mul(pts.reduce(add, origin), 1 / pts.length);
@@ -707,23 +715,38 @@ export function wedgeGeometry({
         ].map(transform),
       );
       let slot: WedgeRect | null | undefined;
+      const slotOf = () => {
+        if (slot === undefined) {
+          slot = slotRect(
+            largestSlot(
+              wedge(from, to, slotInset),
+              cutRadius + slotInset,
+              square,
+            ),
+            transform,
+          );
+        }
+        return slot;
+      };
+      let tilt: number | undefined;
       return [
         {
           ...outline(cut, transform, bend),
           anchor,
           bounds,
           get slot() {
-            if (slot === undefined) {
-              slot = slotRect(
-                largestSlot(
-                  wedge(from, to, slotInset),
-                  cutRadius + slotInset,
-                  square,
-                ),
-                transform,
+            return slotOf();
+          },
+          get tilt() {
+            if (tilt === undefined) {
+              const at = slotOf();
+              const axis = sub(
+                at ? point(at.x + at.width / 2, at.y + at.height / 2) : anchor,
+                center,
               );
+              tilt = upright((Math.atan2(axis.y, axis.x) * 180) / Math.PI);
             }
-            return slot;
+            return tilt;
           },
         },
       ];
@@ -747,7 +770,27 @@ export function wedgeGeometry({
           ),
         }
       : null;
-    return { wedges, ring };
+    let expandedSlot: WedgeRect | null | undefined;
+    return {
+      wedges,
+      ring,
+      get expandedSlot() {
+        if (expandedSlot === undefined) {
+          expandedSlot =
+            count > 0
+              ? slotRect(
+                  largestSlot(
+                    wedge(0, Math.PI, slotInset),
+                    cutRadius + slotInset,
+                    square,
+                  ),
+                  transform,
+                )
+              : null;
+        }
+        return expandedSlot;
+      },
+    };
   });
 
   return {

@@ -17,6 +17,7 @@ import {
   wedgeGeometry,
   type WedgeGeometryOptions,
   type WedgeOrientation,
+  type WedgeRect,
 } from "../utils/wedge-geometry";
 import type { ImageBlur, ImageSource } from "../atoms/image";
 import { Wedge, WedgeLines } from "../molecules/wedge";
@@ -52,6 +53,18 @@ const holdDelay = 350;
 const holdSlop = 10;
 
 const wedgeKey = (side: number, index: number) => `${side}-${index}`;
+
+const mix = (a: number, b: number, t: number) => a + (b - a) * t;
+
+function blend(from: WedgeRect | null, to: WedgeRect | null, t: number) {
+  if (!from || !to || t <= 0) return from;
+  return {
+    x: mix(from.x, to.x, t),
+    y: mix(from.y, to.y, t),
+    width: mix(from.width, to.width, t),
+    height: mix(from.height, to.height, t),
+  };
+}
 
 function readMotion(element: Element) {
   if (window.matchMedia(reducedMotionQuery).matches) {
@@ -113,6 +126,7 @@ export function Wedges({
   content,
   images,
   blur,
+  tilt = false,
   className,
   children,
 }: {
@@ -121,6 +135,7 @@ export function Wedges({
   content?: WedgesContent;
   images?: WedgesImages;
   blur?: ImageBlur;
+  tilt?: boolean;
   className?: string;
   children?: ReactNode;
 }) {
@@ -241,8 +256,14 @@ export function Wedges({
           side.wedges.map((wedge, i) => {
             const key = wedgeKey(s, i);
             const rank = stack.indexOf(key);
-            const resting = rest?.sides[s].wedges[i];
-            const slot = (rank < 0 && resting ? resting : wedge).slot;
+            const resting = rest?.sides[s].wedges[i] ?? wedge;
+            const e = expansion.get(key) ?? 0;
+            const slot = blend(
+              resting.slot,
+              rest?.sides[s].expandedSlot ?? null,
+              e,
+            );
+            const angle = resting.tilt * (1 - e);
             const node = content?.[s]?.[i];
             return (
               <div
@@ -301,7 +322,13 @@ export function Wedges({
                       height: slot.height,
                     }}
                   >
-                    {node}
+                    {tilt ? (
+                      <div style={{ rotate: `${angle}deg` }}>
+                        {node}
+                      </div>
+                    ) : (
+                      node
+                    )}
                   </div>
                 )}
               </div>

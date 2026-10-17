@@ -1,10 +1,12 @@
 import {
   Avatar,
   type ImageSource,
+  type TextWobble,
   Wedges,
   type WedgesContent,
   type WedgesImages,
   type WedgesLayout,
+  WobbleText,
 } from "@insaeng/design-system";
 import Image, { getImageProps } from "next/image";
 import { preload } from "react-dom";
@@ -32,20 +34,21 @@ const column: WedgesLayout = {
   wobble: { amplitude: 2, wavelength: 20 },
 };
 
+const titleWobble: TextWobble = { amplitude: 0.035, period: 4 };
+
 function Placeholder({ title }: { title: string }) {
   return (
-    <div className="flex flex-col items-center gap-1 text-center">
-      <span className="
-        type-title text-on-surface
-        lg:type-heading-xl
-      ">{title}</span>
-      <span className="type-caption text-on-surface-variant">Coming soon</span>
-    </div>
+    <h2 className="
+      type-heading-xl whitespace-nowrap text-on-surface
+      lg:type-display
+    ">
+      <WobbleText text={title} wobble={titleWobble} />
+    </h2>
   );
 }
 
 const content: WedgesContent = [
-  ["Background", "Sports", "Interests", "Dreams"].map((title) => (
+  ["About", "Sports", "Interests", "Dreams"].map((title) => (
     <Placeholder key={title} title={title} />
   )),
   ["Mission", "Resume", "Projects", "Contact"].map((title) => (
@@ -67,7 +70,7 @@ function photo(src: string): ImageSource {
 
 const images: WedgesImages = [
   [
-    photo("/wedges/background.jpg"),
+    photo("/wedges/about.jpg"),
     photo("/wedges/sports.jpg"),
     photo("/wedges/interests.jpg"),
     photo("/wedges/dreams.jpg"),
@@ -96,6 +99,7 @@ export default function Home() {
         content={content}
         images={images}
         blur="md"
+        tilt
       >
         <Avatar shape="square" className="
           size-[11.5rem]

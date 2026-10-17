@@ -368,6 +368,52 @@ describe("wedgeGeometry", () => {
     }
   });
 
+  it.each(orientations)("tilts %s wedges along the line from their slot to the center", (o) => {
+    const options = { ...base[o], wedgesPerSide: 4 };
+    const geometry = wedgeGeometry(options);
+    const center = { x: options.width / 2, y: options.height / 2 };
+    for (const side of geometry.sides) {
+      for (const { anchor, slot, tilt } of side.wedges) {
+        expect(tilt).toBeGreaterThanOrEqual(-90);
+        expect(tilt).toBeLessThan(90);
+        const radians = (tilt * Math.PI) / 180;
+        const at = slot
+          ? { x: slot.x + slot.width / 2, y: slot.y + slot.height / 2 }
+          : anchor;
+        const axis = { x: at.x - center.x, y: at.y - center.y };
+        expect(
+          Math.abs(axis.x * Math.sin(radians) - axis.y * Math.cos(radians)),
+        ).toBeLessThan(EPSILON * Math.hypot(axis.x, axis.y));
+      }
+    }
+    const [left, right] = geometry.sides.map((side) =>
+      side.wedges.map(({ tilt }) => tilt),
+    );
+    left.forEach((t, i) => expect(right[i]).toBeCloseTo(-t, 1));
+  });
+
+  it.each(orientations)("matches %s expanded slots to fully expanded wedges", (o) => {
+    const options = { ...base[o], wedgesPerSide: 4 };
+    const rest = wedgeGeometry(options);
+    for (let i = 0; i < options.wedgesPerSide; i++) {
+      const full = Array.from({ length: options.wedgesPerSide }, (_, j) =>
+        j === i ? 1 : 0,
+      );
+      const geometry = wedgeGeometry({ ...options, expansion: [full, full] });
+      geometry.sides.forEach((side, s) => {
+        const expected = rest.sides[s].expandedSlot;
+        const actual = side.wedges[i].slot;
+        expect(expected).not.toBeNull();
+        expect(actual).not.toBeNull();
+        if (!expected || !actual) return;
+        expect(actual.x).toBeCloseTo(expected.x, 1);
+        expect(actual.y).toBeCloseTo(expected.y, 1);
+        expect(actual.width).toBeCloseTo(expected.width, 1);
+        expect(actual.height).toBeCloseTo(expected.height, 1);
+      });
+    }
+  });
+
   it.each(orientations)("grows %s slots as the inset shrinks", (o) => {
     const area = (slotInset: number) =>
       wedgeGeometry({ ...base[o], wedgesPerSide: 4, slotInset }).sides[0].wedges.map(
