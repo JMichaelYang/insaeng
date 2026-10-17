@@ -7,7 +7,12 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 const PACKAGES = [
   { dir: "packages/design-system", tests: "tests", source: "src" },
-  { dir: "apps/web", tests: "tests", source: "app", required: /^page\.tsx$/ },
+  {
+    dir: "apps/web",
+    tests: "tests",
+    source: "app",
+    exceptions: new Set(["snapshots.spec.ts"]),
+  },
 ];
 
 const TEST_FILE = /\.(test|spec)\.tsx?$/;
@@ -31,9 +36,10 @@ for (const pkg of PACKAGES) {
   const testsDir = path.join(root, pkg.dir, pkg.tests);
   const sourceDir = path.join(root, pkg.dir, pkg.source);
   const tests = await files(testsDir);
-  checked += tests.length;
 
   for (const test of tests) {
+    if (pkg.exceptions?.has(test)) continue;
+    checked += 1;
     const testPath = path.join(pkg.dir, pkg.tests, test);
     if (!TEST_FILE.test(test)) {
       problems.push(`${testPath} is not named *.test.ts(x) or *.spec.ts(x)`);
@@ -43,16 +49,6 @@ for (const pkg of PACKAGES) {
     if (SOURCE_EXTENSIONS.some((ext) => existsSync(base + ext))) continue;
     const expected = path.relative(root, base);
     problems.push(`${testPath} has no source at ${expected}.ts or ${expected}.tsx`);
-  }
-
-  if (!pkg.required) continue;
-  for (const source of await files(sourceDir)) {
-    if (!pkg.required.test(path.basename(source))) continue;
-    const stem = source.replace(/\.tsx?$/, "");
-    const tested = tests.some((test) => test.replace(TEST_FILE, "") === stem);
-    if (tested) continue;
-    const sourcePath = path.join(pkg.dir, pkg.source, source);
-    problems.push(`${sourcePath} has no test at ${path.join(pkg.dir, pkg.tests, stem)}.spec.ts`);
   }
 }
 

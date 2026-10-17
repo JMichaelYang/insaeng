@@ -10,7 +10,7 @@ Run `pnpm dev`, `pnpm build`, and `pnpm lint` from the repo root.
 ## Code rules
 
 - NO CODE COMMENTS. Do not add comments to code, including generated code.
-- Tests mirror their source folder exactly: `packages/design-system/tests/<path>.test.ts` tests `src/<path>.ts`, and `apps/web/tests/<path>.spec.ts` tests `app/<path>.tsx`. Every `app/**/page.tsx` needs a snapshot spec. `pnpm lint` fails otherwise.
+- Tests mirror their source folder exactly: `packages/design-system/tests/<path>.test.ts` tests `src/<path>.ts`, and `apps/web/tests/<path>.spec.ts` tests `app/<path>.tsx`. The one exception is `apps/web/tests/snapshots.spec.ts`, which crawls `app/` and snapshots every route. `pnpm lint` fails otherwise.
 
 ## Styling rules
 
