@@ -360,8 +360,7 @@ export function Wedges({
                 {slot && node != null && (
                   <div
                     className="
-                      pointer-events-auto absolute flex items-center
-                      justify-center overflow-hidden
+                      absolute flex items-center justify-center overflow-hidden
                     "
                     style={{
                       left: slot.x,
