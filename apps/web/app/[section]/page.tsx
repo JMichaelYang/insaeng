@@ -1,7 +1,8 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { headshotSizes, preloadHeadshot } from "../headshot";
 import { findSection, sections } from "../sections";
+import { SectionNav } from "./section-nav";
 
 export const dynamicParams = false;
 
@@ -14,23 +15,16 @@ export default async function SectionPage({
 }: PageProps<"/[section]">) {
   const section = findSection((await params).section);
   if (!section) notFound();
+  preloadHeadshot(headshotSizes.home);
   return (
-    <main className="
-      flex flex-1 flex-col items-center justify-center gap-6 p-6 text-center
-    ">
-      <div className="flex flex-col items-center gap-1">
+    <>
+      <SectionNav current={section.slug} />
+      <main className="
+        flex flex-1 flex-col items-center justify-center gap-1 p-6 text-center
+      ">
         <h1 className="type-display text-on-surface">{section.title}</h1>
         <p className="type-body-md text-on-surface-variant">Coming soon</p>
-      </div>
-      <Link
-        href="/"
-        className="
-          state-layer inline-flex h-control-md items-center rounded-full
-          bg-primary px-6 type-label text-on-primary
-        "
-      >
-        Back home
-      </Link>
-    </main>
+      </main>
+    </>
   );
 }

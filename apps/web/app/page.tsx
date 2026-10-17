@@ -1,16 +1,23 @@
 import {
   Avatar,
   type ImageSource,
-  type TextWobble,
   type WedgesLayout,
   type WedgesSides,
   WobbleText,
 } from "@insaeng/design-system";
 import Image, { getImageProps } from "next/image";
+import { ViewTransition } from "react";
 import { preload } from "react-dom";
 
+import {
+  headshot,
+  headshotSizes,
+  headshotTransition,
+  preloadHeadshot,
+} from "./headshot";
 import { LinkedWedges } from "./linked-wedges";
 import { type Section, sectionHref, sections } from "./sections";
+import { lgWobble, titleWobble, wobble } from "./wobble";
 
 const shared = {
   centerGap: 0,
@@ -23,16 +30,14 @@ const row: WedgesLayout = {
   ...shared,
   avatarRadius: 192,
   slotInset: 24,
-  wobble: { amplitude: 3, wavelength: 30 },
+  wobble: lgWobble,
 };
 const column: WedgesLayout = {
   ...shared,
   avatarRadius: 88,
   slotInset: 16,
-  wobble: { amplitude: 2, wavelength: 20 },
+  wobble,
 };
-
-const titleWobble: TextWobble = { amplitude: 0.035, period: 4 };
 
 function WedgeTitle({ title }: { title: string }) {
   return (
@@ -73,6 +78,7 @@ export default function Home() {
       imageSrcSet: image.mode === "raster" ? image.srcSet : undefined,
     });
   }
+  preloadHeadshot(headshotSizes.nav);
   return (
     <main className="flex flex-1 flex-col">
       <LinkedWedges
@@ -83,19 +89,19 @@ export default function Home() {
         blur="md"
         tilt
       >
-        <Avatar shape="square" className="
-          size-[11.5rem]
-          lg:size-[25rem]
-        ">
-          <Image
-            src="/headshot.jpg"
-            alt="Jaewon Yang"
-            width={720}
-            height={720}
-            sizes="(min-width: 64rem) 25rem, 11.5rem"
-            preload
-          />
-        </Avatar>
+        <ViewTransition name={headshotTransition} share="morph" default="none">
+          <Avatar shape="square" className="
+            size-[11.5rem]
+            lg:size-[25rem]
+          ">
+            <Image
+              {...headshot}
+              alt="Jaewon Yang"
+              sizes={headshotSizes.home}
+              preload
+            />
+          </Avatar>
+        </ViewTransition>
       </LinkedWedges>
     </main>
   );
