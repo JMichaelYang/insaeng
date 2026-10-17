@@ -43,10 +43,55 @@ const inside = (p: WedgePoint, poly: WedgePoint[]) =>
     return p.x < x ? !hit : hit;
   }, false);
 
+const chebyshev = (p: WedgePoint, c: WedgePoint) =>
+  Math.max(Math.abs(p.x - c.x), Math.abs(p.y - c.y));
+
+const upright = (degrees: number) =>
+  ((((degrees + 90) % 180) + 180) % 180) - 90;
+
+function turn(p: WedgePoint, about: WedgePoint, degrees: number) {
+  const radians = (degrees * Math.PI) / 180;
+  const dx = p.x - about.x;
+  const dy = p.y - about.y;
+  return {
+    x: about.x + dx * Math.cos(radians) - dy * Math.sin(radians),
+    y: about.y + dx * Math.sin(radians) + dy * Math.cos(radians),
+  };
+}
+
+function slotCorners(slot: WedgeRect, tilt: number) {
+  const at = { x: slot.x + slot.width / 2, y: slot.y + slot.height / 2 };
+  return [
+    { x: slot.x, y: slot.y },
+    { x: slot.x + slot.width, y: slot.y },
+    { x: slot.x + slot.width, y: slot.y + slot.height },
+    { x: slot.x, y: slot.y + slot.height },
+  ].map((p) => turn(p, at, tilt));
+}
+
+const lerp = (a: WedgePoint, b: WedgePoint, t: number) => ({
+  x: a.x + (b.x - a.x) * t,
+  y: a.y + (b.y - a.y) * t,
+});
+
+function closest(a: WedgePoint, b: WedgePoint, gap: (p: WedgePoint) => number) {
+  const at = (t: number) => gap(lerp(a, b, t));
+  let lo = 0;
+  let hi = 1;
+  for (let k = 0; k < 60; k++) {
+    const m1 = lo + (hi - lo) / 3;
+    const m2 = hi - (hi - lo) / 3;
+    if (at(m1) < at(m2)) hi = m2;
+    else lo = m1;
+  }
+  return Math.min(at(0), at(1), at((lo + hi) / 2));
+}
+
 function expectSlotInside(
   slot: WedgeRect | null,
   path: string,
   options: WedgeGeometryOptions,
+  tilt = 0,
 ) {
   expect(slot).not.toBeNull();
   if (!slot) return;
@@ -54,32 +99,28 @@ function expectSlotInside(
   const center = { x: width / 2, y: height / 2 };
   expect(slot.width).toBeGreaterThan(0);
   expect(slot.height).toBeGreaterThan(0);
-  expect(slot.x).toBeGreaterThanOrEqual(slotInset - EPSILON);
-  expect(slot.y).toBeGreaterThanOrEqual(slotInset - EPSILON);
-  expect(slot.x + slot.width).toBeLessThanOrEqual(width - slotInset + EPSILON);
-  expect(slot.y + slot.height).toBeLessThanOrEqual(
-    height - slotInset + EPSILON,
-  );
-  const nearest = {
-    x: Math.max(slot.x, Math.min(center.x, slot.x + slot.width)),
-    y: Math.max(slot.y, Math.min(center.y, slot.y + slot.height)),
-  };
-  expect(distance(nearest, center)).toBeGreaterThanOrEqual(
-    cutRadiusOf(options) + slotInset - EPSILON,
-  );
+  const corners = slotCorners(slot, tilt);
+  for (const p of corners) {
+    expect(p.x).toBeGreaterThanOrEqual(slotInset - EPSILON);
+    expect(p.y).toBeGreaterThanOrEqual(slotInset - EPSILON);
+    expect(p.x).toBeLessThanOrEqual(width - slotInset + EPSILON);
+    expect(p.y).toBeLessThanOrEqual(height - slotInset + EPSILON);
+  }
+  const gap =
+    options.centerShape === "square"
+      ? (p: WedgePoint) => chebyshev(p, center)
+      : (p: WedgePoint) => distance(p, center);
   const outline = points(path);
   const steps = 8;
-  for (let k = 0; k <= steps; k++) {
-    const t = k / steps;
-    for (const p of [
-      { x: slot.x + t * slot.width, y: slot.y },
-      { x: slot.x + t * slot.width, y: slot.y + slot.height },
-      { x: slot.x, y: slot.y + t * slot.height },
-      { x: slot.x + slot.width, y: slot.y + t * slot.height },
-    ]) {
-      expect(inside(p, outline)).toBe(true);
+  corners.forEach((a, i) => {
+    const b = corners[(i + 1) % corners.length];
+    expect(closest(a, b, gap)).toBeGreaterThanOrEqual(
+      cutRadiusOf(options) + slotInset - EPSILON,
+    );
+    for (let k = 0; k <= steps; k++) {
+      expect(inside(lerp(a, b, k / steps), outline)).toBe(true);
     }
-  }
+  });
 }
 
 function expectBoundsAround(
@@ -368,28 +409,11 @@ describe("wedgeGeometry", () => {
     }
   });
 
-  it.each(orientations)("tilts %s wedges along the line from their slot to the center", (o) => {
-    const options = { ...base[o], wedgesPerSide: 4 };
-    const geometry = wedgeGeometry(options);
-    const center = { x: options.width / 2, y: options.height / 2 };
+  it.each(orientations)("leaves %s slots upright by default", (o) => {
+    const geometry = wedgeGeometry({ ...base[o], wedgesPerSide: 4 });
     for (const side of geometry.sides) {
-      for (const { anchor, slot, tilt } of side.wedges) {
-        expect(tilt).toBeGreaterThanOrEqual(-90);
-        expect(tilt).toBeLessThan(90);
-        const radians = (tilt * Math.PI) / 180;
-        const at = slot
-          ? { x: slot.x + slot.width / 2, y: slot.y + slot.height / 2 }
-          : anchor;
-        const axis = { x: at.x - center.x, y: at.y - center.y };
-        expect(
-          Math.abs(axis.x * Math.sin(radians) - axis.y * Math.cos(radians)),
-        ).toBeLessThan(EPSILON * Math.hypot(axis.x, axis.y));
-      }
+      for (const { tilt } of side.wedges) expect(tilt).toBeCloseTo(0);
     }
-    const [left, right] = geometry.sides.map((side) =>
-      side.wedges.map(({ tilt }) => tilt),
-    );
-    left.forEach((t, i) => expect(right[i]).toBeCloseTo(-t, 1));
   });
 
   it.each(orientations)("matches %s expanded slots to fully expanded wedges", (o) => {
@@ -647,8 +671,48 @@ describe("wedgeGeometry with a square center", () => {
     ...overrides,
   });
 
-  const chebyshev = (p: WedgePoint, c: WedgePoint) =>
-    Math.max(Math.abs(p.x - c.x), Math.abs(p.y - c.y));
+  const tilted = orientations.flatMap((o) => [
+    { label: `${o} ring`, options: { ...base[o], wedgesPerSide: 4, maxTilt: 45 } },
+    { label: `${o} square`, options: square(o, { maxTilt: 45 }) },
+  ]);
+
+  it.each(tilted)("tilts slots toward the center up to the cap: $label", ({ options }) => {
+    const geometry = wedgeGeometry(options);
+    const center = { x: options.width / 2, y: options.height / 2 };
+    for (const side of geometry.sides) {
+      for (const { slot, tilt } of side.wedges) {
+        expect(slot).not.toBeNull();
+        if (!slot) continue;
+        const axis = {
+          x: slot.x + slot.width / 2 - center.x,
+          y: slot.y + slot.height / 2 - center.y,
+        };
+        const toward = upright((Math.atan2(axis.y, axis.x) * 180) / Math.PI);
+        expect(Math.abs(tilt)).toBeLessThanOrEqual(45);
+        expect(tilt).toBeCloseTo(Math.max(-45, Math.min(45, toward)), 0);
+      }
+    }
+    const [left, right] = geometry.sides.map((side) =>
+      side.wedges.map(({ tilt }) => tilt),
+    );
+    left.forEach((t, i) => expect(right[i]).toBeCloseTo(-t, 1));
+  });
+
+  it.each(tilted)("keeps tilted landscape slots inside their wedges: $label", ({ options }) => {
+    const geometry = wedgeGeometry(options);
+    for (const side of geometry.sides) {
+      for (const { path, slot, tilt } of side.wedges) {
+        expectSlotInside(slot, path, options, tilt);
+        if (slot) expect(slot.width).toBeGreaterThanOrEqual(2 * slot.height - EPSILON);
+      }
+    }
+  });
+
+  it.each([-1, 91, Number.NaN])("rejects max tilt %s", (maxTilt) => {
+    expect(() =>
+      wedgeGeometry({ ...base.row, wedgesPerSide: 4, maxTilt }),
+    ).toThrow(RangeError);
+  });
 
   it.each(orientations)("tiles everything outside the %s square", (o) => {
     const options = square(o);

@@ -53,7 +53,6 @@ const rowQuery = "(min-width: 64rem)";
 const reducedMotionQuery = "(prefers-reduced-motion: reduce)";
 const holdDelay = 350;
 const holdSlop = 10;
-const maxTilt = 45;
 
 const wedgeKey = (side: number, index: number) => `${side}-${index}`;
 
@@ -130,7 +129,6 @@ export function Wedges({
   images,
   links,
   blur,
-  tilt = false,
   className,
   children,
 }: {
@@ -140,7 +138,6 @@ export function Wedges({
   images?: WedgesImages;
   links?: WedgesLinks;
   blur?: ImageBlur;
-  tilt?: boolean;
   className?: string;
   children?: ReactNode;
 }) {
@@ -271,8 +268,7 @@ export function Wedges({
               rest?.sides[s].expandedSlot ?? null,
               e,
             );
-            const angle =
-              Math.min(Math.max(resting.tilt, -maxTilt), maxTilt) * (1 - e);
+            const angle = resting.tilt * (1 - e);
             const node = content?.[s]?.[i];
             const href = links?.[s]?.[i];
             const Element = href ? "a" : "div";
@@ -341,15 +337,10 @@ export function Wedges({
                       top: slot.y,
                       width: slot.width,
                       height: slot.height,
+                      rotate: `${angle}deg`,
                     }}
                   >
-                    {tilt ? (
-                      <div style={{ rotate: `${angle}deg` }}>
-                        {node}
-                      </div>
-                    ) : (
-                      node
-                    )}
+                    {node}
                   </div>
                 )}
               </Element>

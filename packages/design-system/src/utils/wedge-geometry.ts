@@ -19,6 +19,7 @@ export type WedgeGeometryOptions = {
   wedgesPerSide: number;
   spread: number;
   slotInset: number;
+  maxTilt?: number;
   wobble?: WedgeWobble;
   expansion?: readonly [readonly number[], readonly number[]];
 };
@@ -56,6 +57,10 @@ type Segment =
 
 type Transform = (p: WedgePoint) => WedgePoint;
 
+type KeepOut = (x0: number, x1: number) => [number, number] | null;
+
+type SlotShape = { aspect: number; vertical: boolean };
+
 type SideFrame = {
   transform: Transform;
   labelDegrees: number;
@@ -72,6 +77,11 @@ const len = (a: WedgePoint) => Math.hypot(a.x, a.y);
 const norm = (a: WedgePoint) => mul(a, 1 / len(a));
 const origin = point(0, 0);
 const chebyshev = (a: WedgePoint) => Math.max(Math.abs(a.x), Math.abs(a.y));
+const rotate = (a: WedgePoint, radians: number) => {
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+  return point(a.x * cos - a.y * sin, a.x * sin + a.y * cos);
+};
 
 const upright = (degrees: number) =>
   ((((degrees + 90) % 180) + 180) % 180) - 90;
@@ -315,6 +325,10 @@ function squareCutPath(
   return roundedPoly([...outside, ...boundary], r);
 }
 
+const tiltPasses = 4;
+const tiltTolerance = 0.5;
+const tiltedAspect = 2;
+
 const wobbleStep = 2;
 const wobbleBlend = 0.2;
 
@@ -434,10 +448,41 @@ function span(poly: WedgePoint[], x: number): [number, number] | null {
 
 type Slot = { min: WedgePoint; max: WedgePoint; area: number };
 
+function disc(R: number): KeepOut {
+  return (x0, x1) => {
+    const x = Math.max(x0, Math.min(0, x1));
+    if (Math.abs(x) >= R) return null;
+    const h = Math.sqrt(R * R - x * x);
+    return [-h, h];
+  };
+}
+
+function block(R: number, radians: number): KeepOut {
+  const corners = [
+    point(-R, -R),
+    point(R, -R),
+    point(R, R),
+    point(-R, R),
+  ].map((p) => rotate(p, radians));
+  const xs = corners.map((p) => p.x);
+  const left = Math.min(...xs);
+  const right = Math.max(...xs);
+  return (x0, x1) => {
+    if (x1 <= left || x0 >= right) return null;
+    const ys = [
+      { n: point(-1, 0), c: -x0 },
+      { n: point(1, 0), c: x1 },
+    ]
+      .reduce(clip, corners)
+      .map((p) => p.y);
+    return [Math.min(...ys), Math.max(...ys)];
+  };
+}
+
 function slotBetween(
   poly: WedgePoint[],
-  R: number,
-  square: boolean,
+  keepOut: KeepOut,
+  shape: SlotShape | null,
   x0: number,
   x1: number,
 ): Slot | null {
@@ -446,19 +491,38 @@ function slotBetween(
   if (!s0 || !s1) return null;
   let lo = Math.max(s0[0], s1[0]);
   let hi = Math.min(s0[1], s1[1]);
-  if (Math.abs(x1) < R) {
-    const h = square ? R : Math.sqrt(R * R - x1 * x1);
-    if (hi - Math.max(lo, h) >= Math.min(hi, -h) - lo) lo = Math.max(lo, h);
-    else hi = Math.min(hi, -h);
+  const blocked = keepOut(x0, x1);
+  if (blocked) {
+    const [below, above] = blocked;
+    if (hi - Math.max(lo, above) >= Math.min(hi, below) - lo) {
+      lo = Math.max(lo, above);
+    } else {
+      hi = Math.min(hi, below);
+    }
   }
   if (hi <= lo) return null;
-  return { min: point(x0, lo), max: point(x1, hi), area: (x1 - x0) * (hi - lo) };
+  let left = x0;
+  let right = x1;
+  if (shape?.vertical) {
+    const trim = Math.max(0, right - left - (hi - lo) / shape.aspect) / 2;
+    left += trim;
+    right -= trim;
+  } else if (shape) {
+    const trim = Math.max(0, hi - lo - (right - left) / shape.aspect) / 2;
+    lo += trim;
+    hi -= trim;
+  }
+  return {
+    min: point(left, lo),
+    max: point(right, hi),
+    area: (right - left) * (hi - lo),
+  };
 }
 
 function largestSlot(
   poly: WedgePoint[],
-  R: number,
-  square: boolean,
+  keepOut: KeepOut,
+  shape: SlotShape | null = null,
 ): Slot | null {
   if (poly.length < 3) return null;
   const xs = poly.map((p) => p.x);
@@ -477,7 +541,7 @@ function largestSlot(
       for (let j = 0; j <= steps; j++) {
         const x1 = a1 + ((b1 - a1) * j) / steps;
         if (x1 <= x0) continue;
-        const slot = slotBetween(poly, R, square, x0, x1);
+        const slot = slotBetween(poly, keepOut, shape, x0, x1);
         if (slot && (!best || slot.area > best.area)) best = slot;
       }
     }
@@ -500,13 +564,18 @@ function boundsOf(pts: WedgePoint[]): WedgeRect {
   return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
 }
 
-function slotRect(slot: Slot | null, transform: Transform): WedgeRect | null {
+function slotRect(
+  slot: Slot | null,
+  transform: Transform,
+  radians = 0,
+): WedgeRect | null {
   if (!slot) return null;
   const a = transform(slot.min);
   const b = transform(slot.max);
-  const x = Math.min(a.x, b.x);
-  const y = Math.min(a.y, b.y);
-  return { x, y, width: Math.abs(a.x - b.x), height: Math.abs(a.y - b.y) };
+  const width = Math.abs(a.x - b.x);
+  const height = Math.abs(a.y - b.y);
+  const at = transform(rotate(mul(add(slot.min, slot.max), 1 / 2), radians));
+  return { x: at.x - width / 2, y: at.y - height / 2, width, height };
 }
 
 const fmt = (n: number) => String(Math.round(n * 100) / 100);
@@ -593,6 +662,7 @@ export function wedgeGeometry({
   wedgesPerSide,
   spread,
   slotInset,
+  maxTilt = 0,
   wobble,
   expansion,
 }: WedgeGeometryOptions): WedgeGeometry {
@@ -604,6 +674,9 @@ export function wedgeGeometry({
   }
   if (!(slotInset >= 0)) {
     throw new RangeError("slotInset must be non-negative");
+  }
+  if (!(maxTilt >= 0 && maxTilt <= 90)) {
+    throw new RangeError("maxTilt must be in [0, 90]");
   }
   const square = centerShape === "square";
   if (square && ringThickness > 0) {
@@ -691,7 +764,12 @@ export function wedgeGeometry({
       bend,
     );
   };
+  const slotR = cutRadius + slotInset;
   const sides = frames.map(({ transform, labelDegrees, clockwise }, s) => {
+    const o = transform(origin);
+    const across = sub(transform(point(1, 0)), o);
+    const handed = Math.sign(cross(across, sub(transform(point(0, 1)), o)));
+    const vertical = Math.abs(across.y) > Math.abs(across.x);
     const wedges = phis.slice(0, count).flatMap((phi, i) => {
       const raw = expansion?.[s]?.[i] ?? 0;
       const e = Math.max(0, Math.min(1, raw));
@@ -714,39 +792,50 @@ export function wedgeGeometry({
           ...cut.map((segment) => segment.to),
         ].map(transform),
       );
-      let slot: WedgeRect | null | undefined;
-      const slotOf = () => {
-        if (slot === undefined) {
-          slot = slotRect(
-            largestSlot(
-              wedge(from, to, slotInset),
-              cutRadius + slotInset,
-              square,
-            ),
-            transform,
-          );
-        }
-        return slot;
+      const towards = (p: WedgePoint) => {
+        const axis = sub(p, center);
+        const degrees = upright((Math.atan2(axis.y, axis.x) * 180) / Math.PI);
+        return Math.max(-maxTilt, Math.min(maxTilt, degrees));
       };
-      let tilt: number | undefined;
+      const slotAt = (tilt: number) => {
+        const radians = (handed * tilt * Math.PI) / 180;
+        return slotRect(
+          largestSlot(
+            wedge(from, to, slotInset).map((p) => rotate(p, -radians)),
+            square ? block(slotR, -radians) : disc(slotR),
+            maxTilt > 0 ? { aspect: tiltedAspect, vertical } : null,
+          ),
+          transform,
+          radians,
+        );
+      };
+      let fit: { tilt: number; slot: WedgeRect | null } | undefined;
+      const fitOf = () => {
+        if (fit === undefined) {
+          let tilt = towards(anchor);
+          let slot = slotAt(tilt);
+          for (let k = 0; k < tiltPasses && slot; k++) {
+            const next = towards(
+              point(slot.x + slot.width / 2, slot.y + slot.height / 2),
+            );
+            if (Math.abs(next - tilt) < tiltTolerance) break;
+            tilt = next;
+            slot = slotAt(tilt);
+          }
+          fit = { tilt, slot };
+        }
+        return fit;
+      };
       return [
         {
           ...outline(cut, transform, bend),
           anchor,
           bounds,
           get slot() {
-            return slotOf();
+            return fitOf().slot;
           },
           get tilt() {
-            if (tilt === undefined) {
-              const at = slotOf();
-              const axis = sub(
-                at ? point(at.x + at.width / 2, at.y + at.height / 2) : anchor,
-                center,
-              );
-              tilt = upright((Math.atan2(axis.y, axis.x) * 180) / Math.PI);
-            }
-            return tilt;
+            return fitOf().tilt;
           },
         },
       ];
@@ -781,8 +870,7 @@ export function wedgeGeometry({
               ? slotRect(
                   largestSlot(
                     wedge(0, Math.PI, slotInset),
-                    cutRadius + slotInset,
-                    square,
+                    square ? block(slotR, 0) : disc(slotR),
                   ),
                   transform,
                 )

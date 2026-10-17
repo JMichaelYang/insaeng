@@ -22,6 +22,7 @@ const shared = {
   wedgesPerSide: 4,
   spread: 1,
   cornerRadius: 0,
+  maxTilt: 45,
 } as const;
 
 const row: WedgesLayout = {
@@ -94,7 +95,6 @@ export default function Home() {
         images={images}
         links={links}
         blur="md"
-        tilt
       >
         <Avatar shape="square" className="
           size-[11.5rem]
