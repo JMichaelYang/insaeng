@@ -260,6 +260,11 @@ export function Wedges({
 
   const stack = [...expansion.keys()];
   const center = frame ? rest?.center : null;
+  const exit = (kept: boolean) =>
+    mergeClasses(
+      "transition-opacity duration-slow ease-exit",
+      tapped !== null && !kept && "opacity-0",
+    );
 
   return (
     <div
@@ -268,7 +273,10 @@ export function Wedges({
     >
       {frame &&
         geometry?.sides.map(
-          (side, s) => side.ring && <Wedge key={s} path={side.ring.path} />,
+          (side, s) =>
+            side.ring && (
+              <Wedge key={s} path={side.ring.path} className={exit(false)} />
+            ),
         )}
       {frame &&
         geometry?.sides.map((side, s) =>
@@ -294,9 +302,13 @@ export function Wedges({
                 href={href}
                 tabIndex={href ? undefined : 0}
                 draggable={href ? false : undefined}
-                className="
-                  pointer-events-none absolute inset-0 outline-none select-none
-                "
+                className={mergeClasses(
+                  `
+                    pointer-events-none absolute inset-0 outline-none
+                    select-none
+                  `,
+                  exit(key === tapped),
+                )}
                 style={{
                   WebkitTouchCallout: "none",
                   zIndex: rank < 0 ? undefined : rank + 1,
@@ -384,14 +396,16 @@ export function Wedges({
           }),
         )}
       <div
-        className="
-          pointer-events-none absolute inset-0 flex items-center justify-center
-        "
-        style={center ? { clipPath: `path("${center.path}")` } : undefined}
+        className={mergeClasses("pointer-events-none absolute inset-0", exit(false))}
       >
-        <div className="pointer-events-auto">{children}</div>
+        <div
+          className="absolute inset-0 flex items-center justify-center"
+          style={center ? { clipPath: `path("${center.path}")` } : undefined}
+        >
+          <div className="pointer-events-auto">{children}</div>
+        </div>
+        {center && <WedgeLines path={center.path} lines={center.lines} />}
       </div>
-      {center && <WedgeLines path={center.path} lines={center.lines} />}
     </div>
   );
 }
