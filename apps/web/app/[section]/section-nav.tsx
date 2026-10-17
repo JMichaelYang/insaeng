@@ -31,10 +31,10 @@ function SectionLink({
       aria-current={section.slug === current ? "page" : undefined}
       className={mergeClasses(
         `
-          state-layer inline-flex h-control-lg items-center rounded-full px-4
-          type-heading-xl whitespace-nowrap text-on-primary-container
-          aria-[current=page]:bg-secondary-container
-          aria-[current=page]:text-on-secondary-container
+          state-layer inline-flex h-control-lg items-center rounded-full
+          border-thick border-transparent px-4 type-heading-xl whitespace-nowrap
+          text-on-primary-container
+          aria-[current=page]:border-on-primary-container
         `,
         className,
       )}
