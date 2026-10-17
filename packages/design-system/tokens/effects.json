@@ -13,6 +13,7 @@
     "$type": "dimension",
     "thin": { "$value": "1px" },
     "thick": { "$value": "2px" },
+    "thicker": { "$value": "3px" },
     "focus": { "$value": "2px", "$description": "Focus ring / outline width." }
   },
   "shadow": {
