@@ -84,16 +84,21 @@ export function WedgeLines({
   path,
   lines,
   focused = false,
+  className,
 }: {
   path: string;
   lines?: string;
   focused?: boolean;
+  className?: string;
 }) {
   const id = useId();
   if (!lines && !focused) return null;
   return (
     <svg
-      className="pointer-events-none absolute inset-0 size-full"
+      className={mergeClasses(
+        "pointer-events-none absolute inset-0 size-full",
+        className,
+      )}
       aria-hidden
     >
       <clipPath id={id}>

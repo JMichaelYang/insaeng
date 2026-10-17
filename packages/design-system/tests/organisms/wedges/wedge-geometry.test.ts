@@ -619,6 +619,22 @@ describe("wedgeGeometry with flush wedges", () => {
     }
   });
 
+  it.each(orientations)("draws the %s center outline inside its bounds", (o) => {
+    const options = flush(o);
+    const { center, cutRadius } = wedgeGeometry(options);
+    expect(center?.bounds).toEqual({
+      x: options.width / 2 - cutRadius,
+      y: options.height / 2 - cutRadius,
+      width: cutRadius * 2,
+      height: cutRadius * 2,
+    });
+    for (const p of points(center?.path ?? "")) {
+      expect(chebyshev(p, { x: cutRadius, y: cutRadius })).toBeCloseTo(
+        cutRadius,
+      );
+    }
+  });
+
   const wobbles = orientations.flatMap((o) =>
     [0, 0.6, 1].map((e) => ({
       options: flush(o, {
@@ -637,9 +653,14 @@ describe("wedgeGeometry with flush wedges", () => {
     ({ options }) => {
       const geometry = wedgeGeometry(options);
       const rest = wedgeGeometry({ ...options, expansion: undefined });
-      expect(geometry.center).not.toBeNull();
+      const center = geometry.center;
+      expect(center).not.toBeNull();
+      if (!center) return;
       const outlines = [
-        points(geometry.center?.path ?? ""),
+        points(center.path).map(({ x, y }) => ({
+          x: x + center.bounds.x,
+          y: y + center.bounds.y,
+        })),
         ...rest.sides.flatMap((side, s) =>
           side.wedges.map(({ path }, i) =>
             points(

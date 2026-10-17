@@ -23,6 +23,8 @@ export type WedgeRect = { x: number; y: number; width: number; height: number };
 
 type WedgeOutline = { path: string; lines: string };
 
+type WedgeCenter = WedgeOutline & { bounds: WedgeRect };
+
 type WedgeShape = WedgeOutline & {
   tilt: number;
   bounds: WedgeRect;
@@ -36,7 +38,7 @@ type WedgeSide = {
 
 export type WedgeGeometry = {
   cutRadius: number;
-  center: WedgeOutline | null;
+  center: WedgeCenter | null;
   sides: [WedgeSide, WedgeSide];
 };
 
@@ -473,7 +475,7 @@ export function wedgeGeometry({
     .filter((p) => near(chebyshev(p), cutRadius));
 
   const frames = sideFrames(orientation, center.x, center.y);
-  const centerOutline = (): WedgeOutline | null => {
+  const centerOutline = (): WedgeCenter | null => {
     if (count === 0) return null;
     const around = (p: WedgePoint) => Math.atan2(p.y - center.y, p.x - center.x);
     const ring = frames
@@ -487,11 +489,21 @@ export function wedgeGeometry({
       ring.pop();
     }
     if (ring.length < 3) return null;
-    return outline(
-      ring.map((to, i) => ({ type: i === 0 ? "M" : "L", to })),
-      (p) => p,
-      bend,
-    );
+    const corner = sub(center, point(cutRadius, cutRadius));
+    const local: Transform = (p) => sub(p, corner);
+    return {
+      ...outline(
+        ring.map((to, i) => ({ type: i === 0 ? "M" : "L", to })),
+        local,
+        (a, b) => bend(add(a, corner), add(b, corner))?.map(local) ?? null,
+      ),
+      bounds: {
+        x: corner.x,
+        y: corner.y,
+        width: cutRadius * 2,
+        height: cutRadius * 2,
+      },
+    };
   };
   const sides = frames.map((transform, s) => {
     const wedges = phis.slice(0, count).flatMap((phi, i) => {

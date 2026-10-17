@@ -3,6 +3,7 @@ import {
   type ImageSource,
   type WedgesLayout,
   type WedgesSides,
+  WedgesCenter,
   WobbleText,
 } from "@insaeng/design-system";
 import Image, { getImageProps } from "next/image";
@@ -90,17 +91,19 @@ export default function Home() {
         tilt
       >
         <ViewTransition name={headshotTransition} share="morph" default="none">
-          <Avatar shape="square" className="
-            size-[11.5rem]
-            lg:size-[25rem]
-          ">
-            <Image
-              {...headshot}
-              alt="Jaewon Yang"
-              sizes={headshotSizes.home}
-              preload
-            />
-          </Avatar>
+          <WedgesCenter>
+            <Avatar shape="square" className="
+              size-[11.5rem]
+              lg:size-[25rem]
+            ">
+              <Image
+                {...headshot}
+                alt="Jaewon Yang"
+                sizes={headshotSizes.home}
+                preload
+              />
+            </Avatar>
+          </WedgesCenter>
         </ViewTransition>
       </LinkedWedges>
     </main>

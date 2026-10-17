@@ -1,6 +1,8 @@
 "use client";
 
 import {
+  createContext,
+  use,
   useMemo,
   useRef,
   type ElementType,
@@ -10,7 +12,11 @@ import {
 
 import { mergeClasses } from "../../utils/merge-classes";
 import { useWedgeFrame } from "./wedge-frame";
-import { wedgeGeometry, type WedgeGeometryOptions } from "./wedge-geometry";
+import {
+  wedgeGeometry,
+  type WedgeGeometry,
+  type WedgeGeometryOptions,
+} from "./wedge-geometry";
 import { wedgeKey } from "./wedge-hit-test";
 import { useWedgeInteraction } from "./wedge-interaction";
 import { blend, useWedgeExpansion } from "./wedge-motion";
@@ -36,6 +42,42 @@ export type WedgesLinks = {
   component: ElementType<WedgeTargetProps & { href: string }>;
   navigate: (href: string) => void;
 };
+
+const CenterContext = createContext<WedgeGeometry["center"]>(null);
+
+export function WedgesCenter({
+  className,
+  children,
+}: {
+  className?: string;
+  children?: ReactNode;
+}) {
+  const center = use(CenterContext);
+  return (
+    <div
+      className={mergeClasses("relative", className)}
+      style={
+        center
+          ? { width: center.bounds.width, height: center.bounds.height }
+          : undefined
+      }
+    >
+      <div
+        className="flex size-full items-center justify-center"
+        style={center ? { clipPath: `path("${center.path}")` } : undefined}
+      >
+        {children}
+      </div>
+      {center && (
+        <WedgeLines
+          path={center.path}
+          lines={center.lines}
+          className="overflow-visible"
+        />
+      )}
+    </div>
+  );
+}
 
 export function Wedges({
   row,
@@ -153,11 +195,11 @@ export function Wedges({
         className="
           pointer-events-none absolute inset-0 flex items-center justify-center
         "
-        style={center ? { clipPath: `path("${center.path}")` } : undefined}
       >
-        <div className="pointer-events-auto">{children}</div>
+        <div className="pointer-events-auto">
+          <CenterContext value={center ?? null}>{children}</CenterContext>
+        </div>
       </div>
-      {center && <WedgeLines path={center.path} lines={center.lines} />}
     </div>
   );
 }
