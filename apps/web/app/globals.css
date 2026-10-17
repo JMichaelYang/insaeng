@@ -1,1 +1,35 @@
 @import "@insaeng/design-system/tailwind.css";
+
+::view-transition {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(.fade) {
+    animation: var(--transition-duration-normal) var(--ease-exit) both fade-out;
+  }
+
+  ::view-transition-new(.fade) {
+    animation: var(--transition-duration-normal) var(--ease-enter) both fade-in;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none;
+  }
+}
