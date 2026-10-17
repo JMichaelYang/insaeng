@@ -2,7 +2,6 @@ import {
   Avatar,
   type NavItem,
   NavLinks,
-  NavMenu,
   WobbleBox,
 } from "@insaeng/design-system";
 import Image from "next/image";
@@ -12,6 +11,7 @@ import { ViewTransition } from "react";
 import { headshot, headshotSizes, headshotTransition } from "../headshot";
 import { type Section, sectionHref, sections } from "../sections";
 import { lgWobble, wobble } from "../wobble";
+import { LinkedNavMenu } from "./linked-nav-menu";
 
 const bottomEdge = { bottom: true };
 const avatarEdges = { right: true, bottom: true, left: true };
@@ -46,11 +46,10 @@ export function SectionNav({ current }: { current: string }) {
           lg:px-8
         "
       >
-        <NavMenu
+        <LinkedNavMenu
           label="Sections"
           items={navItems(sections.flat(), current)}
           wobble={wobble}
-          component={Link}
           className="
             col-start-1 row-start-1
             lg:hidden
