@@ -21,10 +21,7 @@ export function WobbleText({
           <span
             key={i}
             className="inline-block"
-            style={{
-              translate: `0 ${amplitude * Math.sin(k * i)}em`,
-              rotate: "calc(-1 * var(--tilt, 0deg))",
-            }}
+            style={{ translate: `0 ${amplitude * Math.sin(k * i)}em` }}
           >
             {letter}
           </span>
