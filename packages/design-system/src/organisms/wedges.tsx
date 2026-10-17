@@ -245,6 +245,8 @@ export function Wedges({
             const rank = stack.indexOf(key);
             const resting = rest?.sides[s].wedges[i];
             const slot = (rank < 0 && resting ? resting : wedge).slot;
+            const angle =
+              (resting ?? wedge).tilt * (1 - (expansion.get(key) ?? 0));
             const node = content?.[s]?.[i];
             return (
               <div
@@ -304,7 +306,7 @@ export function Wedges({
                     }}
                   >
                     {tilt ? (
-                      <div style={{ rotate: `${(resting ?? wedge).tilt}deg` }}>
+                      <div style={{ rotate: `${angle}deg` }}>
                         {node}
                       </div>
                     ) : (
