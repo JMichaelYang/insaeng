@@ -45,10 +45,10 @@ function Placeholder({ title }: { title: string }) {
 }
 
 const content: WedgesContent = [
-  ["One", "Two", "Three", "Four"].map((title) => (
+  ["Background", "Sports", "Interests", "Dreams"].map((title) => (
     <Placeholder key={title} title={title} />
   )),
-  ["Five", "Six", "Seven", "Eight"].map((title) => (
+  ["Mission", "Resume", "Projects", "Contact"].map((title) => (
     <Placeholder key={title} title={title} />
   )),
 ];
