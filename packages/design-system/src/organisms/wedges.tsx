@@ -61,10 +61,24 @@ const rowQuery = "(min-width: 64rem)";
 const reducedMotionQuery = "(prefers-reduced-motion: reduce)";
 const holdDelay = 350;
 const holdSlop = 10;
+const hoverSlop = 8;
 
 const wedgeKey = (side: number, index: number) => `${side}-${index}`;
 
 const mix = (a: number, b: number, t: number) => a + (b - a) * t;
+
+let hitContext: CanvasRenderingContext2D | null | undefined;
+
+function contains(path: string | undefined, x: number, y: number, slop = 0) {
+  if (!path) return false;
+  hitContext ??= document.createElement("canvas").getContext("2d");
+  if (!hitContext) return false;
+  const shape = new Path2D(path);
+  if (hitContext.isPointInPath(shape, x, y)) return true;
+  if (slop <= 0) return false;
+  hitContext.lineWidth = slop * 2;
+  return hitContext.isPointInStroke(shape, x, y);
+}
 
 function blend(from: WedgeRect | null, to: WedgeRect | null, t: number) {
   if (!from || !to || t <= 0) return from;
@@ -258,6 +272,28 @@ export function Wedges({
   const release = (key: string) => (current: string | null) =>
     current === key ? null : current;
 
+  const hoverAt = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === "touch" || !rest) return;
+    const box = event.currentTarget.getBoundingClientRect();
+    const x = event.clientX - box.left;
+    const y = event.clientY - box.top;
+    const wedges = rest.sides.flatMap((side, s) =>
+      side.wedges.map((wedge, i) => ({
+        key: wedgeKey(s, i),
+        resting: wedge.path,
+        current: geometry?.sides[s].wedges[i]?.path,
+      })),
+    );
+    const inside = wedges.find(({ resting }) => contains(resting, x, y));
+    const slop = inside ? hoverSlop : 0;
+    const kept = wedges.find(
+      ({ key, resting, current }) =>
+        key === hovered &&
+        (contains(current, x, y) || contains(resting, x, y, slop)),
+    );
+    setHovered((kept ?? inside)?.key ?? null);
+  };
+
   const stack = [...expansion.keys()];
   const center = frame ? rest?.center : null;
 
@@ -265,6 +301,10 @@ export function Wedges({
     <div
       ref={ref}
       className={mergeClasses("relative flex items-center justify-center", className)}
+      onPointerMove={hoverAt}
+      onPointerLeave={(event) => {
+        if (event.pointerType !== "touch") setHovered(null);
+      }}
     >
       {frame &&
         geometry?.sides.map(
@@ -319,12 +359,6 @@ export function Wedges({
                     transition.current = null;
                     links.navigate(href);
                   }, duration);
-                }}
-                onPointerEnter={(event) => {
-                  if (event.pointerType !== "touch") setHovered(key);
-                }}
-                onPointerLeave={(event) => {
-                  if (event.pointerType !== "touch") setHovered(release(key));
                 }}
                 onPointerDown={(event) => {
                   touched.current = event.pointerType === "touch" ? key : null;
