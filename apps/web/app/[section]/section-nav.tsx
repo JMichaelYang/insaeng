@@ -10,7 +10,7 @@ import { ViewTransition } from "react";
 
 import { headshot, headshotSizes, headshotTransition } from "../headshot";
 import { type Section, sectionHref, sections } from "../sections";
-import { lgWobble, wobble } from "../wobble";
+import { lgWobble, pillWobble, wobble } from "../wobble";
 
 const menuId = "section-menu";
 const bottomEdge = { bottom: true };
@@ -40,7 +40,7 @@ function SectionLink({
     >
       {section.title}
       {section.slug === current && (
-        <WobblePill wobble={wobble} strokeWidth={pillStroke} />
+        <WobblePill wobble={pillWobble} strokeWidth={pillStroke} />
       )}
     </Link>
   );
