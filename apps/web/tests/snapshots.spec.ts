@@ -25,6 +25,8 @@ for (const route of discoverRoutes(appDir)) {
   test(`snapshot ${route}`, async ({ page }) => {
     await page.goto(route, { waitUntil: "networkidle" });
     await page.evaluate(() => document.fonts.ready);
+    const viewport = page.viewportSize();
+    if (viewport) await page.mouse.move(viewport.width / 2, viewport.height / 2);
     const name = route === "/" ? "index" : route.slice(1).replaceAll("/", "-");
     await expect(page).toHaveScreenshot(`${name}.png`, { fullPage: true });
   });

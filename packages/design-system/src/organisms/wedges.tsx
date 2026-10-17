@@ -19,7 +19,7 @@ import {
   type WedgeOrientation,
 } from "../utils/wedge-geometry";
 import type { ImageBlur, ImageSource } from "../atoms/image";
-import { Wedge } from "../molecules/wedge";
+import { Wedge, WedgeLines } from "../molecules/wedge";
 
 export type WedgesLayout = Omit<
   WedgeGeometryOptions,
@@ -225,6 +225,7 @@ export function Wedges({
     current === key ? null : current;
 
   const stack = [...expansion.keys()];
+  const center = frame ? rest?.center : null;
 
   return (
     <div
@@ -279,6 +280,7 @@ export function Wedges({
               >
                 <Wedge
                   path={wedge.path}
+                  lines={wedge.lines}
                   image={images?.[s]?.[i]}
                   bounds={wedge.bounds}
                   blur={blur}
@@ -306,7 +308,15 @@ export function Wedges({
             );
           }),
         )}
-      <div className="relative">{children}</div>
+      <div
+        className="
+          pointer-events-none absolute inset-0 flex items-center justify-center
+        "
+        style={center ? { clipPath: `path("${center.path}")` } : undefined}
+      >
+        <div className="pointer-events-auto">{children}</div>
+      </div>
+      {center && <WedgeLines path={center.path} lines={center.lines} />}
     </div>
   );
 }

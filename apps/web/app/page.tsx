@@ -10,25 +10,26 @@ import Image, { getImageProps } from "next/image";
 import { preload } from "react-dom";
 
 const shared = {
+  centerShape: "square",
+  centerGap: 0,
+  relatedGap: 0,
   ringThickness: 0,
   wedgesPerSide: 4,
   spread: 1,
   cornerRadius: 0,
-};
+} as const;
 
 const row: WedgesLayout = {
   ...shared,
-  avatarRadius: 176,
-  centerGap: 12,
-  relatedGap: 8,
+  avatarRadius: 192,
   slotInset: 24,
+  wobble: { amplitude: 3, wavelength: 30 },
 };
 const column: WedgesLayout = {
   ...shared,
-  avatarRadius: 80,
-  centerGap: 8,
-  relatedGap: 4,
+  avatarRadius: 88,
   slotInset: 16,
+  wobble: { amplitude: 2, wavelength: 20 },
 };
 
 function Placeholder({ title }: { title: string }) {
@@ -87,10 +88,7 @@ export default function Home() {
     });
   }
   return (
-    <main className="
-      flex flex-1 flex-col p-2
-      lg:p-5
-    ">
+    <main className="flex flex-1 flex-col">
       <Wedges
         className="flex-1"
         row={row}
@@ -99,16 +97,16 @@ export default function Home() {
         images={images}
         blur="lg"
       >
-        <Avatar className="
-          size-[10rem]
-          lg:size-[22rem]
+        <Avatar shape="square" className="
+          size-[11.5rem]
+          lg:size-[25rem]
         ">
           <Image
             src="/headshot.jpg"
             alt="Jaewon Yang"
             width={720}
             height={720}
-            sizes="(min-width: 64rem) 22rem, 10rem"
+            sizes="(min-width: 64rem) 25rem, 11.5rem"
             preload
           />
         </Avatar>
