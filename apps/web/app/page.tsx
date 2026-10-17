@@ -1,10 +1,12 @@
 import {
   Avatar,
   type ImageSource,
+  type TextWobble,
   Wedges,
   type WedgesContent,
   type WedgesImages,
   type WedgesLayout,
+  WobbleText,
 } from "@insaeng/design-system";
 import Image, { getImageProps } from "next/image";
 import { preload } from "react-dom";
@@ -32,12 +34,16 @@ const column: WedgesLayout = {
   wobble: { amplitude: 2, wavelength: 20 },
 };
 
+const titleWobble: TextWobble = { amplitude: 0.05, period: 4 };
+
 function Placeholder({ title }: { title: string }) {
   return (
     <h2 className="
       type-heading-xl whitespace-nowrap text-on-surface
       lg:type-display
-    ">{title}</h2>
+    ">
+      <WobbleText text={title} wobble={titleWobble} />
+    </h2>
   );
 }
 
