@@ -1,1 +1,1 @@
-export { Wedges, type WedgesContent, type WedgesImages, type WedgesLayout, type WedgesLinks } from "./wedges";
+export { Wedges, type WedgeItem, type WedgesLayout, type WedgesLinks, type WedgesSides } from "./wedges";

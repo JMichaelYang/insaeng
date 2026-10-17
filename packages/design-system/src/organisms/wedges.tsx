@@ -17,6 +17,7 @@ import { linear, parseCubicBezier, parseDuration } from "../utils/easing";
 import { mergeClasses } from "../utils/merge-classes";
 import {
   wedgeGeometry,
+  type WedgeGeometry,
   type WedgeGeometryOptions,
   type WedgeOrientation,
   type WedgeRect,
@@ -26,23 +27,20 @@ import { Wedge, WedgeLines } from "../molecules/wedge";
 
 export type WedgesLayout = Omit<
   WedgeGeometryOptions,
-  "width" | "height" | "orientation" | "expansion"
+  "width" | "height" | "orientation" | "expansion" | "wedgesPerSide"
 >;
 
-export type WedgesContent = readonly [
-  readonly ReactNode[],
-  readonly ReactNode[],
-];
+export type WedgeItem = {
+  content?: ReactNode;
+  image?: ImageSource;
+  href?: string;
+};
 
-export type WedgesImages = readonly [
-  readonly ImageSource[],
-  readonly ImageSource[],
-];
+export type WedgesSides = readonly [readonly WedgeItem[], readonly WedgeItem[]];
 
 type WedgeTargetProps = HTMLAttributes<HTMLElement> & { href?: string };
 
 export type WedgesLinks = {
-  hrefs: readonly [readonly string[], readonly string[]];
   component: ElementType<WedgeTargetProps & { href: string }>;
   navigate: (href: string) => void;
 };
@@ -102,6 +100,125 @@ function readMotion(element: Element) {
   };
 }
 
+function pick(
+  rest: WedgeGeometry,
+  geometry: WedgeGeometry | null,
+  hovered: string | null,
+  x: number,
+  y: number,
+) {
+  const wedges = rest.sides.flatMap((side, s) =>
+    side.wedges.map((wedge, i) => ({
+      key: wedgeKey(s, i),
+      resting: wedge.path,
+      current: geometry?.sides[s].wedges[i]?.path,
+    })),
+  );
+  const inside = wedges.find(({ resting }) => contains(resting, x, y));
+  const slop = inside ? hoverSlop : 0;
+  const kept = wedges.find(
+    ({ key, resting, current }) =>
+      key === hovered &&
+      (contains(current, x, y) || contains(resting, x, y, slop)),
+  );
+  return (kept ?? inside)?.key ?? null;
+}
+
+function useFrame(ref: RefObject<HTMLElement | null>) {
+  const [frame, setFrame] = useState<Frame | null>(null);
+
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const media = window.matchMedia(rowQuery);
+    const measure = () => {
+      const { width, height } = element.getBoundingClientRect();
+      const orientation = media.matches ? "row" : "column";
+      setFrame((prev) =>
+        prev &&
+        prev.width === width &&
+        prev.height === height &&
+        prev.orientation === orientation
+          ? prev
+          : { width, height, orientation },
+      );
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    media.addEventListener("change", measure);
+    return () => {
+      observer.disconnect();
+      media.removeEventListener("change", measure);
+    };
+  }, [ref]);
+
+  return frame;
+}
+
+function useHold() {
+  const hold = useRef<Hold | null>(null);
+  const heldClick = useRef<string | null>(null);
+  const [held, setHeld] = useState<string | null>(null);
+
+  useEffect(
+    () => () => {
+      const timer = hold.current?.timer;
+      if (timer != null) window.clearTimeout(timer);
+    },
+    [],
+  );
+
+  const cancel = () => {
+    const timer = hold.current?.timer;
+    if (timer != null) window.clearTimeout(timer);
+    hold.current = null;
+  };
+
+  const start = (key: string, event: PointerEvent) => {
+    cancel();
+    heldClick.current = null;
+    const next: Hold = {
+      key,
+      pointerId: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      timer: null,
+    };
+    next.timer = window.setTimeout(() => {
+      next.timer = null;
+      heldClick.current = key;
+      setHeld(key);
+    }, holdDelay);
+    hold.current = next;
+  };
+
+  const move = (event: PointerEvent) => {
+    const current = hold.current;
+    if (current?.pointerId !== event.pointerId || current.timer === null) {
+      return;
+    }
+    const moved = Math.hypot(event.clientX - current.x, event.clientY - current.y);
+    if (moved > holdSlop) cancel();
+  };
+
+  const end = (event: PointerEvent) => {
+    if (hold.current?.pointerId !== event.pointerId) return;
+    cancel();
+    setHeld(null);
+  };
+
+  const consumeClick = (key: string) => {
+    if (heldClick.current !== key) return false;
+    heldClick.current = null;
+    return true;
+  };
+
+  const holding = (key: string) => hold.current?.key === key;
+
+  return { held, start, move, end, consumeClick, holding };
+}
+
 function useExpansion(
   active: string | null,
   ref: RefObject<HTMLElement | null>,
@@ -147,8 +264,7 @@ function useExpansion(
 export function Wedges({
   row,
   column,
-  content,
-  images,
+  sides,
   links,
   blur,
   tilt = false,
@@ -157,8 +273,7 @@ export function Wedges({
 }: {
   row: WedgesLayout;
   column: WedgesLayout;
-  content?: WedgesContent;
-  images?: WedgesImages;
+  sides: WedgesSides;
   links?: WedgesLinks;
   blur?: ImageBlur;
   tilt?: boolean;
@@ -166,108 +281,45 @@ export function Wedges({
   children?: ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const hold = useRef<Hold | null>(null);
-  const heldClick = useRef<string | null>(null);
   const touched = useRef<string | null>(null);
   const transition = useRef<number | null>(null);
-  const [frame, setFrame] = useState<Frame | null>(null);
+  const frame = useFrame(ref);
+  const hold = useHold();
   const [hovered, setHovered] = useState<string | null>(null);
-  const [held, setHeld] = useState<string | null>(null);
   const [tapped, setTapped] = useState<string | null>(null);
   const [focused, setFocused] = useState<string | null>(null);
-  const expansion = useExpansion(tapped ?? held ?? hovered ?? focused, ref);
-
-  useLayoutEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-    const media = window.matchMedia(rowQuery);
-    const measure = () => {
-      const { width, height } = element.getBoundingClientRect();
-      const orientation = media.matches ? "row" : "column";
-      setFrame((prev) =>
-        prev &&
-        prev.width === width &&
-        prev.height === height &&
-        prev.orientation === orientation
-          ? prev
-          : { width, height, orientation },
-      );
-    };
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(element);
-    media.addEventListener("change", measure);
-    return () => {
-      observer.disconnect();
-      media.removeEventListener("change", measure);
-    };
-  }, []);
+  const expansion = useExpansion(tapped ?? hold.held ?? hovered ?? focused, ref);
 
   useEffect(
     () => () => {
-      const timer = hold.current?.timer;
-      if (timer != null) window.clearTimeout(timer);
       if (transition.current !== null) window.clearTimeout(transition.current);
     },
     [],
   );
 
   const layout = frame?.orientation === "row" ? row : column;
+  const wedgesPerSide = Math.max(sides[0].length, sides[1].length);
 
   const rest = useMemo(() => {
     if (!frame || frame.width <= 0 || frame.height <= 0) return null;
-    return wedgeGeometry({ ...layout, ...frame });
-  }, [frame, layout]);
+    return wedgeGeometry({ ...layout, ...frame, wedgesPerSide });
+  }, [frame, layout, wedgesPerSide]);
 
   const geometry = useMemo(() => {
     if (!frame || !rest || expansion.size === 0) return rest;
     const [first, second] = [0, 1].map((s) =>
       Array.from(
-        { length: layout.wedgesPerSide },
+        { length: wedgesPerSide },
         (_, i) => expansion.get(wedgeKey(s, i)) ?? 0,
       ),
     );
-    return wedgeGeometry({ ...layout, ...frame, expansion: [first, second] });
-  }, [frame, layout, rest, expansion]);
-
-  const cancelHold = () => {
-    const timer = hold.current?.timer;
-    if (timer != null) window.clearTimeout(timer);
-    hold.current = null;
-  };
-
-  const startHold = (key: string, event: PointerEvent) => {
-    cancelHold();
-    heldClick.current = null;
-    const next: Hold = {
-      key,
-      pointerId: event.pointerId,
-      x: event.clientX,
-      y: event.clientY,
-      timer: null,
-    };
-    next.timer = window.setTimeout(() => {
-      next.timer = null;
-      heldClick.current = key;
-      setHeld(key);
-    }, holdDelay);
-    hold.current = next;
-  };
-
-  const moveHold = (event: PointerEvent) => {
-    const current = hold.current;
-    if (current?.pointerId !== event.pointerId || current.timer === null) {
-      return;
-    }
-    const moved = Math.hypot(event.clientX - current.x, event.clientY - current.y);
-    if (moved > holdSlop) cancelHold();
-  };
-
-  const endHold = (event: PointerEvent) => {
-    if (hold.current?.pointerId !== event.pointerId) return;
-    cancelHold();
-    setHeld(null);
-  };
+    return wedgeGeometry({
+      ...layout,
+      ...frame,
+      wedgesPerSide,
+      expansion: [first, second],
+    });
+  }, [frame, layout, wedgesPerSide, rest, expansion]);
 
   const release = (key: string) => (current: string | null) =>
     current === key ? null : current;
@@ -277,21 +329,7 @@ export function Wedges({
     const box = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - box.left;
     const y = event.clientY - box.top;
-    const wedges = rest.sides.flatMap((side, s) =>
-      side.wedges.map((wedge, i) => ({
-        key: wedgeKey(s, i),
-        resting: wedge.path,
-        current: geometry?.sides[s].wedges[i]?.path,
-      })),
-    );
-    const inside = wedges.find(({ resting }) => contains(resting, x, y));
-    const slop = inside ? hoverSlop : 0;
-    const kept = wedges.find(
-      ({ key, resting, current }) =>
-        key === hovered &&
-        (contains(current, x, y) || contains(resting, x, y, slop)),
-    );
-    setHovered((kept ?? inside)?.key ?? null);
+    setHovered(pick(rest, geometry, hovered, x, y));
   };
 
   const stack = [...expansion.keys()];
@@ -319,8 +357,8 @@ export function Wedges({
               e,
             );
             const angle = resting.tilt * (1 - e);
-            const node = content?.[s]?.[i];
-            const href = links?.hrefs[s]?.[i];
+            const item: WedgeItem = sides[s][i] ?? {};
+            const { content: node, image, href } = item;
             const Element = (
               links && href ? links.component : "div"
             ) as ElementType<WedgeTargetProps>;
@@ -340,8 +378,7 @@ export function Wedges({
                 onClick={(event) => {
                   const tap = touched.current === key;
                   touched.current = null;
-                  if (heldClick.current === key) {
-                    heldClick.current = null;
+                  if (hold.consumeClick(key)) {
                     event.preventDefault();
                     return;
                   }
@@ -358,13 +395,13 @@ export function Wedges({
                 }}
                 onPointerDown={(event) => {
                   touched.current = event.pointerType === "touch" ? key : null;
-                  if (event.pointerType === "touch") startHold(key, event);
+                  if (event.pointerType === "touch") hold.start(key, event);
                 }}
-                onPointerMove={moveHold}
-                onPointerUp={endHold}
-                onPointerCancel={endHold}
+                onPointerMove={hold.move}
+                onPointerUp={hold.end}
+                onPointerCancel={hold.end}
                 onContextMenu={(event) => {
-                  if (hold.current?.key === key) event.preventDefault();
+                  if (hold.holding(key)) event.preventDefault();
                 }}
                 onFocus={(event) => {
                   if (event.target.matches(":focus-visible")) setFocused(key);
@@ -380,7 +417,7 @@ export function Wedges({
                 <Wedge
                   path={wedge.path}
                   lines={wedge.lines}
-                  image={images?.[s]?.[i]}
+                  image={image}
                   bounds={wedge.bounds}
                   blur={blur}
                   fade={geometry.cutRadius}
