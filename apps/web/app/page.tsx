@@ -34,7 +34,7 @@ const column: WedgesLayout = {
   wobble: { amplitude: 2, wavelength: 20 },
 };
 
-const titleWobble: TextWobble = { amplitude: 0.05, period: 4 };
+const titleWobble: TextWobble = { amplitude: 0.035, period: 4 };
 
 function Placeholder({ title }: { title: string }) {
   return (
