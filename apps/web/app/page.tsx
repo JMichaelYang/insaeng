@@ -15,7 +15,6 @@ import { LinkedWedges } from "./linked-wedges";
 import { sectionHref, sections } from "./sections";
 
 const shared = {
-  centerShape: "square",
   centerGap: 0,
   relatedGap: 0,
   wedgesPerSide: 4,
