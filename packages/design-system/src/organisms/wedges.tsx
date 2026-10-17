@@ -54,6 +54,7 @@ const rowQuery = "(min-width: 64rem)";
 const reducedMotionQuery = "(prefers-reduced-motion: reduce)";
 const holdDelay = 350;
 const holdSlop = 10;
+const maxTilt = 35;
 
 const wedgeKey = (side: number, index: number) => `${side}-${index}`;
 
@@ -271,7 +272,8 @@ export function Wedges({
               rest?.sides[s].expandedSlot ?? null,
               e,
             );
-            const angle = resting.tilt * (1 - e);
+            const angle =
+              Math.min(Math.max(resting.tilt, -maxTilt), maxTilt) * (1 - e);
             const node = content?.[s]?.[i];
             const href = links?.[s]?.[i];
             const Element = href ? "a" : "div";
