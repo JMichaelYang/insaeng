@@ -368,6 +368,27 @@ describe("wedgeGeometry", () => {
     }
   });
 
+  it.each(orientations)("tilts %s wedges along their axis to the center", (o) => {
+    const options = { ...base[o], wedgesPerSide: 4 };
+    const geometry = wedgeGeometry(options);
+    const center = { x: options.width / 2, y: options.height / 2 };
+    for (const side of geometry.sides) {
+      for (const { anchor, tilt } of side.wedges) {
+        expect(tilt).toBeGreaterThanOrEqual(-90);
+        expect(tilt).toBeLessThan(90);
+        const radians = (tilt * Math.PI) / 180;
+        const axis = { x: anchor.x - center.x, y: anchor.y - center.y };
+        expect(
+          Math.abs(axis.x * Math.sin(radians) - axis.y * Math.cos(radians)),
+        ).toBeLessThan(EPSILON * Math.hypot(axis.x, axis.y));
+      }
+    }
+    const [left, right] = geometry.sides.map((side) =>
+      side.wedges.map(({ tilt }) => tilt),
+    );
+    left.forEach((t, i) => expect(right[i]).toBeCloseTo(-t, 1));
+  });
+
   it.each(orientations)("grows %s slots as the inset shrinks", (o) => {
     const area = (slotInset: number) =>
       wedgeGeometry({ ...base[o], wedgesPerSide: 4, slotInset }).sides[0].wedges.map(

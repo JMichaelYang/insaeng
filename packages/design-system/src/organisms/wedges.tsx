@@ -113,6 +113,7 @@ export function Wedges({
   content,
   images,
   blur,
+  tilt = false,
   className,
   children,
 }: {
@@ -121,6 +122,7 @@ export function Wedges({
   content?: WedgesContent;
   images?: WedgesImages;
   blur?: ImageBlur;
+  tilt?: boolean;
   className?: string;
   children?: ReactNode;
 }) {
@@ -301,7 +303,13 @@ export function Wedges({
                       height: slot.height,
                     }}
                   >
-                    {node}
+                    {tilt ? (
+                      <div style={{ rotate: `${(resting ?? wedge).tilt}deg` }}>
+                        {node}
+                      </div>
+                    ) : (
+                      node
+                    )}
                   </div>
                 )}
               </div>

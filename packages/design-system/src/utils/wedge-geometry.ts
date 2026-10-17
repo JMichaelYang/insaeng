@@ -29,6 +29,7 @@ export type WedgeOutline = { path: string; lines: string };
 
 export type WedgeShape = WedgeOutline & {
   anchor: WedgePoint;
+  tilt: number;
   bounds: WedgeRect;
   slot: WedgeRect | null;
 };
@@ -67,6 +68,9 @@ const len = (a: WedgePoint) => Math.hypot(a.x, a.y);
 const norm = (a: WedgePoint) => mul(a, 1 / len(a));
 const origin = point(0, 0);
 const chebyshev = (a: WedgePoint) => Math.max(Math.abs(a.x), Math.abs(a.y));
+
+const upright = (degrees: number) =>
+  ((((degrees + 90) % 180) + 180) % 180) - 90;
 
 const centroid = (pts: WedgePoint[]) =>
   mul(pts.reduce(add, origin), 1 / pts.length);
@@ -700,6 +704,8 @@ export function wedgeGeometry({
       if (cut.length === 0) return [];
       const far = centroid(poly.filter(beyond));
       const anchor = transform(mul(norm(far), (cutRadius + len(far)) / 2));
+      const axis = sub(anchor, center);
+      const tilt = upright((Math.atan2(axis.y, axis.x) * 180) / Math.PI);
       const bounds = boundsOf(
         [
           ...poly.filter(beyond),
@@ -711,6 +717,7 @@ export function wedgeGeometry({
         {
           ...outline(cut, transform, bend),
           anchor,
+          tilt,
           bounds,
           get slot() {
             if (slot === undefined) {

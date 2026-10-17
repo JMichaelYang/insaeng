@@ -34,13 +34,10 @@ const column: WedgesLayout = {
 
 function Placeholder({ title }: { title: string }) {
   return (
-    <div className="flex flex-col items-center gap-1 text-center">
-      <span className="
-        type-title text-on-surface
-        lg:type-heading-xl
-      ">{title}</span>
-      <span className="type-caption text-on-surface-variant">Coming soon</span>
-    </div>
+    <h2 className="
+      type-heading-xl whitespace-nowrap text-on-surface
+      lg:type-display
+    ">{title}</h2>
   );
 }
 
@@ -96,6 +93,7 @@ export default function Home() {
         content={content}
         images={images}
         blur="md"
+        tilt
       >
         <Avatar shape="square" className="
           size-[11.5rem]
