@@ -39,7 +39,7 @@ const column: WedgesLayout = {
 
 const titleWobble: TextWobble = { amplitude: 0.035, period: 4 };
 
-function Placeholder({ title }: { title: string }) {
+function WedgeTitle({ title }: { title: string }) {
   return (
     <h2 className="
       type-heading-xl whitespace-nowrap text-on-surface
@@ -51,8 +51,8 @@ function Placeholder({ title }: { title: string }) {
 }
 
 const content: WedgesContent = [
-  sections[0].map(({ slug, title }) => <Placeholder key={slug} title={title} />),
-  sections[1].map(({ slug, title }) => <Placeholder key={slug} title={title} />),
+  sections[0].map(({ slug, title }) => <WedgeTitle key={slug} title={title} />),
+  sections[1].map(({ slug, title }) => <WedgeTitle key={slug} title={title} />),
 ];
 
 const links: WedgesLinks = [
