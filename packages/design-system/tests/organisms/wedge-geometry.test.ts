@@ -35,6 +35,9 @@ const arcs = (path: string) =>
 const distance = (a: WedgePoint, b: WedgePoint) =>
   Math.hypot(a.x - b.x, a.y - b.y);
 
+const chebyshev = (a: WedgePoint, b: WedgePoint) =>
+  Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
+
 const inside = (p: WedgePoint, poly: WedgePoint[]) =>
   poly.reduce((hit, a, i) => {
     const b = poly[(i + 1) % poly.length];
@@ -64,7 +67,7 @@ function expectSlotInside(
     x: Math.max(slot.x, Math.min(center.x, slot.x + slot.width)),
     y: Math.max(slot.y, Math.min(center.y, slot.y + slot.height)),
   };
-  expect(distance(nearest, center)).toBeGreaterThanOrEqual(
+  expect(chebyshev(nearest, center)).toBeGreaterThanOrEqual(
     cutRadiusOf(options) + slotInset - EPSILON,
   );
   const outline = points(path);
@@ -113,7 +116,6 @@ const base: Record<
     centerGap: 16,
     relatedGap: 8,
     cornerRadius: 16,
-    ringThickness: 48,
     spread: 0.8,
     slotInset: 16,
   },
@@ -125,7 +127,6 @@ const base: Record<
     centerGap: 16,
     relatedGap: 8,
     cornerRadius: 12,
-    ringThickness: 32,
     spread: 0.8,
     slotInset: 16,
   },
@@ -133,7 +134,6 @@ const base: Record<
 
 const counts = [2, 3, 4, 5, 6];
 const orientations: WedgeOrientation[] = ["row", "column"];
-const rings = [true, false];
 const progress = [0, 0.5, 1];
 
 type Case = {
@@ -143,36 +143,30 @@ type Case = {
 };
 
 const cases: Case[] = orientations.flatMap((orientation) =>
-  rings.flatMap((ring) =>
-    counts.flatMap((wedgesPerSide) =>
-      progress.flatMap((e) =>
-        (e === 1
-          ? Array.from({ length: wedgesPerSide }, (_, i) => i)
-          : [Math.floor(wedgesPerSide / 2)]
-        ).map((i) => {
-          const values = Array.from({ length: wedgesPerSide }, (_, j) =>
-            e > 0 && j === i ? e : 0,
-          );
-          return {
-            options: {
-              ...base[orientation],
-              ringThickness: ring ? base[orientation].ringThickness : 0,
-              wedgesPerSide,
-              expansion: [values, values] as const,
-            },
-            expanded: e > 0 ? i : null,
-            label: `${orientation} ring=${ring} n=${wedgesPerSide} e=${e}${e > 0 ? ` wedge=${i}` : ""}`,
-          };
-        }),
-      ),
+  counts.flatMap((wedgesPerSide) =>
+    progress.flatMap((e) =>
+      (e === 1
+        ? Array.from({ length: wedgesPerSide }, (_, i) => i)
+        : [Math.floor(wedgesPerSide / 2)]
+      ).map((i) => {
+        const values = Array.from({ length: wedgesPerSide }, (_, j) =>
+          e > 0 && j === i ? e : 0,
+        );
+        return {
+          options: {
+            ...base[orientation],
+            wedgesPerSide,
+            expansion: [values, values] as const,
+          },
+          expanded: e > 0 ? i : null,
+          label: `${orientation} n=${wedgesPerSide} e=${e}${e > 0 ? ` wedge=${i}` : ""}`,
+        };
+      }),
     ),
   ),
 );
 
-const cutRadiusOf = (o: WedgeGeometryOptions) =>
-  o.avatarRadius +
-  o.centerGap +
-  (o.ringThickness > 0 ? o.ringThickness + o.relatedGap : 0);
+const cutRadiusOf = (o: WedgeGeometryOptions) => o.avatarRadius + o.centerGap;
 
 describe("wedgeGeometry", () => {
   it.each(cases)("$label", ({ options, expanded }) => {
@@ -188,15 +182,15 @@ describe("wedgeGeometry", () => {
     geometry.sides.forEach((side, s) => {
       expect(side.wedges).toHaveLength(wedgesPerSide);
 
-      side.wedges.forEach(({ path, anchor, slot, bounds }) => {
+      side.wedges.forEach(({ path, slot, bounds }) => {
         expectSlotInside(slot, path, options);
         expectBoundsAround(bounds, path, options);
         expect(path).toMatch(/^M/);
         expect(path).toMatch(/Z$/);
         expect(path).not.toMatch(/NaN|Infinity/);
 
-        for (const p of [...points(path), anchor]) {
-          expect(distance(p, center)).toBeGreaterThanOrEqual(
+        for (const p of points(path)) {
+          expect(chebyshev(p, center)).toBeGreaterThanOrEqual(
             cutRadius - EPSILON,
           );
           expect(p.x).toBeGreaterThanOrEqual(-EPSILON);
@@ -212,23 +206,13 @@ describe("wedgeGeometry", () => {
         }
 
         const radii = arcs(path).map((a) => a.radius);
-        expect(radii.some((r) => Math.abs(r - cutRadius) < EPSILON)).toBe(
-          true,
-        );
         for (const r of radii) {
-          const ring = Math.abs(r - cutRadius) < EPSILON;
-          expect(ring || r <= cornerRadius + EPSILON).toBe(true);
+          expect(r).toBeLessThanOrEqual(cornerRadius + EPSILON);
         }
         expect(
           radii.filter((r) => Math.abs(r - cornerRadius) < EPSILON).length,
         ).toBeGreaterThanOrEqual(2);
       });
-
-      if (options.ringThickness === 0) {
-        expect(side.ring).toBeNull();
-      } else {
-        expect(side.ring).not.toBeNull();
-      }
     });
 
     if (expanded !== null && options.expansion?.[0][expanded] === 1) {
@@ -278,66 +262,6 @@ describe("wedgeGeometry", () => {
         expect(twin.width).toBeCloseTo(slot.width, 1);
         expect(twin.height).toBeCloseTo(slot.height, 1);
       }
-      const anchor = mirror(wedge.anchor);
-      expect(geometry.sides[1].wedges[i].anchor.x).toBeCloseTo(anchor.x, 1);
-      expect(geometry.sides[1].wedges[i].anchor.y).toBeCloseTo(anchor.y, 1);
-    });
-  });
-
-  it.each(orientations)("builds %s label rings around the avatar", (o) => {
-    const options = { ...base[o], wedgesPerSide: 3 };
-    const geometry = wedgeGeometry(options);
-    const { width, height, avatarRadius, centerGap, ringThickness } = options;
-    const center = { x: width / 2, y: height / 2 };
-    const inner = avatarRadius + centerGap;
-    const outer = inner + ringThickness;
-    const fillet = Math.min(options.cornerRadius, ringThickness / 2);
-    const row = o === "row";
-
-    geometry.sides.forEach((side, s) => {
-      const ring = side.ring;
-      expect(ring).not.toBeNull();
-      if (!ring) return;
-      expect(ring.path).toMatch(/^M.*Z$/);
-      expect(ring.path).not.toMatch(/NaN|Infinity/);
-      for (const p of points(ring.path)) {
-        const r = distance(p, center);
-        expect(r).toBeGreaterThanOrEqual(inner - EPSILON);
-        expect(r).toBeLessThanOrEqual(outer + EPSILON);
-        const across = row ? p.x - center.x : p.y - center.y;
-        expect(s === 0 ? -across : across).toBeGreaterThanOrEqual(
-          centerGap / 2 - EPSILON,
-        );
-      }
-      const radii = arcs(ring.path).map((a) => a.radius);
-      expect(radii).toHaveLength(6);
-      for (const r of radii) {
-        expect(
-          [inner, outer, fillet].some((v) => Math.abs(v - r) < EPSILON),
-        ).toBe(true);
-      }
-
-      const text = parse(ring.textPath);
-      expect(text.map((c) => c.type)).toEqual(["M", "A"]);
-      const [start, arc] = text;
-      if (start.type !== "M" || arc.type !== "A") return;
-      const mid = (inner + outer) / 2;
-      expect(arc.radius).toBeCloseTo(mid, 1);
-      expect(distance(start.to, center)).toBeCloseTo(mid, 1);
-      expect(distance(arc.to, center)).toBeCloseTo(mid, 1);
-      if (row) {
-        if (s === 0) {
-          expect(start.to.x).toBeLessThan(center.x);
-          expect(start.to.y).toBeGreaterThan(arc.to.y);
-        } else {
-          expect(start.to.x).toBeGreaterThan(center.x);
-          expect(start.to.y).toBeLessThan(arc.to.y);
-        }
-      } else {
-        expect(start.to.x).toBeLessThan(arc.to.x);
-        if (s === 0) expect(start.to.y).toBeLessThan(center.y);
-        else expect(start.to.y).toBeGreaterThan(center.y);
-      }
     });
   });
 
@@ -351,8 +275,12 @@ describe("wedgeGeometry", () => {
         points(top.path).map((p) => key({ x: p.x, y: options.height - p.y })),
       );
       expect(new Set(points(bottom.path).map(key))).toEqual(flipped);
-      expect(top.anchor.y).toBeLessThan(options.height / 2);
-      expect(bottom.anchor.y).toBeGreaterThan(options.height / 2);
+      expect(top.bounds.y + top.bounds.height / 2).toBeLessThan(
+        options.height / 2,
+      );
+      expect(bottom.bounds.y + bottom.bounds.height / 2).toBeGreaterThan(
+        options.height / 2,
+      );
     });
   });
 
@@ -360,8 +288,10 @@ describe("wedgeGeometry", () => {
     for (const o of orientations) {
       const geometry = wedgeGeometry({ ...base[o], wedgesPerSide: 4 });
       for (const side of geometry.sides) {
-        const along = side.wedges.map(({ anchor }) =>
-          o === "row" ? anchor.y : anchor.x,
+        const along = side.wedges.map(({ bounds }) =>
+          o === "row"
+            ? bounds.y + bounds.height / 2
+            : bounds.x + bounds.width / 2,
         );
         expect(along).toEqual([...along].sort((a, b) => a - b));
       }
@@ -373,13 +303,13 @@ describe("wedgeGeometry", () => {
     const geometry = wedgeGeometry(options);
     const center = { x: options.width / 2, y: options.height / 2 };
     for (const side of geometry.sides) {
-      for (const { anchor, slot, tilt } of side.wedges) {
+      for (const { slot, tilt } of side.wedges) {
         expect(tilt).toBeGreaterThanOrEqual(-90);
         expect(tilt).toBeLessThan(90);
+        expect(slot).not.toBeNull();
+        if (!slot) continue;
         const radians = (tilt * Math.PI) / 180;
-        const at = slot
-          ? { x: slot.x + slot.width / 2, y: slot.y + slot.height / 2 }
-          : anchor;
+        const at = { x: slot.x + slot.width / 2, y: slot.y + slot.height / 2 };
         const axis = { x: at.x - center.x, y: at.y - center.y };
         expect(
           Math.abs(axis.x * Math.sin(radians) - axis.y * Math.cos(radians)),
@@ -432,8 +362,16 @@ describe("wedgeGeometry", () => {
     });
     for (const side of geometry.sides) {
       expect(side.wedges).toHaveLength(4);
-      for (const { slot } of side.wedges) expect(slot).toBeNull();
+      for (const { slot, tilt } of side.wedges) {
+        expect(slot).toBeNull();
+        expect(tilt).toBeGreaterThanOrEqual(-90);
+        expect(tilt).toBeLessThan(90);
+      }
     }
+    const [left, right] = geometry.sides.map((side) =>
+      side.wedges.map(({ tilt }) => tilt),
+    );
+    left.forEach((t, i) => expect(right[i]).toBeCloseTo(-t, 1));
   });
 
   it("returns the same slot on every read", () => {
@@ -520,22 +458,19 @@ describe("wedgeGeometry", () => {
   ];
   const tight = orientations.flatMap((orientation) =>
     frames.flatMap(([width, height]) =>
-      [0, 32].flatMap((ringThickness) =>
-        [0, 1].map((e) => ({
-          options: {
-            ...base[orientation],
-            width,
-            height,
-            ringThickness,
-            wedgesPerSide: 4,
-            expansion: [
-              [e, 0, 0, 0],
-              [0, 0, 0, e],
-            ] as const,
-          },
-          label: `${orientation} ${width}x${height} ring=${ringThickness} e=${e}`,
-        })),
-      ),
+      [0, 1].map((e) => ({
+        options: {
+          ...base[orientation],
+          width,
+          height,
+          wedgesPerSide: 4,
+          expansion: [
+            [e, 0, 0, 0],
+            [0, 0, 0, e],
+          ] as const,
+        },
+        label: `${orientation} ${width}x${height} e=${e}`,
+      })),
     ),
   );
 
@@ -547,7 +482,7 @@ describe("wedgeGeometry", () => {
       for (const { path } of side.wedges) {
         expect(path).not.toMatch(/NaN|Infinity/);
         for (const p of points(path)) {
-          expect(distance(p, center)).toBeGreaterThanOrEqual(
+          expect(chebyshev(p, center)).toBeGreaterThanOrEqual(
             geometry.cutRadius - EPSILON,
           );
           expect(p.x).toBeGreaterThanOrEqual(-EPSILON);
@@ -559,12 +494,11 @@ describe("wedgeGeometry", () => {
     }
   });
 
-  it("draws no wedges when the cut circle does not fit", () => {
+  it("draws no wedges when the center square does not fit", () => {
     const geometry = wedgeGeometry({
       ...base.column,
       width: 120,
       height: 120,
-      ringThickness: 0,
       wedgesPerSide: 4,
     });
     for (const side of geometry.sides) expect(side.wedges).toHaveLength(0);
@@ -580,9 +514,22 @@ describe("wedgeGeometry", () => {
         [1, 0],
       ],
     });
+    const corners = (path: string) =>
+      parse(path).filter((c, i, all) => {
+        const prev = all[i - 1];
+        const next = all[i + 1];
+        if (c.type !== "L" || next?.type !== "L" || !prev || prev.type === "Z") {
+          return true;
+        }
+        const a = { x: prev.to.x - c.to.x, y: prev.to.y - c.to.y };
+        const b = { x: next.to.x - c.to.x, y: next.to.y - c.to.y };
+        return Math.abs(a.x * b.y - a.y * b.x) > EPSILON;
+      });
     geometry.sides.forEach((side, s) => {
       expect(side.wedges).toHaveLength(1);
-      expect(side.wedges[0].path).toBe(full.sides[s].wedges[0].path);
+      expect(corners(side.wedges[0].path)).toEqual(
+        corners(full.sides[s].wedges[0].path),
+      );
     });
   });
 
@@ -595,50 +542,18 @@ describe("wedgeGeometry", () => {
     for (const side of geometry.sides) {
       for (const { path } of side.wedges) {
         expect(path).not.toMatch(/NaN|Infinity/);
-        for (const { radius } of arcs(path)) {
-          expect(radius).toBeCloseTo(geometry.cutRadius, 1);
-        }
+        expect(arcs(path)).toHaveLength(0);
       }
     }
   });
-
-  const bare = { ...base.column, ringThickness: 0 };
-  const narrow: WedgeGeometryOptions[] = [
-    { ...bare, wedgesPerSide: 4, relatedGap: 12, centerGap: 12 },
-    { ...bare, wedgesPerSide: 6, relatedGap: 12, centerGap: 12 },
-    { ...bare, wedgesPerSide: 6, cornerRadius: 24 },
-    { ...base.row, wedgesPerSide: 6, cornerRadius: 24 },
-    { ...bare, wedgesPerSide: 4, relatedGap: 4, centerGap: 8 },
-    { ...bare, wedgesPerSide: 6, spread: 0.3 },
-  ];
-
-  it.each(narrow)(
-    "cuts each ring arc the same way ($orientation, n=$wedgesPerSide)",
-    (options) => {
-      const geometry = wedgeGeometry(options);
-      for (const side of geometry.sides) {
-        const sweeps = side.wedges.flatMap(({ path }) => {
-          const cut = arcs(path).filter(
-            (a) => Math.abs(a.radius - geometry.cutRadius) < EPSILON,
-          );
-          expect(cut.length).toBeLessThanOrEqual(1);
-          return cut.map((a) => a.sweep);
-        });
-        expect(sweeps.length).toBeGreaterThan(0);
-        expect(new Set(sweeps).size).toBe(1);
-      }
-    },
-  );
 });
 
-describe("wedgeGeometry with a square center", () => {
-  const square = (
+describe("wedgeGeometry with flush wedges", () => {
+  const flush = (
     o: WedgeOrientation,
     overrides: Partial<WedgeGeometryOptions> = {},
   ): WedgeGeometryOptions => ({
     ...base[o],
-    centerShape: "square",
-    ringThickness: 0,
     centerGap: 0,
     relatedGap: 0,
     cornerRadius: 0,
@@ -647,11 +562,8 @@ describe("wedgeGeometry with a square center", () => {
     ...overrides,
   });
 
-  const chebyshev = (p: WedgePoint, c: WedgePoint) =>
-    Math.max(Math.abs(p.x - c.x), Math.abs(p.y - c.y));
-
   it.each(orientations)("tiles everything outside the %s square", (o) => {
-    const options = square(o);
+    const options = flush(o);
     const geometry = wedgeGeometry(options);
     const R = geometry.cutRadius;
     const center = { x: options.width / 2, y: options.height / 2 };
@@ -674,7 +586,7 @@ describe("wedgeGeometry with a square center", () => {
   });
 
   it.each(orientations)("keeps %s wedges and slots outside the square", (o) => {
-    const options = square(o, {
+    const options = flush(o, {
       centerGap: 8,
       relatedGap: 4,
       cornerRadius: 12,
@@ -709,7 +621,7 @@ describe("wedgeGeometry with a square center", () => {
 
   const wobbles = orientations.flatMap((o) =>
     [0, 0.6, 1].map((e) => ({
-      options: square(o, {
+      options: flush(o, {
         wobble: { amplitude: 3, wavelength: 48 },
         expansion: [
           [0, e, 0, 0],
@@ -757,7 +669,7 @@ describe("wedgeGeometry with a square center", () => {
   );
 
   it.each(orientations)("leaves %s frame edges straight and undrawn", (o) => {
-    const options = square(o, { wobble: { amplitude: 3, wavelength: 48 } });
+    const options = flush(o, { wobble: { amplitude: 3, wavelength: 48 } });
     const geometry = wedgeGeometry(options);
     for (const side of geometry.sides) {
       for (const { path, lines } of side.wedges) {
@@ -788,11 +700,5 @@ describe("wedgeGeometry with a square center", () => {
         });
       }
     }
-  });
-
-  it("rejects a ring around a square center", () => {
-    expect(() => wedgeGeometry(square("row", { ringThickness: 32 }))).toThrow(
-      RangeError,
-    );
   });
 });

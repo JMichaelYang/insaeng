@@ -307,10 +307,6 @@ export function Wedges({
       }}
     >
       {frame &&
-        geometry?.sides.map(
-          (side, s) => side.ring && <Wedge key={s} path={side.ring.path} />,
-        )}
-      {frame &&
         geometry?.sides.map((side, s) =>
           side.wedges.map((wedge, i) => {
             const key = wedgeKey(s, i);
