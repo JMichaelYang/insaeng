@@ -32,7 +32,7 @@ function SectionLink({
       className={mergeClasses(
         `
           state-layer inline-flex h-control-lg items-center rounded-full px-4
-          type-heading-xl whitespace-nowrap text-on-surface
+          type-heading-xl whitespace-nowrap text-on-primary-container
           aria-[current=page]:bg-secondary-container
           aria-[current=page]:text-on-secondary-container
         `,
@@ -89,7 +89,7 @@ function SectionMenu({ current }: { current: string }) {
         aria-label="Sections"
         className="
           state-layer inline-flex size-10 items-center justify-center
-          rounded-full text-on-surface
+          rounded-full text-on-primary-container
         "
       >
         <MenuIcon />
@@ -99,11 +99,13 @@ function SectionMenu({ current }: { current: string }) {
         popover="auto"
         className="
           fixed inset-x-0 top-16 bottom-auto m-0 w-full border-0 bg-transparent
-          p-0 text-on-surface
+          p-0 text-on-primary-container
         "
       >
         <WobbleBox wobble={wobble} edges={bottomEdge}>
-          <ul className="flex flex-col gap-1 bg-surface px-4 pt-2 pb-6">
+          <ul className="
+            flex flex-col gap-1 bg-primary-container px-4 pt-2 pb-6
+          ">
             {sections.flat().map((section) => (
               <li key={section.slug}>
                 <SectionLink
@@ -132,12 +134,13 @@ export function SectionNav({ current }: { current: string }) {
         edges={bottomEdge}
         className="absolute inset-0"
       >
-        <div className="size-full bg-surface" />
+        <div className="size-full bg-primary-container" />
       </WobbleBox>
       <nav
         aria-label="Sections"
         className="
-          relative grid h-full grid-cols-[1fr_auto_1fr] items-center gap-4 px-4
+          relative grid h-full grid-cols-[1fr_auto_1fr] grid-rows-1 items-center
+          gap-4 px-4
           lg:px-8
         "
       >
