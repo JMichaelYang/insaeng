@@ -2,7 +2,7 @@ export type WedgePoint = { x: number; y: number };
 
 export type WedgeOrientation = "row" | "column";
 
-type WedgeWobble = { amplitude: number; wavelength: number };
+export type WedgeWobble = { amplitude: number; wavelength: number };
 
 export type WedgeGeometryOptions = {
   width: number;
@@ -228,7 +228,7 @@ function wave(cycles: number, t: number) {
   );
 }
 
-function wobbleLine(
+export function wobbleLine(
   a: WedgePoint,
   b: WedgePoint,
   { amplitude, wavelength }: WedgeWobble,
