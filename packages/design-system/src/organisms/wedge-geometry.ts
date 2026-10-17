@@ -25,24 +25,24 @@ export type WedgeGeometryOptions = {
 
 export type WedgeRect = { x: number; y: number; width: number; height: number };
 
-export type WedgeOutline = { path: string; lines: string };
+type WedgeOutline = { path: string; lines: string };
 
-export type WedgeShape = WedgeOutline & {
+type WedgeShape = WedgeOutline & {
   anchor: WedgePoint;
   tilt: number;
   bounds: WedgeRect;
   slot: WedgeRect | null;
 };
 
-export type WedgeRing = { path: string; textPath: string };
+type WedgeRing = { path: string };
 
-export type WedgeSide = {
+type WedgeSide = {
   wedges: WedgeShape[];
   ring: WedgeRing | null;
   expandedSlot: WedgeRect | null;
 };
 
-export type WedgeGeometry = {
+type WedgeGeometry = {
   cutRadius: number;
   center: WedgeOutline | null;
   sides: [WedgeSide, WedgeSide];
@@ -55,12 +55,6 @@ type Segment =
   | { type: "A"; to: WedgePoint; radius: number; center: WedgePoint };
 
 type Transform = (p: WedgePoint) => WedgePoint;
-
-type SideFrame = {
-  transform: Transform;
-  labelDegrees: number;
-  clockwise: boolean;
-};
 
 const point = (x: number, y: number): WedgePoint => ({ x, y });
 const add = (a: WedgePoint, b: WedgePoint) => point(a.x + b.x, a.y + b.y);
@@ -533,51 +527,17 @@ function sideFrames(
   orientation: WedgeOrientation,
   cx: number,
   cy: number,
-): [SideFrame, SideFrame] {
+): [Transform, Transform] {
   if (orientation === "row") {
     return [
-      {
-        transform: (p) => point(cx + p.x, cy + p.y),
-        labelDegrees: 180,
-        clockwise: true,
-      },
-      {
-        transform: (p) => point(cx - p.x, cy + p.y),
-        labelDegrees: 0,
-        clockwise: true,
-      },
+      (p) => point(cx + p.x, cy + p.y),
+      (p) => point(cx - p.x, cy + p.y),
     ];
   }
   return [
-    {
-      transform: (p) => point(cx + p.y, cy + p.x),
-      labelDegrees: 270,
-      clockwise: true,
-    },
-    {
-      transform: (p) => point(cx + p.y, cy - p.x),
-      labelDegrees: 90,
-      clockwise: false,
-    },
+    (p) => point(cx + p.y, cy + p.x),
+    (p) => point(cx + p.y, cy - p.x),
   ];
-}
-
-function labelPath(
-  center: WedgePoint,
-  radius: number,
-  degrees: number,
-  clockwise: boolean,
-): string {
-  const at = (deg: number) => {
-    const rad = (deg * Math.PI) / 180;
-    return point(
-      center.x + radius * Math.cos(rad),
-      center.y + radius * Math.sin(rad),
-    );
-  };
-  const from = at(degrees + (clockwise ? -80 : 80));
-  const to = at(degrees + (clockwise ? 80 : -80));
-  return `M${fmtPoint(from)}A${fmt(radius)} ${fmt(radius)} 0 0 ${clockwise ? 1 : 0} ${fmtPoint(to)}`;
 }
 
 export function wedgeGeometry({
@@ -675,7 +635,7 @@ export function wedgeGeometry({
     if (!square || count === 0) return null;
     const around = (p: WedgePoint) => Math.atan2(p.y - center.y, p.x - center.x);
     const ring = frames
-      .flatMap(({ transform }) => marks.map(transform))
+      .flatMap((transform) => marks.map(transform))
       .sort((a, b) => around(a) - around(b))
       .filter(
         (p, i, all) =>
@@ -691,7 +651,7 @@ export function wedgeGeometry({
       bend,
     );
   };
-  const sides = frames.map(({ transform, labelDegrees, clockwise }, s) => {
+  const sides = frames.map((transform, s) => {
     const wedges = phis.slice(0, count).flatMap((phi, i) => {
       const raw = expansion?.[s]?.[i] ?? 0;
       const e = Math.max(0, Math.min(1, raw));
@@ -761,12 +721,6 @@ export function wedgeGeometry({
               Math.min(cornerRadius, ringThickness / 2),
             ),
             transform,
-          ),
-          textPath: labelPath(
-            center,
-            (innerRadius + outerRadius) / 2,
-            labelDegrees,
-            clockwise,
           ),
         }
       : null;

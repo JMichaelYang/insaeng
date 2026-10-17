@@ -1,4 +1,4 @@
-export type Section = { slug: string; title: string; image: string };
+type Section = { slug: string; title: string; image: string };
 
 export const sections = [
   [

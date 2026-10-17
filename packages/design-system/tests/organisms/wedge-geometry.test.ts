@@ -284,7 +284,7 @@ describe("wedgeGeometry", () => {
     });
   });
 
-  it.each(orientations)("builds %s label rings around the avatar", (o) => {
+  it.each(orientations)("builds %s rings around the avatar", (o) => {
     const options = { ...base[o], wedgesPerSide: 3 };
     const geometry = wedgeGeometry(options);
     const { width, height, avatarRadius, centerGap, ringThickness } = options;
@@ -315,28 +315,6 @@ describe("wedgeGeometry", () => {
         expect(
           [inner, outer, fillet].some((v) => Math.abs(v - r) < EPSILON),
         ).toBe(true);
-      }
-
-      const text = parse(ring.textPath);
-      expect(text.map((c) => c.type)).toEqual(["M", "A"]);
-      const [start, arc] = text;
-      if (start.type !== "M" || arc.type !== "A") return;
-      const mid = (inner + outer) / 2;
-      expect(arc.radius).toBeCloseTo(mid, 1);
-      expect(distance(start.to, center)).toBeCloseTo(mid, 1);
-      expect(distance(arc.to, center)).toBeCloseTo(mid, 1);
-      if (row) {
-        if (s === 0) {
-          expect(start.to.x).toBeLessThan(center.x);
-          expect(start.to.y).toBeGreaterThan(arc.to.y);
-        } else {
-          expect(start.to.x).toBeGreaterThan(center.x);
-          expect(start.to.y).toBeLessThan(arc.to.y);
-        }
-      } else {
-        expect(start.to.x).toBeLessThan(arc.to.x);
-        if (s === 0) expect(start.to.y).toBeLessThan(center.y);
-        else expect(start.to.y).toBeGreaterThan(center.y);
       }
     });
   });
