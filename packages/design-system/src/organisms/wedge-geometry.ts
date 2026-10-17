@@ -2,9 +2,9 @@ export type WedgePoint = { x: number; y: number };
 
 export type WedgeOrientation = "row" | "column";
 
-export type WedgeCenterShape = "circle" | "square";
+type WedgeCenterShape = "circle" | "square";
 
-export type WedgeWobble = { amplitude: number; wavelength: number };
+type WedgeWobble = { amplitude: number; wavelength: number };
 
 export type WedgeGeometryOptions = {
   width: number;
@@ -15,7 +15,6 @@ export type WedgeGeometryOptions = {
   centerGap: number;
   relatedGap: number;
   cornerRadius: number;
-  ringThickness: number;
   wedgesPerSide: number;
   spread: number;
   slotInset: number;
@@ -28,17 +27,13 @@ export type WedgeRect = { x: number; y: number; width: number; height: number };
 type WedgeOutline = { path: string; lines: string };
 
 type WedgeShape = WedgeOutline & {
-  anchor: WedgePoint;
   tilt: number;
   bounds: WedgeRect;
   slot: WedgeRect | null;
 };
 
-type WedgeRing = { path: string };
-
 type WedgeSide = {
   wedges: WedgeShape[];
-  ring: WedgeRing | null;
   expandedSlot: WedgeRect | null;
 };
 
@@ -145,7 +140,7 @@ function fillet(
   };
 }
 
-function splitAtRing(poly: WedgePoint[], R: number): WedgePoint[] {
+function splitAtCircle(poly: WedgePoint[], R: number): WedgePoint[] {
   return poly.flatMap((a, i) => {
     const b = poly[(i + 1) % poly.length];
     const d = sub(b, a);
@@ -155,8 +150,8 @@ function splitAtRing(poly: WedgePoint[], R: number): WedgePoint[] {
   });
 }
 
-function ringCutPath(source: WedgePoint[], R: number, r: number): Segment[] {
-  const poly = splitAtRing(source, R);
+function circleCutPath(source: WedgePoint[], R: number, r: number): Segment[] {
+  const poly = splitAtCircle(source, R);
   const n = poly.length;
   const inside = poly.map((p) => len(p) < R);
   if (!inside.some(Boolean)) return roundedPoly(poly, r);
@@ -392,30 +387,6 @@ function outline(
   return { path: `${path}Z`, lines };
 }
 
-function halfRing(Ri: number, Ro: number, G: number, r: number): Segment[] {
-  const x = -G / 2 - r;
-  const at = (radius: number) =>
-    point(x, -Math.sqrt(radius * radius - x * x));
-  const flip = (p: WedgePoint) => point(p.x, -p.y);
-  const fo = at(Ro - r);
-  const fi = at(Ri + r);
-  const lineO = point(-G / 2, fo.y);
-  const circleO = mul(fo, Ro / (Ro - r));
-  const lineI = point(-G / 2, fi.y);
-  const circleI = mul(fi, Ri / (Ri + r));
-  return [
-    { type: "M", to: lineI },
-    { type: "L", to: lineO },
-    { type: "A", to: circleO, radius: r, center: fo },
-    { type: "A", to: flip(circleO), radius: Ro, center: origin },
-    { type: "A", to: flip(lineO), radius: r, center: flip(fo) },
-    { type: "L", to: flip(lineI) },
-    { type: "A", to: flip(circleI), radius: r, center: flip(fi) },
-    { type: "A", to: circleI, radius: Ri, center: origin },
-    { type: "A", to: lineI, radius: r, center: fi },
-  ];
-}
-
 function span(poly: WedgePoint[], x: number): [number, number] | null {
   const ys = poly.flatMap((a, i) => {
     const b = poly[(i + 1) % poly.length];
@@ -506,23 +477,6 @@ function slotRect(slot: Slot | null, transform: Transform): WedgeRect | null {
 const fmt = (n: number) => String(Math.round(n * 100) / 100);
 const fmtPoint = (p: WedgePoint) => `${fmt(p.x)} ${fmt(p.y)}`;
 
-function serialize(segments: Segment[], transform: Transform): string {
-  let d = "";
-  let current = origin;
-  for (const segment of segments) {
-    const p = transform(segment.to);
-    if (segment.type === "A" && segment.radius > 0) {
-      const c = transform(segment.center);
-      const sweep = cross(sub(current, c), sub(p, c)) > 0 ? 1 : 0;
-      d += `A${fmt(segment.radius)} ${fmt(segment.radius)} 0 0 ${sweep} ${fmtPoint(p)}`;
-    } else {
-      d += `${segment.type === "M" ? "M" : "L"}${fmtPoint(p)}`;
-    }
-    current = p;
-  }
-  return `${d}Z`;
-}
-
 function sideFrames(
   orientation: WedgeOrientation,
   cx: number,
@@ -549,7 +503,6 @@ export function wedgeGeometry({
   centerGap,
   relatedGap,
   cornerRadius,
-  ringThickness,
   wedgesPerSide,
   spread,
   slotInset,
@@ -566,17 +519,11 @@ export function wedgeGeometry({
     throw new RangeError("slotInset must be non-negative");
   }
   const square = centerShape === "square";
-  if (square && ringThickness > 0) {
-    throw new RangeError("a square center cannot have a ring");
-  }
   const row = orientation === "row";
   const E = (row ? width : height) / 2;
   const S = (row ? height : width) / 2;
   const center = point(width / 2, height / 2);
-  const innerRadius = avatarRadius + centerGap;
-  const outerRadius = innerRadius + ringThickness;
-  const hasRing = ringThickness > 0;
-  const cutRadius = hasRing ? outerRadius + relatedGap : innerRadius;
+  const cutRadius = avatarRadius + centerGap;
   const fits = cutRadius + cornerRadius < Math.min(E, S);
 
   const hits =
@@ -664,7 +611,7 @@ export function wedgeGeometry({
         (square ? chebyshev(p) : len(p)) >= cutRadius;
       const cut = square
         ? squareCutPath(poly, cutRadius, cornerRadius, marks)
-        : ringCutPath(poly, cutRadius, cornerRadius);
+        : circleCutPath(poly, cutRadius, cornerRadius);
       if (cut.length === 0) return [];
       const far = centroid(poly.filter(beyond));
       const anchor = transform(mul(norm(far), (cutRadius + len(far)) / 2));
@@ -692,7 +639,6 @@ export function wedgeGeometry({
       return [
         {
           ...outline(cut, transform, bend),
-          anchor,
           bounds,
           get slot() {
             return slotOf();
@@ -711,23 +657,9 @@ export function wedgeGeometry({
         },
       ];
     });
-    const ring = hasRing
-      ? {
-          path: serialize(
-            halfRing(
-              innerRadius,
-              outerRadius,
-              centerGap,
-              Math.min(cornerRadius, ringThickness / 2),
-            ),
-            transform,
-          ),
-        }
-      : null;
     let expandedSlot: WedgeRect | null | undefined;
     return {
       wedges,
-      ring,
       get expandedSlot() {
         if (expandedSlot === undefined) {
           expandedSlot =
