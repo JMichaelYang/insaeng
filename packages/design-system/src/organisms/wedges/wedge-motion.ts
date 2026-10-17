@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
 
-import { linear, parseCubicBezier, parseDuration } from "../utils/easing";
+import { linear, parseCubicBezier, parseDuration } from "../../utils/easing";
 import type { WedgeRect } from "./wedge-geometry";
 
 const reducedMotionQuery = "(prefers-reduced-motion: reduce)";

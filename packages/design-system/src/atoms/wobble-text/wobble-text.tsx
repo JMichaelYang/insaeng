@@ -1,4 +1,4 @@
-import { mergeClasses } from "../utils/merge-classes";
+import { mergeClasses } from "../../utils/merge-classes";
 
 export type TextWobble = { amplitude: number; period: number };
 

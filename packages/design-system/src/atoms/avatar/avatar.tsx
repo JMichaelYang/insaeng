@@ -1,6 +1,6 @@
 import type { ComponentProps } from "react";
 
-import { mergeClasses } from "../utils/merge-classes";
+import { mergeClasses } from "../../utils/merge-classes";
 
 export function Avatar({
   shape = "circle",

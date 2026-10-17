@@ -8,14 +8,14 @@ import {
   type ReactNode,
 } from "react";
 
-import { mergeClasses } from "../utils/merge-classes";
+import { mergeClasses } from "../../utils/merge-classes";
 import { useWedgeFrame } from "./wedge-frame";
 import { wedgeGeometry, type WedgeGeometryOptions } from "./wedge-geometry";
 import { wedgeKey } from "./wedge-hit-test";
 import { useWedgeInteraction } from "./wedge-interaction";
 import { blend, useWedgeExpansion } from "./wedge-motion";
-import type { ImageBlur, ImageSource } from "../atoms/image";
-import { Wedge, WedgeLines, WedgeSlot } from "../molecules/wedge";
+import type { ImageBlur, ImageSource } from "../../atoms/image";
+import { Wedge, WedgeLines, WedgeSlot } from "../../molecules/wedge";
 
 export type WedgesLayout = Omit<
   WedgeGeometryOptions,
