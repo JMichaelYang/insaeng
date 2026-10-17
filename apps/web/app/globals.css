@@ -4,6 +4,14 @@
   pointer-events: none;
 }
 
+::view-transition-old(root) {
+  display: none;
+}
+
+::view-transition-new(root) {
+  animation: none;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   ::view-transition-old(.fade) {
     animation: var(--transition-duration-normal) var(--ease-exit) both fade-out;
