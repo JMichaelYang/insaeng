@@ -39,13 +39,13 @@ export type WedgesImages = readonly [
   readonly ImageSource[],
 ];
 
-export type WedgesLinks = readonly [readonly string[], readonly string[]];
-
 type WedgeTargetProps = HTMLAttributes<HTMLElement> & { href?: string };
 
-export type WedgesLinkComponent = ElementType<
-  WedgeTargetProps & { href: string }
->;
+export type WedgesLinks = {
+  hrefs: readonly [readonly string[], readonly string[]];
+  component: ElementType<WedgeTargetProps & { href: string }>;
+  navigate: (href: string) => void;
+};
 
 type Frame = { width: number; height: number; orientation: WedgeOrientation };
 
@@ -136,7 +136,6 @@ export function Wedges({
   content,
   images,
   links,
-  linkAs = "a",
   blur,
   tilt = false,
   className,
@@ -147,7 +146,6 @@ export function Wedges({
   content?: WedgesContent;
   images?: WedgesImages;
   links?: WedgesLinks;
-  linkAs?: WedgesLinkComponent;
   blur?: ImageBlur;
   tilt?: boolean;
   className?: string;
@@ -157,7 +155,6 @@ export function Wedges({
   const hold = useRef<Hold | null>(null);
   const heldClick = useRef<string | null>(null);
   const touched = useRef<string | null>(null);
-  const navigating = useRef<string | null>(null);
   const transition = useRef<number | null>(null);
   const [frame, setFrame] = useState<Frame | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
@@ -200,17 +197,6 @@ export function Wedges({
     },
     [],
   );
-
-  useEffect(() => {
-    const reset = (event: PageTransitionEvent) => {
-      if (!event.persisted) return;
-      if (transition.current !== null) window.clearTimeout(transition.current);
-      transition.current = null;
-      setTapped(null);
-    };
-    window.addEventListener("pageshow", reset);
-    return () => window.removeEventListener("pageshow", reset);
-  }, []);
 
   const layout = frame?.orientation === "row" ? row : column;
 
@@ -298,8 +284,10 @@ export function Wedges({
             );
             const angle = resting.tilt * (1 - e);
             const node = content?.[s]?.[i];
-            const href = links?.[s]?.[i];
-            const Element = (href ? linkAs : "div") as ElementType<WedgeTargetProps>;
+            const href = links?.hrefs[s]?.[i];
+            const Element = (
+              links && href ? links.component : "div"
+            ) as ElementType<WedgeTargetProps>;
             return (
               <Element
                 key={key}
@@ -321,21 +309,15 @@ export function Wedges({
                     event.preventDefault();
                     return;
                   }
-                  if (navigating.current === key) {
-                    navigating.current = null;
-                    return;
-                  }
-                  if (!href || !tap || !ref.current) return;
+                  if (!links || !href || !tap || !ref.current) return;
                   const { duration } = readMotion(ref.current);
                   if (duration <= 0) return;
                   event.preventDefault();
                   if (transition.current !== null) return;
-                  const target = event.currentTarget;
                   setTapped(key);
                   transition.current = window.setTimeout(() => {
                     transition.current = null;
-                    navigating.current = key;
-                    target.click();
+                    links.navigate(href);
                   }, duration);
                 }}
                 onPointerEnter={(event) => {

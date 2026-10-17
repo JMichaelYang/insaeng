@@ -2,7 +2,6 @@ import {
   Avatar,
   type ImageSource,
   type TextWobble,
-  Wedges,
   type WedgesContent,
   type WedgesImages,
   type WedgesLayout,
@@ -12,7 +11,7 @@ import {
 import Image, { getImageProps } from "next/image";
 import { preload } from "react-dom";
 
-import ClientLink from "./client-link";
+import { LinkedWedges } from "./linked-wedges";
 import { sectionHref, sections } from "./sections";
 
 const shared = {
@@ -56,7 +55,7 @@ const content: WedgesContent = [
   sections[1].map(({ slug, title }) => <WedgeTitle key={slug} title={title} />),
 ];
 
-const links: WedgesLinks = [
+const hrefs: WedgesLinks["hrefs"] = [
   sections[0].map(sectionHref),
   sections[1].map(sectionHref),
 ];
@@ -87,14 +86,13 @@ export default function Home() {
   }
   return (
     <main className="flex flex-1 flex-col">
-      <Wedges
+      <LinkedWedges
         className="flex-1"
         row={row}
         column={column}
         content={content}
         images={images}
-        links={links}
-        linkAs={ClientLink}
+        hrefs={hrefs}
         blur="md"
         tilt
       >
@@ -111,7 +109,7 @@ export default function Home() {
             preload
           />
         </Avatar>
-      </Wedges>
+      </LinkedWedges>
     </main>
   );
 }
