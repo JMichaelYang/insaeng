@@ -1,1 +1,1 @@
-export { Wedge } from "./wedge";
+export { Wedge, WedgeLines } from "./wedge";

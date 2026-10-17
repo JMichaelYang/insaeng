@@ -135,6 +135,13 @@ export const themeNames = {
     "lg",
     "xl"
   ],
+  "blur": [
+    "sm",
+    "md",
+    "lg",
+    "xl",
+    "2xl"
+  ],
   "ease": [
     "standard",
     "enter",
@@ -146,6 +153,7 @@ export const semanticNames = {
   "type": [
     "display",
     "heading-xl",
+    "title",
     "heading-lg",
     "heading-md",
     "heading-sm",

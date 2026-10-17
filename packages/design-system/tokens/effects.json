@@ -39,6 +39,14 @@
       ]
     }
   },
+  "blur": {
+    "$type": "dimension",
+    "sm": { "$value": "4px" },
+    "md": { "$value": "8px" },
+    "lg": { "$value": "16px" },
+    "xl": { "$value": "24px" },
+    "2xl": { "$value": "40px" }
+  },
   "opacity": {
     "$type": "number",
     "state-hover": { "$value": 0.08, "$description": "M3 state layer over content color." },

@@ -11,8 +11,8 @@
         "$description": "Code. The app loads Geist Mono with next/font and exposes it as --font-geist-mono."
       },
       "display": {
-        "$value": ["var(--font-pochaevsk)", "Pretendard Variable", "Pretendard", "serif"],
-        "$description": "Display headings. Pochaevsk has Latin only and a single 400 weight; Hangul falls back to Pretendard."
+        "$value": ["var(--font-dongle)", "Pretendard Variable", "Pretendard", "sans-serif"],
+        "$description": "Display headings and titles. The app loads Dongle 400 with next/font and exposes it as --font-dongle. Dongle covers Latin and Hangul and renders small, so display styles use larger sizes."
       }
     },
     "weight": {
@@ -59,7 +59,10 @@
       "$value": { "fontFamily": "{font.family.display}", "fontSize": "{font.size.6xl}", "fontWeight": "{font.weight.normal}", "lineHeight": "{font.line-height.none}", "letterSpacing": "{font.letter-spacing.normal}" }
     },
     "heading-xl": {
-      "$value": { "fontFamily": "{font.family.display}", "fontSize": "{font.size.4xl}", "fontWeight": "{font.weight.normal}", "lineHeight": "{font.line-height.tight}", "letterSpacing": "{font.letter-spacing.normal}" }
+      "$value": { "fontFamily": "{font.family.display}", "fontSize": "{font.size.4xl}", "fontWeight": "{font.weight.normal}", "lineHeight": "{font.line-height.none}", "letterSpacing": "{font.letter-spacing.normal}" }
+    },
+    "title": {
+      "$value": { "fontFamily": "{font.family.display}", "fontSize": "{font.size.2xl}", "fontWeight": "{font.weight.normal}", "lineHeight": "{font.line-height.none}", "letterSpacing": "{font.letter-spacing.normal}" }
     },
     "heading-lg": {
       "$value": { "fontFamily": "{font.family.sans}", "fontSize": "{font.size.3xl}", "fontWeight": "{font.weight.bold}", "lineHeight": "{font.line-height.tight}", "letterSpacing": "{font.letter-spacing.tight}" }

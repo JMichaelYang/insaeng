@@ -17,8 +17,10 @@ import {
   wedgeGeometry,
   type WedgeGeometryOptions,
   type WedgeOrientation,
+  type WedgeRect,
 } from "../utils/wedge-geometry";
-import { Wedge } from "../molecules/wedge";
+import type { ImageBlur, ImageSource } from "../atoms/image";
+import { Wedge, WedgeLines } from "../molecules/wedge";
 
 export type WedgesLayout = Omit<
   WedgeGeometryOptions,
@@ -30,7 +32,12 @@ export type WedgesContent = readonly [
   readonly ReactNode[],
 ];
 
-export type WedgesImages = readonly [readonly string[], readonly string[]];
+export type WedgesImages = readonly [
+  readonly ImageSource[],
+  readonly ImageSource[],
+];
+
+export type WedgesLinks = readonly [readonly string[], readonly string[]];
 
 type Frame = { width: number; height: number; orientation: WedgeOrientation };
 
@@ -48,6 +55,18 @@ const holdDelay = 350;
 const holdSlop = 10;
 
 const wedgeKey = (side: number, index: number) => `${side}-${index}`;
+
+const mix = (a: number, b: number, t: number) => a + (b - a) * t;
+
+function blend(from: WedgeRect | null, to: WedgeRect | null, t: number) {
+  if (!from || !to || t <= 0) return from;
+  return {
+    x: mix(from.x, to.x, t),
+    y: mix(from.y, to.y, t),
+    width: mix(from.width, to.width, t),
+    height: mix(from.height, to.height, t),
+  };
+}
 
 function readMotion(element: Element) {
   if (window.matchMedia(reducedMotionQuery).matches) {
@@ -108,6 +127,9 @@ export function Wedges({
   column,
   content,
   images,
+  links,
+  blur,
+  tilt = false,
   className,
   children,
 }: {
@@ -115,11 +137,15 @@ export function Wedges({
   column: WedgesLayout;
   content?: WedgesContent;
   images?: WedgesImages;
+  links?: WedgesLinks;
+  blur?: ImageBlur;
+  tilt?: boolean;
   className?: string;
   children?: ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const hold = useRef<Hold | null>(null);
+  const heldClick = useRef<string | null>(null);
   const [frame, setFrame] = useState<Frame | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
   const [held, setHeld] = useState<string | null>(null);
@@ -186,6 +212,7 @@ export function Wedges({
 
   const startHold = (key: string, event: PointerEvent) => {
     cancelHold();
+    heldClick.current = null;
     const next: Hold = {
       key,
       pointerId: event.pointerId,
@@ -195,6 +222,7 @@ export function Wedges({
     };
     next.timer = window.setTimeout(() => {
       next.timer = null;
+      heldClick.current = key;
       setHeld(key);
     }, holdDelay);
     hold.current = next;
@@ -219,41 +247,51 @@ export function Wedges({
     current === key ? null : current;
 
   const stack = [...expansion.keys()];
+  const center = frame ? rest?.center : null;
 
   return (
     <div
       ref={ref}
       className={mergeClasses("relative flex items-center justify-center", className)}
     >
-      {frame && geometry?.sides.some((side) => side.ring) && (
-        <svg
-          className="absolute inset-0 size-full"
-          width={frame.width}
-          height={frame.height}
-          viewBox={`0 0 ${frame.width} ${frame.height}`}
-          aria-hidden
-        >
-          {geometry.sides.map(
-            (side, s) => side.ring && <Wedge key={s} path={side.ring.path} />,
-          )}
-        </svg>
-      )}
+      {frame &&
+        geometry?.sides.map(
+          (side, s) => side.ring && <Wedge key={s} path={side.ring.path} />,
+        )}
       {frame &&
         geometry?.sides.map((side, s) =>
           side.wedges.map((wedge, i) => {
             const key = wedgeKey(s, i);
             const rank = stack.indexOf(key);
-            const resting = rest?.sides[s].wedges[i];
-            const slot = (rank < 0 && resting ? resting : wedge).slot;
+            const resting = rest?.sides[s].wedges[i] ?? wedge;
+            const e = expansion.get(key) ?? 0;
+            const slot = blend(
+              resting.slot,
+              rest?.sides[s].expandedSlot ?? null,
+              e,
+            );
+            const angle = resting.tilt * (1 - e);
             const node = content?.[s]?.[i];
+            const href = links?.[s]?.[i];
+            const Element = href ? "a" : "div";
             return (
-              <div
+              <Element
                 key={key}
-                tabIndex={0}
+                href={href}
+                tabIndex={href ? undefined : 0}
+                draggable={href ? false : undefined}
                 className="
                   pointer-events-none absolute inset-0 outline-none select-none
                 "
-                style={rank < 0 ? undefined : { zIndex: rank + 1 }}
+                style={{
+                  WebkitTouchCallout: "none",
+                  zIndex: rank < 0 ? undefined : rank + 1,
+                }}
+                onClick={(event) => {
+                  if (heldClick.current !== key) return;
+                  heldClick.current = null;
+                  event.preventDefault();
+                }}
                 onPointerEnter={(event) => {
                   if (event.pointerType !== "touch") setHovered(key);
                 }}
@@ -280,21 +318,16 @@ export function Wedges({
                   setFocused(release(key));
                 }}
               >
-                <svg
-                  className="absolute inset-0 size-full"
-                  width={frame.width}
-                  height={frame.height}
-                  viewBox={`0 0 ${frame.width} ${frame.height}`}
-                  aria-hidden
-                >
-                  <Wedge
-                    path={wedge.path}
-                    image={images?.[s]?.[i]}
-                    bounds={wedge.bounds}
-                    focused={focused === key}
-                    className="pointer-events-auto"
-                  />
-                </svg>
+                <Wedge
+                  path={wedge.path}
+                  lines={wedge.lines}
+                  image={images?.[s]?.[i]}
+                  bounds={wedge.bounds}
+                  blur={blur}
+                  fade={geometry.cutRadius}
+                  focused={focused === key}
+                  className="pointer-events-auto"
+                />
                 {slot && node != null && (
                   <div
                     className="
@@ -308,14 +341,28 @@ export function Wedges({
                       height: slot.height,
                     }}
                   >
-                    {node}
+                    {tilt ? (
+                      <div style={{ rotate: `${angle}deg` }}>
+                        {node}
+                      </div>
+                    ) : (
+                      node
+                    )}
                   </div>
                 )}
-              </div>
+              </Element>
             );
           }),
         )}
-      <div className="relative">{children}</div>
+      <div
+        className="
+          pointer-events-none absolute inset-0 flex items-center justify-center
+        "
+        style={center ? { clipPath: `path("${center.path}")` } : undefined}
+      >
+        <div className="pointer-events-auto">{children}</div>
+      </div>
+      {center && <WedgeLines path={center.path} lines={center.lines} />}
     </div>
   );
 }
