@@ -55,7 +55,6 @@ export function SectionNav({ current }: { current: string }) {
             col-start-1 row-start-1
             lg:hidden
           "
-          panelClassName="top-16"
         />
         <NavLinks
           items={navItems(sections[0], current)}
