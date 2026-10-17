@@ -53,7 +53,7 @@ const rowQuery = "(min-width: 64rem)";
 const reducedMotionQuery = "(prefers-reduced-motion: reduce)";
 const holdDelay = 350;
 const holdSlop = 10;
-const maxTilt = 35;
+const maxTilt = 45;
 
 const wedgeKey = (side: number, index: number) => `${side}-${index}`;
 
