@@ -2,7 +2,7 @@ import {
   Avatar,
   mergeClasses,
   WobbleBox,
-  WobbleText,
+  WobblePill,
 } from "@insaeng/design-system";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,10 +10,11 @@ import { ViewTransition } from "react";
 
 import { headshot, headshotSizes, headshotTransition } from "../headshot";
 import { type Section, sectionHref, sections } from "../sections";
-import { lgWobble, titleWobble, wobble } from "../wobble";
+import { lgWobble, wobble } from "../wobble";
 
 const menuId = "section-menu";
 const bottomEdge = { bottom: true };
+const pillStroke = 3;
 const avatarEdges = { right: true, bottom: true, left: true };
 
 function SectionLink({
@@ -31,15 +32,16 @@ function SectionLink({
       aria-current={section.slug === current ? "page" : undefined}
       className={mergeClasses(
         `
-          state-layer inline-flex h-control-lg items-center rounded-full
-          border-thick border-transparent px-4 type-heading-xl whitespace-nowrap
-          text-on-primary-container
-          aria-[current=page]:border-on-primary-container
+          state-layer inline-flex h-control-lg items-center rounded-full px-4
+          type-heading-xl whitespace-nowrap text-on-primary-container
         `,
         className,
       )}
     >
-      <WobbleText text={section.title} wobble={titleWobble} />
+      {section.title}
+      {section.slug === current && (
+        <WobblePill wobble={wobble} strokeWidth={pillStroke} />
+      )}
     </Link>
   );
 }

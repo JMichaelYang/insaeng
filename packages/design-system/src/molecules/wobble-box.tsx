@@ -1,18 +1,12 @@
 "use client";
 
-import {
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ComponentProps,
-} from "react";
+import { useMemo, useRef, type ComponentProps } from "react";
 
 import { mergeClasses } from "../utils/merge-classes";
+import { useFrame } from "../utils/use-frame";
 import type { WedgeWobble } from "../organisms/wedges/wedge-geometry";
 import { wobbleRect, type WobbleEdges } from "../utils/wobble-rect";
 
-const lgQuery = "(min-width: 64rem)";
 const strokeWidth = 4;
 const allEdges: WobbleEdges = {
   top: true,
@@ -20,8 +14,6 @@ const allEdges: WobbleEdges = {
   bottom: true,
   left: true,
 };
-
-type Frame = { width: number; height: number; lg: boolean };
 
 export function WobbleBox({
   wobble,
@@ -36,33 +28,7 @@ export function WobbleBox({
   edges?: WobbleEdges;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [frame, setFrame] = useState<Frame | null>(null);
-
-  useLayoutEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-    const media = window.matchMedia(lgQuery);
-    const measure = () => {
-      const { width, height } = element.getBoundingClientRect();
-      const lg = media.matches;
-      setFrame((prev) =>
-        prev &&
-        prev.width === width &&
-        prev.height === height &&
-        prev.lg === lg
-          ? prev
-          : { width, height, lg },
-      );
-    };
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(element);
-    media.addEventListener("change", measure);
-    return () => {
-      observer.disconnect();
-      media.removeEventListener("change", measure);
-    };
-  }, []);
+  const frame = useFrame(ref);
 
   const shape = useMemo(() => {
     if (!frame || frame.width <= 0 || frame.height <= 0) return null;
