@@ -1,6 +1,6 @@
 import type { AnchorHTMLAttributes, ElementType, ReactNode } from "react";
 
-import { mergeClasses } from "../utils/merge-classes";
+import { mergeClasses } from "../../utils/merge-classes";
 
 export type NavLinkComponent = ElementType<
   AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }

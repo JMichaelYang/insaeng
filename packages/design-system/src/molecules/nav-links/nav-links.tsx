@@ -2,8 +2,8 @@ import {
   NavLink,
   type NavItem,
   type NavLinkComponent,
-} from "../atoms/nav-link";
-import { mergeClasses } from "../utils/merge-classes";
+} from "../../atoms/nav-link";
+import { mergeClasses } from "../../utils/merge-classes";
 
 export function NavLinks({
   items,

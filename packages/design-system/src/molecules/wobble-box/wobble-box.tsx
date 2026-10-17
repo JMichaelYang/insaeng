@@ -2,10 +2,10 @@
 
 import { useMemo, useRef, type ComponentProps } from "react";
 
-import { mergeClasses } from "../utils/merge-classes";
-import { useFrame } from "../utils/use-frame";
-import type { WedgeWobble } from "../organisms/wedges/wedge-geometry";
-import { wobbleRect, type WobbleEdges } from "../utils/wobble-rect";
+import { mergeClasses } from "../../utils/merge-classes";
+import { useFrame } from "./use-frame";
+import type { WedgeWobble } from "../../organisms/wedges/wedge-geometry";
+import { wobbleRect, type WobbleEdges } from "./wobble-rect";
 
 const strokeWidth = 4;
 const allEdges: WobbleEdges = {

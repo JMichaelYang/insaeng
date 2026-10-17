@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { wobbleRect } from "../../src/utils/wobble-rect";
+import { wobbleRect } from "../../../src/molecules/wobble-box/wobble-rect";
 
 const wobble = { amplitude: 3, wavelength: 30 };
 

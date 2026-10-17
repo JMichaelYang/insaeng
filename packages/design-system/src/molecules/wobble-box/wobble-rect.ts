@@ -1,4 +1,4 @@
-import { type WedgePoint, type WedgeWobble, wobbleLine } from "../organisms/wedges/wedge-geometry";
+import { type WedgePoint, type WedgeWobble, wobbleLine } from "../../organisms/wedges/wedge-geometry";
 
 export type WobbleEdges = {
   top?: boolean;

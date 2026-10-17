@@ -1,28 +1,16 @@
 import { useId } from "react";
 
+import { MenuIcon } from "../../atoms/menu-icon";
 import {
   NavLink,
   type NavItem,
   type NavLinkComponent,
-} from "../atoms/nav-link";
-import { WobbleBox } from "../molecules/wobble-box";
-import { mergeClasses } from "../utils/merge-classes";
-import type { WedgeWobble } from "./wedges/wedge-geometry";
+} from "../../atoms/nav-link";
+import { WobbleBox } from "../../molecules/wobble-box";
+import { mergeClasses } from "../../utils/merge-classes";
+import type { WedgeWobble } from "../wedges/wedge-geometry";
 
 const bottomEdge = { bottom: true };
-
-function MenuIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-icon-lg" aria-hidden>
-      <path
-        d="M4 7h16M4 12h16M4 17h16"
-        className="fill-none stroke-current"
-        strokeWidth={2}
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
 
 export function NavMenu({
   label,
