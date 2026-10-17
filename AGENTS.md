@@ -10,6 +10,7 @@ Run `pnpm dev`, `pnpm build`, and `pnpm lint` from the repo root.
 ## Code rules
 
 - NO CODE COMMENTS. Do not add comments to code, including generated code.
+- Design-system tests mirror `src` exactly: the test for `src/<path>.ts` lives at `tests/<path>.test.ts`. Lint fails on any test without a matching source file.
 
 ## Styling rules
 
