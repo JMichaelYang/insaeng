@@ -344,39 +344,34 @@ describe("wedgeGeometry", () => {
     }
   });
 
-  it.each(orientations)("centers %s slots where their wedge has the most room", (o) => {
-    const options = { ...base[o], wedgesPerSide: 4, cornerRadius: 0 };
-    const room = (p: WedgePoint, outline: WedgePoint[]) =>
-      Math.min(
-        ...outline.map((a, i) => {
-          const b = outline[(i + 1) % outline.length];
-          const d = { x: b.x - a.x, y: b.y - a.y };
-          const length = d.x ** 2 + d.y ** 2;
-          const t = length
-            ? Math.max(0, Math.min(1, ((p.x - a.x) * d.x + (p.y - a.y) * d.y) / length))
-            : 0;
-          return distance(p, { x: a.x + t * d.x, y: a.y + t * d.y });
-        }),
-      );
+  it.each(orientations)("centers %s slots between their wedge's radial edges", (o) => {
+    const options = {
+      ...base[o],
+      wedgesPerSide: 4,
+      cornerRadius: 0,
+      centerGap: 16,
+      relatedGap: 16,
+    };
+    const center = { x: options.width / 2, y: options.height / 2 };
+    const offset = (p: WedgePoint, a: WedgePoint, b: WedgePoint) =>
+      Math.abs((b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x)) /
+      distance(a, b);
     for (const side of wedgeGeometry(options).sides) {
-      for (const { path, slot, bounds } of side.wedges) {
+      for (const { path, slot } of side.wedges) {
         expect(slot).not.toBeNull();
         if (!slot) continue;
         const outline = points(path);
-        const steps = 40;
-        let most = 0;
-        for (let i = 0; i <= steps; i++) {
-          for (let j = 0; j <= steps; j++) {
-            const p = {
-              x: bounds.x + (bounds.width * i) / steps,
-              y: bounds.y + (bounds.height * j) / steps,
-            };
-            if (inside(p, outline)) most = Math.max(most, room(p, outline));
-          }
-        }
+        const radial = outline
+          .map((a, i) => [a, outline[(i + 1) % outline.length]] as const)
+          .filter(
+            ([a, b]) =>
+              distance(a, b) > 1 &&
+              Math.abs(offset(center, a, b) - options.relatedGap / 2) < EPSILON,
+          );
+        expect(radial).toHaveLength(2);
         const at = { x: slot.x + slot.width / 2, y: slot.y + slot.height / 2 };
-        expect(inside(at, outline)).toBe(true);
-        expect(room(at, outline)).toBeGreaterThan(most - 2);
+        const [first, second] = radial.map(([a, b]) => offset(at, a, b));
+        expect(Math.abs(first - second)).toBeLessThan(1);
       }
     }
   });

@@ -296,71 +296,7 @@ function outline(
   return { path: `${path}Z`, lines };
 }
 
-function span(poly: WedgePoint[], x: number): [number, number] | null {
-  const ys = poly.flatMap((a, i) => {
-    const b = poly[(i + 1) % poly.length];
-    if (a.x === b.x) return a.x === x ? [a.y, b.y] : [];
-    const t = (x - a.x) / (b.x - a.x);
-    return t >= 0 && t <= 1 ? [a.y + t * (b.y - a.y)] : [];
-  });
-  return ys.length ? [Math.min(...ys), Math.max(...ys)] : null;
-}
-
 type Slot = { min: WedgePoint; max: WedgePoint };
-
-type SizedSlot = Slot & { area: number };
-
-function slotBetween(
-  poly: WedgePoint[],
-  R: number,
-  x0: number,
-  x1: number,
-): SizedSlot | null {
-  const s0 = span(poly, x0);
-  const s1 = span(poly, x1);
-  if (!s0 || !s1) return null;
-  let lo = Math.max(s0[0], s1[0]);
-  let hi = Math.min(s0[1], s1[1]);
-  if (Math.abs(x1) < R) {
-    if (hi - Math.max(lo, R) >= Math.min(hi, -R) - lo) lo = Math.max(lo, R);
-    else hi = Math.min(hi, -R);
-  }
-  if (hi <= lo) return null;
-  return { min: point(x0, lo), max: point(x1, hi), area: (x1 - x0) * (hi - lo) };
-}
-
-function largestSlot(poly: WedgePoint[], R: number): Slot | null {
-  if (poly.length < 3) return null;
-  const xs = poly.map((p) => p.x);
-  const left = Math.min(...xs);
-  const right = Math.max(...xs);
-  const steps = 24;
-  let ranges = [
-    [left, right],
-    [left, right],
-  ];
-  let best: SizedSlot | null = null;
-  for (let pass = 0; pass < 4; pass++) {
-    const [[a0, b0], [a1, b1]] = ranges;
-    for (let i = 0; i <= steps; i++) {
-      const x0 = a0 + ((b0 - a0) * i) / steps;
-      for (let j = 0; j <= steps; j++) {
-        const x1 = a1 + ((b1 - a1) * j) / steps;
-        if (x1 <= x0) continue;
-        const slot = slotBetween(poly, R, x0, x1);
-        if (slot && (!best || slot.area > best.area)) best = slot;
-      }
-    }
-    if (!best) return null;
-    const found = best;
-    ranges = ranges.map(([a, b], k) => {
-      const at = k === 0 ? found.min.x : found.max.x;
-      const reach = (b - a) / steps;
-      return [Math.max(left, at - reach), Math.min(right, at + reach)];
-    });
-  }
-  return best;
-}
 
 function segmentDistance(p: WedgePoint, a: WedgePoint, b: WedgePoint) {
   const d = sub(b, a);
@@ -380,28 +316,34 @@ function clearance(poly: WedgePoint[], R: number, p: WedgePoint) {
   );
 }
 
-function roomiest(poly: WedgePoint[], R: number): WedgePoint | null {
-  const { x, y, width, height } = boundsOf(poly);
-  const steps = 24;
-  let best: { at: WedgePoint; room: number } | null = null;
-  let reach = point(width, height);
-  let from = point(x, y);
+function roomiest(
+  poly: WedgePoint[],
+  R: number,
+  axis: WedgePoint,
+): WedgePoint | null {
+  const steps = 48;
+  let best: { t: number; room: number } | null = null;
+  let reach = Math.max(...poly.map(len));
+  let from = 0;
   for (let pass = 0; pass < 4; pass++) {
     for (let i = 0; i <= steps; i++) {
-      for (let j = 0; j <= steps; j++) {
-        const at = add(from, point((reach.x * i) / steps, (reach.y * j) / steps));
-        const room = clearance(poly, R, at);
-        if (room > 0 && (!best || room > best.room)) best = { at, room };
-      }
+      const t = from + (reach * i) / steps;
+      const room = clearance(poly, R, mul(axis, t));
+      if (room > 0 && (!best || room > best.room)) best = { t, room };
     }
     if (!best) return null;
-    reach = mul(reach, 2 / steps);
-    from = sub(best.at, mul(reach, 0.5));
+    reach = (reach * 2) / steps;
+    from = best.t - reach / 2;
   }
-  return best?.at ?? null;
+  return best && mul(axis, best.t);
 }
 
-function fits(poly: WedgePoint[], R: number, min: WedgePoint, max: WedgePoint) {
+function rectFits(
+  poly: WedgePoint[],
+  R: number,
+  min: WedgePoint,
+  max: WedgePoint,
+) {
   const clear = min.x >= R || max.x <= -R || min.y >= R || max.y <= -R;
   return (
     clear &&
@@ -411,9 +353,13 @@ function fits(poly: WedgePoint[], R: number, min: WedgePoint, max: WedgePoint) {
   );
 }
 
-function centeredSlot(poly: WedgePoint[], R: number): Slot | null {
+function centeredSlot(
+  poly: WedgePoint[],
+  R: number,
+  axis: WedgePoint,
+): Slot | null {
   if (poly.length < 3) return null;
-  const at = roomiest(poly, R);
+  const at = roomiest(poly, R, axis);
   if (!at) return null;
   const { width, height } = boundsOf(poly);
   const tallest = (w: number) => {
@@ -422,13 +368,13 @@ function centeredSlot(poly: WedgePoint[], R: number): Slot | null {
     for (let k = 0; k < 24; k++) {
       const h = (lo + hi) / 2;
       const half = point(w, h);
-      if (fits(poly, R, sub(at, half), add(at, half))) lo = h;
+      if (rectFits(poly, R, sub(at, half), add(at, half))) lo = h;
       else hi = h;
     }
     return lo;
   };
   const steps = 48;
-  let best: SizedSlot | null = null;
+  let best: (Slot & { area: number }) | null = null;
   for (let i = 1; i < steps; i++) {
     const w = (width / 2) * (i / steps);
     const half = point(w, tallest(w));
@@ -530,11 +476,14 @@ export function wedgeGeometry({
     -E + d < -centerGap / 2 - d && -S + d < S - d
       ? [halfPlane(a, 1, d), halfPlane(b, -1, d)].reduce(clip, box(d))
       : [];
-  const labelSlot = (a: number, b: number) =>
-    (a === 0 && b === Math.PI ? largestSlot : centeredSlot)(
+  const labelSlot = (a: number, b: number) => {
+    const mid = (a + b) / 2;
+    return centeredSlot(
       wedge(a, b, slotInset),
       cutRadius + slotInset,
+      point(-Math.sin(mid), -Math.cos(mid)),
     );
+  };
 
   const count = fits ? wedgesPerSide : 0;
   const near = (a: number, b: number) => Math.abs(a - b) < 1e-6;
