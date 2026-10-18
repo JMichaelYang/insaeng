@@ -381,6 +381,19 @@ describe("wedgeGeometry", () => {
     }
   });
 
+  it.each(orientations)("centers %s expanded slots across their side", (o) => {
+    const options = { ...base[o], wedgesPerSide: 4 };
+    for (const { expandedSlot } of wedgeGeometry(options).sides) {
+      expect(expandedSlot).not.toBeNull();
+      if (!expandedSlot) continue;
+      const across =
+        o === "row"
+          ? expandedSlot.y + expandedSlot.height / 2 - options.height / 2
+          : expandedSlot.x + expandedSlot.width / 2 - options.width / 2;
+      expect(Math.abs(across)).toBeLessThan(1);
+    }
+  });
+
   it.each(orientations)("grows %s slots as the inset shrinks", (o) => {
     const area = (slotInset: number) =>
       wedgeGeometry({ ...base[o], wedgesPerSide: 4, slotInset }).sides[0].wedges.map(
