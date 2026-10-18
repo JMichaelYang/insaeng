@@ -4,7 +4,7 @@ import { Image, type ImageBlur, type ImageSource } from "../../atoms/image";
 import { mergeClasses } from "../../utils/merge-classes";
 import type { WedgeRect } from "../../organisms/wedges/wedge-geometry";
 
-const strokeWidth = 2;
+const strokeWidth = 4;
 const fadeExtent = "100%";
 const fadeStops = [
   [0, 75],
@@ -108,17 +108,16 @@ export function WedgeLines({
         <path
           className="fill-none stroke-on-surface"
           d={lines}
-          strokeWidth={strokeWidth * 2}
+          strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeLinejoin="round"
-          clipPath={`url(#${id})`}
         />
       )}
       {focused && (
         <path
           className="fill-none stroke-secondary"
           d={path}
-          strokeWidth={strokeWidth * 2}
+          strokeWidth={strokeWidth}
           clipPath={`url(#${id})`}
         />
       )}
