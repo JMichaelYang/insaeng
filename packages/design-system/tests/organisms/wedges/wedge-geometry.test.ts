@@ -344,6 +344,43 @@ describe("wedgeGeometry", () => {
     }
   });
 
+  it.each(orientations)("centers %s slots where their wedge has the most room", (o) => {
+    const options = { ...base[o], wedgesPerSide: 4, cornerRadius: 0 };
+    const room = (p: WedgePoint, outline: WedgePoint[]) =>
+      Math.min(
+        ...outline.map((a, i) => {
+          const b = outline[(i + 1) % outline.length];
+          const d = { x: b.x - a.x, y: b.y - a.y };
+          const length = d.x ** 2 + d.y ** 2;
+          const t = length
+            ? Math.max(0, Math.min(1, ((p.x - a.x) * d.x + (p.y - a.y) * d.y) / length))
+            : 0;
+          return distance(p, { x: a.x + t * d.x, y: a.y + t * d.y });
+        }),
+      );
+    for (const side of wedgeGeometry(options).sides) {
+      for (const { path, slot, bounds } of side.wedges) {
+        expect(slot).not.toBeNull();
+        if (!slot) continue;
+        const outline = points(path);
+        const steps = 40;
+        let most = 0;
+        for (let i = 0; i <= steps; i++) {
+          for (let j = 0; j <= steps; j++) {
+            const p = {
+              x: bounds.x + (bounds.width * i) / steps,
+              y: bounds.y + (bounds.height * j) / steps,
+            };
+            if (inside(p, outline)) most = Math.max(most, room(p, outline));
+          }
+        }
+        const at = { x: slot.x + slot.width / 2, y: slot.y + slot.height / 2 };
+        expect(inside(at, outline)).toBe(true);
+        expect(room(at, outline)).toBeGreaterThan(most - 2);
+      }
+    }
+  });
+
   it.each(orientations)("grows %s slots as the inset shrinks", (o) => {
     const area = (slotInset: number) =>
       wedgeGeometry({ ...base[o], wedgesPerSide: 4, slotInset }).sides[0].wedges.map(

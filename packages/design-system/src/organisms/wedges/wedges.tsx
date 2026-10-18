@@ -187,6 +187,7 @@ export function Wedges({
                 />
                 {slot && content != null && (
                   <WedgeSlot
+                    path={wedge.path}
                     slot={slot}
                     tilt={tilt ? resting.tilt * (1 - e) : undefined}
                   >
