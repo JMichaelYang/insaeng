@@ -8,159 +8,159 @@
       "$value": "#000000"
     },
     "primary": {
-      "$description": "Teal. Anchor #588B8B at 500.",
+      "$description": "Eucalyptus. Anchor #68897C at 500.",
       "50": {
-        "$value": "#E7FCFB"
+        "$value": "#EFFAF5"
       },
       "100": {
-        "$value": "#D8F2F1"
+        "$value": "#E2F0EA"
       },
       "200": {
-        "$value": "#BFE1E0"
+        "$value": "#CBDED6"
       },
       "300": {
-        "$value": "#A1CBCA"
+        "$value": "#B0C8BE"
       },
       "400": {
-        "$value": "#7BACAB"
+        "$value": "#8CA99D"
       },
       "500": {
-        "$value": "#588B8B"
+        "$value": "#68897C"
       },
       "600": {
-        "$value": "#427373"
+        "$value": "#517165"
       },
       "700": {
-        "$value": "#305C5D"
+        "$value": "#3D5B4F"
       },
       "800": {
-        "$value": "#234848"
+        "$value": "#2E473D"
       },
       "900": {
-        "$value": "#183434"
+        "$value": "#1F342C"
       },
       "950": {
-        "$value": "#102222"
+        "$value": "#13221C"
       }
     },
     "secondary": {
-      "$description": "Sage. Anchor #C6DEA6 at 200.",
+      "$description": "Fog blue. Anchor #CBD6DD at 200.",
       "50": {
-        "$value": "#EFFDDD"
+        "$value": "#F2F8FC"
       },
       "100": {
-        "$value": "#DFF2C7"
+        "$value": "#E3EBF0"
       },
       "200": {
-        "$value": "#C6DEA6"
+        "$value": "#CBD6DD"
       },
       "300": {
-        "$value": "#B0CB89"
+        "$value": "#B4C2CB"
       },
       "400": {
-        "$value": "#94B06B"
+        "$value": "#96A7B2"
       },
       "500": {
-        "$value": "#799450"
+        "$value": "#798C98"
       },
       "600": {
-        "$value": "#607A37"
+        "$value": "#60737E"
       },
       "700": {
-        "$value": "#49621E"
+        "$value": "#4A5B65"
       },
       "800": {
-        "$value": "#364C0A"
+        "$value": "#37464F"
       },
       "900": {
-        "$value": "#263606"
+        "$value": "#263239"
       },
       "950": {
-        "$value": "#182207"
+        "$value": "#171F24"
       }
     },
     "tertiary": {
-      "$description": "Clay. Anchor #AF7A6D at 500.",
+      "$description": "Apricot. Anchor #A1826B at 500.",
       "50": {
-        "$value": "#FFF4F1"
+        "$value": "#FFF5ED"
       },
       "100": {
-        "$value": "#FFE6E0"
+        "$value": "#F7E9E0"
       },
       "200": {
-        "$value": "#F7D1C8"
+        "$value": "#EAD7CA"
       },
       "300": {
-        "$value": "#E6B9AE"
+        "$value": "#D8C0AF"
       },
       "400": {
-        "$value": "#CD998D"
+        "$value": "#BDA18D"
       },
       "500": {
-        "$value": "#AF7A6D"
+        "$value": "#A1826B"
       },
       "600": {
-        "$value": "#936155"
+        "$value": "#866953"
       },
       "700": {
-        "$value": "#784B40"
+        "$value": "#6D523E"
       },
       "800": {
-        "$value": "#5E382F"
+        "$value": "#553E2D"
       },
       "900": {
-        "$value": "#432721"
+        "$value": "#3D2B1D"
       },
       "950": {
-        "$value": "#2A1915"
+        "$value": "#281B11"
       }
     },
     "neutral": {
-      "$description": "Slate. Anchor #2A2D34 at 900. Half steps exist for M3 surface containers.",
+      "$description": "Cool stone. Anchor #2A2E2D at 900. Half steps exist for M3 surface containers.",
       "50": {
-        "$value": "#F5F7FB"
+        "$value": "#F4F8F7"
       },
       "75": {
-        "$value": "#F0F2F6"
+        "$value": "#EFF3F2"
       },
       "100": {
-        "$value": "#EBEDF1"
+        "$value": "#EAEEED"
       },
       "150": {
-        "$value": "#E2E5EA"
+        "$value": "#E2E6E5"
       },
       "200": {
-        "$value": "#D9DCE3"
+        "$value": "#D9DDDC"
       },
       "300": {
-        "$value": "#C3C6CE"
+        "$value": "#C2C7C6"
       },
       "400": {
-        "$value": "#A6A9B0"
+        "$value": "#A5AAA9"
       },
       "500": {
-        "$value": "#898C92"
+        "$value": "#888D8C"
       },
       "600": {
-        "$value": "#6D7179"
+        "$value": "#6D7271"
       },
       "700": {
-        "$value": "#555860"
+        "$value": "#555958"
       },
       "800": {
-        "$value": "#3F4249"
+        "$value": "#3F4342"
       },
       "850": {
-        "$value": "#34373E"
+        "$value": "#343837"
       },
       "875": {
-        "$value": "#2F3239"
+        "$value": "#2F3332"
       },
       "900": {
-        "$value": "#2A2D34"
+        "$value": "#2A2E2D"
       },
       "950": {
-        "$value": "#1B1E25"
+        "$value": "#1B1F1E"
       }
     },
     "error": {

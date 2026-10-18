@@ -20,6 +20,7 @@ import {
 import { wedgeKey } from "./wedge-hit-test";
 import { useWedgeInteraction } from "./wedge-interaction";
 import { blend, useWedgeExpansion } from "./wedge-motion";
+import { orderWedges } from "./wedge-order";
 import type { ImageBlur, ImageSource } from "../../atoms/image";
 import { Wedge, WedgeLines, WedgeSlot } from "../../molecules/wedge";
 
@@ -105,6 +106,11 @@ export function Wedges({
 
   const layout = frame?.orientation === "row" ? row : column;
   const wedgesPerSide = Math.max(sides[0].length, sides[1].length);
+  const orientation = frame?.orientation ?? "column";
+  const placed = useMemo(
+    () => orderWedges(sides, orientation, wedgesPerSide),
+    [sides, orientation, wedgesPerSide],
+  );
 
   const rest = useMemo(() => {
     if (!frame || frame.width <= 0 || frame.height <= 0) return null;
@@ -149,7 +155,7 @@ export function Wedges({
               rest?.sides[s].expandedSlot ?? null,
               e,
             );
-            const item: WedgeItem = sides[s][i] ?? {};
+            const item: WedgeItem = placed[s][i] ?? {};
             const { content, image, href } = item;
             const Element = (
               links && href ? links.component : "div"
@@ -181,6 +187,7 @@ export function Wedges({
                 />
                 {slot && content != null && (
                   <WedgeSlot
+                    path={wedge.path}
                     slot={slot}
                     tilt={tilt ? resting.tilt * (1 - e) : undefined}
                   >
