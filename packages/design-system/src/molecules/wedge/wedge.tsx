@@ -126,29 +126,36 @@ export function WedgeLines({
 }
 
 export function WedgeSlot({
+  path,
   slot,
   tilt,
   children,
 }: {
+  path: string;
   slot: WedgeRect;
   tilt?: number;
   children: ReactNode;
 }) {
   return (
     <div
-      className="absolute flex items-center justify-center overflow-hidden"
-      style={{
-        left: slot.x,
-        top: slot.y,
-        width: slot.width,
-        height: slot.height,
-      }}
+      className="absolute inset-0"
+      style={{ clipPath: `path("${path}")` }}
     >
-      {tilt === undefined ? (
-        children
-      ) : (
-        <div style={{ rotate: `${tilt}deg` }}>{children}</div>
-      )}
+      <div
+        className="absolute flex items-center justify-center"
+        style={{
+          left: slot.x,
+          top: slot.y,
+          width: slot.width,
+          height: slot.height,
+        }}
+      >
+        {tilt === undefined ? (
+          children
+        ) : (
+          <div style={{ rotate: `${tilt}deg` }}>{children}</div>
+        )}
+      </div>
     </div>
   );
 }

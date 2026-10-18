@@ -344,6 +344,51 @@ describe("wedgeGeometry", () => {
     }
   });
 
+  it.each(orientations)("centers %s slots between their wedge's radial edges", (o) => {
+    const options = {
+      ...base[o],
+      wedgesPerSide: 4,
+      cornerRadius: 0,
+      centerGap: 16,
+      relatedGap: 16,
+    };
+    const center = { x: options.width / 2, y: options.height / 2 };
+    const offset = (p: WedgePoint, a: WedgePoint, b: WedgePoint) =>
+      Math.abs((b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x)) /
+      distance(a, b);
+    for (const side of wedgeGeometry(options).sides) {
+      for (const { path, slot } of side.wedges) {
+        expect(slot).not.toBeNull();
+        if (!slot) continue;
+        const outline = points(path);
+        const radial = outline
+          .map((a, i) => [a, outline[(i + 1) % outline.length]] as const)
+          .filter(
+            ([a, b]) =>
+              distance(a, b) > 1 &&
+              Math.abs(offset(center, a, b) - options.relatedGap / 2) < EPSILON,
+          );
+        expect(radial).toHaveLength(2);
+        const at = { x: slot.x + slot.width / 2, y: slot.y + slot.height / 2 };
+        const [first, second] = radial.map(([a, b]) => offset(at, a, b));
+        expect(Math.abs(first - second)).toBeLessThan(1);
+      }
+    }
+  });
+
+  it.each(orientations)("centers %s expanded slots across their side", (o) => {
+    const options = { ...base[o], wedgesPerSide: 4 };
+    for (const { expandedSlot } of wedgeGeometry(options).sides) {
+      expect(expandedSlot).not.toBeNull();
+      if (!expandedSlot) continue;
+      const across =
+        o === "row"
+          ? expandedSlot.y + expandedSlot.height / 2 - options.height / 2
+          : expandedSlot.x + expandedSlot.width / 2 - options.width / 2;
+      expect(Math.abs(across)).toBeLessThan(1);
+    }
+  });
+
   it.each(orientations)("grows %s slots as the inset shrinks", (o) => {
     const area = (slotInset: number) =>
       wedgeGeometry({ ...base[o], wedgesPerSide: 4, slotInset }).sides[0].wedges.map(
