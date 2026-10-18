@@ -178,7 +178,7 @@ export const semanticNames = {
 
 export const colorSchemes = [
   "dusk",
-  "eucalyptus",
   "heather",
-  "sage"
+  "sage",
+  "teal"
 ] as const;

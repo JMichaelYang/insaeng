@@ -1,0 +1,161 @@
+{
+  "palette": {
+    "$type": "color",
+    "primary": {
+      "$description": "Teal. Anchor #588B8B at 500.",
+      "50": {
+        "$value": "#E7FCFB"
+      },
+      "100": {
+        "$value": "#D8F2F1"
+      },
+      "200": {
+        "$value": "#BFE1E0"
+      },
+      "300": {
+        "$value": "#A1CBCA"
+      },
+      "400": {
+        "$value": "#7BACAB"
+      },
+      "500": {
+        "$value": "#588B8B"
+      },
+      "600": {
+        "$value": "#427373"
+      },
+      "700": {
+        "$value": "#305C5D"
+      },
+      "800": {
+        "$value": "#234848"
+      },
+      "900": {
+        "$value": "#183434"
+      },
+      "950": {
+        "$value": "#102222"
+      }
+    },
+    "secondary": {
+      "$description": "Sage. Anchor #C6DEA6 at 200.",
+      "50": {
+        "$value": "#EFFDDD"
+      },
+      "100": {
+        "$value": "#DFF2C7"
+      },
+      "200": {
+        "$value": "#C6DEA6"
+      },
+      "300": {
+        "$value": "#B0CB89"
+      },
+      "400": {
+        "$value": "#94B06B"
+      },
+      "500": {
+        "$value": "#799450"
+      },
+      "600": {
+        "$value": "#607A37"
+      },
+      "700": {
+        "$value": "#49621E"
+      },
+      "800": {
+        "$value": "#364C0A"
+      },
+      "900": {
+        "$value": "#263606"
+      },
+      "950": {
+        "$value": "#182207"
+      }
+    },
+    "tertiary": {
+      "$description": "Clay. Anchor #AF7A6D at 500.",
+      "50": {
+        "$value": "#FFF4F1"
+      },
+      "100": {
+        "$value": "#FFE6E0"
+      },
+      "200": {
+        "$value": "#F7D1C8"
+      },
+      "300": {
+        "$value": "#E6B9AE"
+      },
+      "400": {
+        "$value": "#CD998D"
+      },
+      "500": {
+        "$value": "#AF7A6D"
+      },
+      "600": {
+        "$value": "#936155"
+      },
+      "700": {
+        "$value": "#784B40"
+      },
+      "800": {
+        "$value": "#5E382F"
+      },
+      "900": {
+        "$value": "#432721"
+      },
+      "950": {
+        "$value": "#2A1915"
+      }
+    },
+    "neutral": {
+      "$description": "Slate. Anchor #2A2D34 at 900. Half steps exist for M3 surface containers.",
+      "50": {
+        "$value": "#F5F7FB"
+      },
+      "75": {
+        "$value": "#F0F2F6"
+      },
+      "100": {
+        "$value": "#EBEDF1"
+      },
+      "150": {
+        "$value": "#E2E5EA"
+      },
+      "200": {
+        "$value": "#D9DCE3"
+      },
+      "300": {
+        "$value": "#C3C6CE"
+      },
+      "400": {
+        "$value": "#A6A9B0"
+      },
+      "500": {
+        "$value": "#898C92"
+      },
+      "600": {
+        "$value": "#6D7179"
+      },
+      "700": {
+        "$value": "#555860"
+      },
+      "800": {
+        "$value": "#3F4249"
+      },
+      "850": {
+        "$value": "#34373E"
+      },
+      "875": {
+        "$value": "#2F3239"
+      },
+      "900": {
+        "$value": "#2A2D34"
+      },
+      "950": {
+        "$value": "#1B1E25"
+      }
+    }
+  }
+}
