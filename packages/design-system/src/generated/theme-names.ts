@@ -175,3 +175,10 @@ export const semanticNames = {
     "lg"
   ]
 } as const;
+
+export const colorSchemes = [
+  "dusk",
+  "eucalyptus",
+  "heather",
+  "sage"
+] as const;

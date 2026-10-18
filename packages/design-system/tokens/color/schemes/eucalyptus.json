@@ -1,0 +1,161 @@
+{
+  "palette": {
+    "$type": "color",
+    "primary": {
+      "50": {
+        "$value": "#EFFAF5"
+      },
+      "100": {
+        "$value": "#E2F0EA"
+      },
+      "200": {
+        "$value": "#CBDED6"
+      },
+      "300": {
+        "$value": "#B0C8BE"
+      },
+      "400": {
+        "$value": "#8CA99D"
+      },
+      "500": {
+        "$value": "#68897C"
+      },
+      "600": {
+        "$value": "#517165"
+      },
+      "700": {
+        "$value": "#3D5B4F"
+      },
+      "800": {
+        "$value": "#2E473D"
+      },
+      "900": {
+        "$value": "#1F342C"
+      },
+      "950": {
+        "$value": "#13221C"
+      },
+      "$description": "Eucalyptus."
+    },
+    "secondary": {
+      "50": {
+        "$value": "#F2F8FC"
+      },
+      "100": {
+        "$value": "#E3EBF0"
+      },
+      "200": {
+        "$value": "#CBD6DD"
+      },
+      "300": {
+        "$value": "#B4C2CB"
+      },
+      "400": {
+        "$value": "#96A7B2"
+      },
+      "500": {
+        "$value": "#798C98"
+      },
+      "600": {
+        "$value": "#60737E"
+      },
+      "700": {
+        "$value": "#4A5B65"
+      },
+      "800": {
+        "$value": "#37464F"
+      },
+      "900": {
+        "$value": "#263239"
+      },
+      "950": {
+        "$value": "#171F24"
+      },
+      "$description": "Fog blue."
+    },
+    "tertiary": {
+      "50": {
+        "$value": "#FFF5ED"
+      },
+      "100": {
+        "$value": "#F7E9E0"
+      },
+      "200": {
+        "$value": "#EAD7CA"
+      },
+      "300": {
+        "$value": "#D8C0AF"
+      },
+      "400": {
+        "$value": "#BDA18D"
+      },
+      "500": {
+        "$value": "#A1826B"
+      },
+      "600": {
+        "$value": "#866953"
+      },
+      "700": {
+        "$value": "#6D523E"
+      },
+      "800": {
+        "$value": "#553E2D"
+      },
+      "900": {
+        "$value": "#3D2B1D"
+      },
+      "950": {
+        "$value": "#281B11"
+      },
+      "$description": "Apricot."
+    },
+    "neutral": {
+      "50": {
+        "$value": "#F4F8F7"
+      },
+      "75": {
+        "$value": "#EFF3F2"
+      },
+      "100": {
+        "$value": "#EAEEED"
+      },
+      "150": {
+        "$value": "#E2E6E5"
+      },
+      "200": {
+        "$value": "#D9DDDC"
+      },
+      "300": {
+        "$value": "#C2C7C6"
+      },
+      "400": {
+        "$value": "#A5AAA9"
+      },
+      "500": {
+        "$value": "#888D8C"
+      },
+      "600": {
+        "$value": "#6D7271"
+      },
+      "700": {
+        "$value": "#555958"
+      },
+      "800": {
+        "$value": "#3F4342"
+      },
+      "850": {
+        "$value": "#343837"
+      },
+      "875": {
+        "$value": "#2F3332"
+      },
+      "900": {
+        "$value": "#2A2E2D"
+      },
+      "950": {
+        "$value": "#1B1F1E"
+      },
+      "$description": "Cool stone. Half steps exist for M3 surface containers."
+    }
+  }
+}
