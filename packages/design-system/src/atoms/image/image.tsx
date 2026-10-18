@@ -2,8 +2,8 @@
 
 import { useCallback, useState, type ComponentProps } from "react";
 
-import type { themeNames } from "../generated/theme-names";
-import { mergeClasses } from "../utils/merge-classes";
+import type { themeNames } from "../../generated/theme-names";
+import { mergeClasses } from "../../utils/merge-classes";
 
 export type ImageSource =
   | { mode: "svg"; src: string }

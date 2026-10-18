@@ -1,4 +1,4 @@
-export type Easing = (progress: number) => number;
+type Easing = (progress: number) => number;
 
 export const linear: Easing = (progress) => progress;
 

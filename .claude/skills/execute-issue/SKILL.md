@@ -5,6 +5,6 @@ description: Use when the user asks to implement, execute, or pick up a GitHub i
 
 1. Read it: `gh issue view <n> --json title,body,comments`.
 2. Assign it: `gh issue edit <n> --add-assignee @me`.
-3. Create a worktree, then implement the issue there and commit.
+3. Create a worktree on a branch named `<n>-<two-to-three-word-slug>` (e.g. `42-fade-page-transitions`), then implement the issue there and commit.
 4. Push and open a PR whose body is ONLY `Closes #<n>`: `gh pr create --title "<title>" --body "Closes #<n>"`.
 5. Reply with the PR URL.

@@ -1,1 +1,2 @@
-export { Wedges, type WedgesContent, type WedgesImages, type WedgesLayout, type WedgesLinks } from "./wedges";
+export { NavMenu } from "./nav-menu";
+export { Wedges, WedgesCenter, type WedgeItem, type WedgesLayout, type WedgesLinks, type WedgesSides } from "./wedges";

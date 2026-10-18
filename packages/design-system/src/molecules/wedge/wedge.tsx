@@ -1,8 +1,8 @@
-import { useId } from "react";
+import { useId, type ReactNode } from "react";
 
-import { Image, type ImageBlur, type ImageSource } from "../atoms/image";
-import { mergeClasses } from "../utils/merge-classes";
-import type { WedgeRect } from "../utils/wedge-geometry";
+import { Image, type ImageBlur, type ImageSource } from "../../atoms/image";
+import { mergeClasses } from "../../utils/merge-classes";
+import type { WedgeRect } from "../../organisms/wedges/wedge-geometry";
 
 const strokeWidth = 2;
 const fadeExtent = "100%";
@@ -84,16 +84,21 @@ export function WedgeLines({
   path,
   lines,
   focused = false,
+  className,
 }: {
   path: string;
   lines?: string;
   focused?: boolean;
+  className?: string;
 }) {
   const id = useId();
   if (!lines && !focused) return null;
   return (
     <svg
-      className="pointer-events-none absolute inset-0 size-full"
+      className={mergeClasses(
+        "pointer-events-none absolute inset-0 size-full",
+        className,
+      )}
       aria-hidden
     >
       <clipPath id={id}>
@@ -118,5 +123,33 @@ export function WedgeLines({
         />
       )}
     </svg>
+  );
+}
+
+export function WedgeSlot({
+  slot,
+  tilt,
+  children,
+}: {
+  slot: WedgeRect;
+  tilt?: number;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className="absolute flex items-center justify-center overflow-hidden"
+      style={{
+        left: slot.x,
+        top: slot.y,
+        width: slot.width,
+        height: slot.height,
+      }}
+    >
+      {tilt === undefined ? (
+        children
+      ) : (
+        <div style={{ rotate: `${tilt}deg` }}>{children}</div>
+      )}
+    </div>
   );
 }

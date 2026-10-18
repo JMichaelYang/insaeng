@@ -1,25 +1,28 @@
 import {
   Avatar,
   type ImageSource,
-  type TextWobble,
-  Wedges,
-  type WedgesContent,
-  type WedgesImages,
   type WedgesLayout,
-  type WedgesLinks,
+  type WedgesSides,
+  WedgesCenter,
   WobbleText,
 } from "@insaeng/design-system";
 import Image, { getImageProps } from "next/image";
+import { ViewTransition } from "react";
 import { preload } from "react-dom";
 
-import { sectionHref, sections } from "./sections";
+import {
+  headshot,
+  headshotSizes,
+  headshotTransition,
+  preloadHeadshot,
+} from "./headshot";
+import { LinkedWedges } from "./linked-wedges";
+import { type Section, sectionHref, sections } from "./sections";
+import { lgWobble, titleWobble, wobble } from "./wobble";
 
 const shared = {
-  centerShape: "square",
   centerGap: 0,
   relatedGap: 0,
-  ringThickness: 0,
-  wedgesPerSide: 4,
   spread: 1,
   cornerRadius: 0,
 } as const;
@@ -28,16 +31,14 @@ const row: WedgesLayout = {
   ...shared,
   avatarRadius: 192,
   slotInset: 24,
-  wobble: { amplitude: 3, wavelength: 30 },
+  wobble: lgWobble,
 };
 const column: WedgesLayout = {
   ...shared,
   avatarRadius: 88,
   slotInset: 16,
-  wobble: { amplitude: 2, wavelength: 20 },
+  wobble,
 };
-
-const titleWobble: TextWobble = { amplitude: 0.035, period: 4 };
 
 function WedgeTitle({ title }: { title: string }) {
   return (
@@ -49,16 +50,6 @@ function WedgeTitle({ title }: { title: string }) {
     </h2>
   );
 }
-
-const content: WedgesContent = [
-  sections[0].map(({ slug, title }) => <WedgeTitle key={slug} title={title} />),
-  sections[1].map(({ slug, title }) => <WedgeTitle key={slug} title={title} />),
-];
-
-const links: WedgesLinks = [
-  sections[0].map(sectionHref),
-  sections[1].map(sectionHref),
-];
 
 const photoSize = 256;
 
@@ -72,44 +63,49 @@ function photo(src: string): ImageSource {
   return { mode: "raster", src: props.src, srcSet: props.srcSet };
 }
 
-const images: WedgesImages = [
-  sections[0].map(({ image }) => photo(image)),
-  sections[1].map(({ image }) => photo(image)),
-];
+const wedge = (section: Section) => ({
+  content: <WedgeTitle title={section.title} />,
+  image: photo(section.image),
+  href: sectionHref(section),
+});
+
+const sides: WedgesSides = [sections[0].map(wedge), sections[1].map(wedge)];
 
 export default function Home() {
-  for (const image of images.flat()) {
+  for (const { image } of sides.flat()) {
+    if (!image) continue;
     preload(image.src, {
       as: "image",
       imageSrcSet: image.mode === "raster" ? image.srcSet : undefined,
     });
   }
+  preloadHeadshot(headshotSizes.nav);
   return (
     <main className="flex flex-1 flex-col">
-      <Wedges
+      <LinkedWedges
         className="flex-1"
         row={row}
         column={column}
-        content={content}
-        images={images}
-        links={links}
+        sides={sides}
         blur="md"
         tilt
       >
-        <Avatar shape="square" className="
-          size-[11.5rem]
-          lg:size-[25rem]
-        ">
-          <Image
-            src="/headshot.jpg"
-            alt="Jaewon Yang"
-            width={720}
-            height={720}
-            sizes="(min-width: 64rem) 25rem, 11.5rem"
-            preload
-          />
-        </Avatar>
-      </Wedges>
+        <ViewTransition name={headshotTransition} share="morph" default="none">
+          <WedgesCenter>
+            <Avatar shape="square" className="
+              size-[11.5rem]
+              lg:size-[25rem]
+            ">
+              <Image
+                {...headshot}
+                alt="Jaewon Yang"
+                sizes={headshotSizes.home}
+                preload
+              />
+            </Avatar>
+          </WedgesCenter>
+        </ViewTransition>
+      </LinkedWedges>
     </main>
   );
 }
