@@ -1,4 +1,4 @@
-import { mkdir, readdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import StyleDictionary from "style-dictionary";
@@ -33,15 +33,6 @@ const base = await load([
 ]);
 const dark = (await load(["color/palette.json", "color/dark.json"])).filter(
   (t) => t.path[0] === "color",
-);
-const schemeFiles = (await readdir(path.join(root, "tokens/color/schemes")))
-  .filter((file) => file.endsWith(".json"))
-  .sort();
-const schemes = await Promise.all(
-  schemeFiles.map(async (file) => ({
-    name: path.basename(file, ".json"),
-    tokens: await load([`color/schemes/${file}`]),
-  })),
 );
 
 function themeVar([group, ...rest]) {
@@ -122,20 +113,6 @@ const roleDecl = (indent) => (t) => `${indent}${roleVar(t)}: ${value(t)};`;
 const themed = base.filter((t) => themeVar(t.path));
 const palette = base.filter((t) => t.path[0] === "palette");
 const roles = base.filter(isRole);
-const paletteVar = (t) => `--palette-${t.path.slice(1).join("-")}`;
-const paletteVars = new Set(palette.map(paletteVar));
-for (const { name, tokens } of schemes) {
-  for (const t of tokens) {
-    if (t.path[0] !== "palette" || !paletteVars.has(paletteVar(t))) {
-      throw new Error(`Scheme ${name} defines ${t.path.join(".")}, which is not in palette.json`);
-    }
-  }
-}
-const schemeCss = schemes
-  .map(({ name, tokens }) => `  :root[data-scheme="${name}"] {
-${tokens.map((t) => `    ${paletteVar(t)}: ${t.$value};`).join("\n")}
-  }`)
-  .join("\n\n");
 
 const themeCss = `@theme {
 ${RESETS.map((r) => `  ${r}: initial;`).join("\n")}
@@ -145,12 +122,10 @@ ${themed.map(decl).join("\n")}
 
 @layer theme {
   :root {
-${palette.map((t) => `    ${paletteVar(t)}: ${t.$value};`).join("\n")}
+${palette.map((t) => `    --palette-${t.path.slice(1).join("-")}: ${t.$value};`).join("\n")}
 
 ${roles.map(roleDecl("    ")).join("\n")}
   }
-
-${schemeCss}
 
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -223,8 +198,6 @@ const semantic = {
 const namesTs = `export const themeNames = ${JSON.stringify(themeNames, null, 2)} as const;
 
 export const semanticNames = ${JSON.stringify(semantic, null, 2)} as const;
-
-export const colorSchemes = ${JSON.stringify(schemes.map((s) => s.name), null, 2)} as const;
 `;
 
 await mkdir(outDir, { recursive: true });
@@ -234,4 +207,4 @@ await Promise.all([
   writeFile(path.join(outDir, "theme-names.ts"), namesTs),
   rm(path.join(outDir, "typography.css"), { force: true }),
 ]);
-console.log(`Wrote ${themed.length} theme variables, ${dark.length} dark overrides, ${typography.length} text styles, ${schemes.length} color schemes to src/generated`);
+console.log(`Wrote ${themed.length} theme variables, ${dark.length} dark overrides, ${typography.length} text styles to src/generated`);
