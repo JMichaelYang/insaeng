@@ -17,7 +17,7 @@ import { type Section, sectionHref, sections } from "../sections";
 import { lgWobble, wobble } from "../wobble";
 
 const bottomEdge = { bottom: true };
-const avatarEdges = { right: true, bottom: true, left: true };
+const avatarEdges = { right: true, left: true };
 
 function navItems(
   group: readonly Section[],
@@ -43,7 +43,27 @@ export function SectionNav() {
         edges={bottomEdge}
         className="absolute inset-0"
       >
-        <div className="size-full bg-primary-container" />
+        <div className="flex size-full justify-center bg-primary-container">
+          <ViewTransition
+            name={headshotTransition}
+            share="morph"
+            default="none"
+          >
+            <WobbleBox
+              wobble={wobble}
+              lgWobble={lgWobble}
+              edges={avatarEdges}
+              className="
+                size-16
+                lg:size-20
+              "
+            >
+              <Avatar shape="square" className="size-full">
+                <Image {...headshot} alt="" sizes={headshotSizes.nav} preload />
+              </Avatar>
+            </WobbleBox>
+          </ViewTransition>
+        </div>
       </WobbleBox>
       <nav
         aria-label="Sections"
@@ -74,28 +94,11 @@ export function SectionNav() {
         <Link
           href="/"
           aria-label="Home"
-          className="col-start-2 row-start-1 self-start"
-        >
-          <ViewTransition
-            name={headshotTransition}
-            share="morph"
-            default="none"
-          >
-            <WobbleBox
-              wobble={wobble}
-              lgWobble={lgWobble}
-              edges={avatarEdges}
-              className="
-                size-avatar-sm
-                lg:size-avatar-md
-              "
-            >
-              <Avatar shape="square" className="size-full">
-                <Image {...headshot} alt="" sizes={headshotSizes.nav} preload />
-              </Avatar>
-            </WobbleBox>
-          </ViewTransition>
-        </Link>
+          className="
+            col-start-2 row-start-1 size-16 self-start
+            lg:size-20
+          "
+        />
         <NavLinks
           items={navItems(sections[1], current)}
           component={Link}

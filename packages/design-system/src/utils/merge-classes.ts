@@ -13,14 +13,7 @@ const twMerge = extendTailwindMerge<"type">({
     classGroups: {
       h: [{ h: semanticNames.control.map((n) => `control-${n}`) }],
       "min-h": [{ "min-h": semanticNames.control.map((n) => `control-${n}`) }],
-      size: [
-        {
-          size: [
-            ...semanticNames.icon.map((n) => `icon-${n}`),
-            ...semanticNames.avatar.map((n) => `avatar-${n}`),
-          ],
-        },
-      ],
+      size: [{ size: semanticNames.icon.map((n) => `icon-${n}`) }],
       type: [{ type: [...semanticNames.type] }],
     },
     conflictingClassGroups: {

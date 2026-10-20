@@ -106,8 +106,3 @@
   width: --value(--size-icon-*);
   height: --value(--size-icon-*);
 }
-
-@utility size-avatar-* {
-  width: --value(--size-avatar-*);
-  height: --value(--size-avatar-*);
-}

@@ -13,7 +13,6 @@ describe("mergeClasses", () => {
     expect(mergeClasses("bg-surface", "bg-primary")).toBe("bg-primary");
     expect(mergeClasses("h-control-sm", "h-control-lg")).toBe("h-control-lg");
     expect(mergeClasses("blur-sm", "blur-2xl")).toBe("blur-2xl");
-    expect(mergeClasses("size-avatar-sm", "size-avatar-md")).toBe("size-avatar-md");
   });
 
   it("lets a type style override font size and weight", () => {
