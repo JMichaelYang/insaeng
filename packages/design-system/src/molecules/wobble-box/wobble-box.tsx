@@ -7,7 +7,7 @@ import { useFrame } from "./use-frame";
 import type { WedgeWobble } from "../../organisms/wedges/wedge-geometry";
 import { wobbleRect, type WobbleEdges } from "./wobble-rect";
 
-const strokeWidth = 4;
+const strokeWidth = 3;
 const allEdges: WobbleEdges = {
   top: true,
   right: true,

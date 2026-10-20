@@ -28,7 +28,7 @@ export function NavLink({
       className={mergeClasses(
         `
           state-layer inline-flex h-control-lg -translate-y-0.5 items-center
-          rounded-full border-thicker border-transparent px-4 type-heading-xl
+          rounded-full border-thick border-transparent px-4 type-heading-xl
           whitespace-nowrap text-on-primary-container
           aria-[current=page]:border-on-primary-container
         `,
