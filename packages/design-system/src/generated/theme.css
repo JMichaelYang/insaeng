@@ -138,6 +138,7 @@
   --shadow-md: 0px 2px 6px -1px #1B1E2514, 0px 1px 3px 0px #1B1E250F;
   --shadow-lg: 0px 10px 24px -6px #1B1E251A, 0px 4px 8px -2px #1B1E250F;
   --shadow-xl: 0px 24px 48px -12px #1B1E2524, 0px 8px 16px -4px #1B1E2514;
+  --blur-xs: 1px;
   --blur-sm: 4px;
   --blur-md: 8px;
   --blur-lg: 16px;

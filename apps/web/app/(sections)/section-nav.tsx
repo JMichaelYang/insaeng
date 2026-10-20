@@ -60,7 +60,7 @@ export function SectionNav() {
             >
               <Avatar
                 shape="square"
-                blur="sm"
+                blur="xs"
                 fade={0}
                 className="size-full"
               >

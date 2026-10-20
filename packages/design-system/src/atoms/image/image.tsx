@@ -12,6 +12,7 @@ export type ImageSource =
 export type ImageBlur = (typeof themeNames.blur)[number];
 
 export const blurClasses: Record<ImageBlur, string> = {
+  xs: "blur-xs",
   sm: "blur-sm",
   md: "blur-md",
   lg: "blur-lg",
