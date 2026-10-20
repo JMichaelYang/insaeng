@@ -7,7 +7,8 @@ import { useFrame } from "./use-frame";
 import type { WedgeWobble } from "../../organisms/wedges/wedge-geometry";
 import { wobbleRect, type WobbleEdges } from "./wobble-rect";
 
-const strokeWidth = 3;
+const strokeWidth = 2;
+const lgStrokeWidth = 3;
 const allEdges: WobbleEdges = {
   top: true,
   right: true,
@@ -62,7 +63,7 @@ export function WobbleBox({
           <path
             className="fill-none stroke-on-surface"
             d={shape.lines}
-            strokeWidth={strokeWidth}
+            strokeWidth={frame?.lg ? lgStrokeWidth : strokeWidth}
             strokeLinejoin="round"
           />
         </svg>
