@@ -16,6 +16,3 @@ export const sections = [
 ] as const satisfies readonly [readonly Section[], readonly Section[]];
 
 export const sectionHref = (section: Section) => `/${section.slug}`;
-
-export const findSection = (slug: string): Section | undefined =>
-  sections.flat().find((section) => section.slug === slug);
