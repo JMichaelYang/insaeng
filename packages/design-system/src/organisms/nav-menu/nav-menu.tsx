@@ -13,6 +13,7 @@ import { mergeClasses } from "../../utils/merge-classes";
 import type { WedgeWobble } from "../wedges/wedge-geometry";
 
 const rightEdge = { right: true };
+const topEdge = { top: true };
 
 export function NavMenu({
   label,
@@ -79,7 +80,13 @@ export function NavMenu({
               {groups.map((group, index) => (
                 <Fragment key={group[0]?.href ?? index}>
                   {index > 0 && (
-                    <hr className="my-2 border-t-thin border-outline-variant" />
+                    <WobbleBox
+                      role="separator"
+                      wobble={wobble}
+                      edges={topEdge}
+                      lineClassName="stroke-tertiary"
+                      className="my-2 h-1"
+                    />
                   )}
                   <ul className="flex flex-col gap-1">
                     {group.map((item) => (
