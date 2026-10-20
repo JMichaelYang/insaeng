@@ -1,28 +1,11 @@
 import { useId, type ReactNode } from "react";
 
+import { Fade } from "../../atoms/fade";
 import { Image, type ImageBlur, type ImageSource } from "../../atoms/image";
 import { mergeClasses } from "../../utils/merge-classes";
 import type { WedgeRect } from "../../organisms/wedges/wedge-geometry";
 
 const strokeWidth = 4;
-const fadeExtent = "100%";
-const fadeStops = [
-  [0, 75],
-  [0.2, 69],
-  [0.35, 65],
-  [0.5, 61],
-  [0.65, 57],
-  [0.8, 54],
-  [1, 50],
-] as const;
-
-function fadeGradient(radius: number) {
-  const stops = fadeStops.map(
-    ([at, opacity]) =>
-      `color-mix(in srgb, var(--color-surface) ${opacity}%, transparent) calc(${radius}px + (${fadeExtent} - ${radius}px) * ${at})`,
-  );
-  return `radial-gradient(circle farthest-side at 50% 50%, ${stops.join(", ")})`;
-}
 
 export function Wedge({
   path,
@@ -68,12 +51,7 @@ export function Wedge({
             }}
           />
         )}
-        {fade !== undefined && (
-          <div
-            className="absolute inset-0"
-            style={{ backgroundImage: fadeGradient(fade) }}
-          />
-        )}
+        {fade !== undefined && <Fade radius={fade} />}
       </div>
       <WedgeLines path={path} lines={lines} focused={focused} />
     </>

@@ -58,7 +58,12 @@ export function SectionNav() {
                 lg:size-20
               "
             >
-              <Avatar shape="square" className="size-full">
+              <Avatar
+                shape="square"
+                blur="md"
+                fade={0}
+                className="size-full"
+              >
                 <Image {...headshot} alt="" sizes={headshotSizes.nav} preload />
               </Avatar>
             </WobbleBox>
