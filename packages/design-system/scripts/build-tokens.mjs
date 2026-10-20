@@ -168,6 +168,11 @@ const utilitiesCss = `${typography
   width: --value(--size-icon-*);
   height: --value(--size-icon-*);
 }
+
+@utility size-avatar-* {
+  width: --value(--size-avatar-*);
+  height: --value(--size-avatar-*);
+}
 `;
 
 const keys = (prefix) =>
@@ -194,6 +199,7 @@ const semantic = {
   type: typography.map((t) => t.path.slice(1).join("-")),
   control: sizeNames("control"),
   icon: sizeNames("icon"),
+  avatar: sizeNames("avatar"),
 };
 const namesTs = `export const themeNames = ${JSON.stringify(themeNames, null, 2)} as const;
 

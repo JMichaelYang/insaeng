@@ -173,5 +173,9 @@ export const semanticNames = {
     "sm",
     "md",
     "lg"
+  ],
+  "avatar": [
+    "sm",
+    "md"
   ]
 } as const;

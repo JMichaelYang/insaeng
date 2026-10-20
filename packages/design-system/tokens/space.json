@@ -33,6 +33,11 @@
       "md": { "$value": "{spacing.5}" },
       "lg": { "$value": "{spacing.6}" }
     },
+    "avatar": {
+      "$description": "Avatar sizes. Used as size-avatar-*.",
+      "sm": { "$value": "4.5rem" },
+      "md": { "$value": "5.5rem" }
+    },
     "container": {
       "$description": "Max widths, used by max-w-*.",
       "3xs": { "$value": "16rem" },

@@ -86,8 +86,8 @@ export function SectionNav() {
               lgWobble={lgWobble}
               edges={avatarEdges}
               className="
-                size-20
-                lg:size-24
+                size-avatar-sm
+                lg:size-avatar-md
               "
             >
               <Avatar shape="square" className="size-full">

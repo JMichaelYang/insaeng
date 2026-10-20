@@ -9,7 +9,7 @@ export const headshot = {
 
 export const headshotSizes = {
   home: "(min-width: 64rem) 25rem, 11.5rem",
-  nav: "(min-width: 64rem) 6rem, 5rem",
+  nav: "(min-width: 64rem) 5.5rem, 4.5rem",
 } as const;
 
 export const headshotTransition = "headshot";
