@@ -20,6 +20,7 @@ export function WobbleBox({
   wobble,
   lgWobble = wobble,
   edges = allEdges,
+  lineClassName = "stroke-on-surface",
   className,
   children,
   ...props
@@ -27,6 +28,7 @@ export function WobbleBox({
   wobble: WedgeWobble;
   lgWobble?: WedgeWobble;
   edges?: WobbleEdges;
+  lineClassName?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const frame = useFrame(ref);
@@ -61,7 +63,7 @@ export function WobbleBox({
           aria-hidden
         >
           <path
-            className="fill-none stroke-on-surface"
+            className={mergeClasses("fill-none", lineClassName)}
             d={shape.lines}
             strokeWidth={frame?.lg ? lgStrokeWidth : strokeWidth}
             strokeLinejoin="round"

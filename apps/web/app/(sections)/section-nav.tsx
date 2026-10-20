@@ -75,7 +75,7 @@ export function SectionNav() {
       >
         <NavMenu
           label="Sections"
-          items={navItems(sections.flat(), current)}
+          groups={sections.map((group) => navItems(group, current))}
           wobble={wobble}
           component={Link}
           className="

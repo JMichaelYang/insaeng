@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef } from "react";
+import { Fragment, useId, useRef } from "react";
 
 import { MenuIcon } from "../../atoms/menu-icon";
 import {
@@ -13,16 +13,17 @@ import { mergeClasses } from "../../utils/merge-classes";
 import type { WedgeWobble } from "../wedges/wedge-geometry";
 
 const rightEdge = { right: true };
+const topEdge = { top: true };
 
 export function NavMenu({
   label,
-  items,
+  groups,
   wobble,
   component,
   className,
 }: {
   label: string;
-  items: readonly NavItem[];
+  groups: readonly (readonly NavItem[])[];
   wobble: WedgeWobble;
   component?: NavLinkComponent;
   className?: string;
@@ -65,7 +66,7 @@ export function NavMenu({
       >
         <WobbleBox wobble={wobble} edges={rightEdge} className="h-full">
           <div className="flex h-full flex-col bg-primary-container">
-            <ul
+            <div
               className="flex flex-col gap-1 overflow-y-auto px-4 py-6"
               onClick={(event) => {
                 if (
@@ -76,19 +77,34 @@ export function NavMenu({
                 }
               }}
             >
-              {items.map((item) => (
-                <li key={item.href}>
-                  <NavLink
-                    href={item.href}
-                    current={item.current}
-                    component={component}
-                    className="flex"
-                  >
-                    {item.label}
-                  </NavLink>
-                </li>
+              {groups.map((group, index) => (
+                <Fragment key={group[0]?.href ?? index}>
+                  {index > 0 && (
+                    <WobbleBox
+                      role="separator"
+                      wobble={wobble}
+                      edges={topEdge}
+                      lineClassName="stroke-tertiary"
+                      className="my-2 h-1"
+                    />
+                  )}
+                  <ul className="flex flex-col gap-1">
+                    {group.map((item) => (
+                      <li key={item.href}>
+                        <NavLink
+                          href={item.href}
+                          current={item.current}
+                          component={component}
+                          className="flex"
+                        >
+                          {item.label}
+                        </NavLink>
+                      </li>
+                    ))}
+                  </ul>
+                </Fragment>
               ))}
-            </ul>
+            </div>
           </div>
         </WobbleBox>
       </div>
