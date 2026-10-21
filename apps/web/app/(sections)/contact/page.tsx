@@ -1,4 +1,5 @@
 import { WobbleBox } from "@insaeng/design-system";
+import Image from "next/image";
 
 import { lgWobble, wobble } from "../../wobble";
 
@@ -53,10 +54,13 @@ export default function ContactPage() {
           size-full bg-tertiary-container p-6
           lg:p-10
         ">
-          <div
-            role="img"
-            aria-label="Placeholder image"
-            className="size-full bg-surface-container-high"
+          <Image
+            src="/details/contact.jpg"
+            width={720}
+            height={720}
+            alt="Jaewon in a ski helmet and goggles in front of snowy mountains"
+            sizes="(min-width: 64rem) 22rem, calc(100vw - 6rem)"
+            className="size-full object-cover"
           />
         </div>
       </WobbleBox>
