@@ -58,7 +58,7 @@ export default function ContactPage() {
             src="/details/contact.jpg"
             width={720}
             height={720}
-            alt="Jaewon in a ski helmet and goggles in front of snowy mountains"
+            alt="Jaewon smiling in front of the sea"
             sizes="(min-width: 64rem) 22rem, calc(100vw - 6rem)"
             className="size-full object-cover"
           />
