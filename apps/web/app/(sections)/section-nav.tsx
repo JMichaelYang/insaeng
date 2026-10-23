@@ -17,7 +17,6 @@ import { type Section, sectionHref, sections } from "../sections";
 import { lgWobble, wobble } from "../wobble";
 
 const bottomEdge = { bottom: true };
-const avatarEdges = { right: true, left: true };
 
 function navItems(
   group: readonly Section[],
@@ -52,13 +51,13 @@ export function SectionNav() {
             <WobbleBox
               wobble={wobble}
               lgWobble={lgWobble}
-              edges={avatarEdges}
+              shape="circle"
               className="
                 size-16
                 lg:size-20
               "
             >
-              <Avatar shape="square" className="size-full">
+              <Avatar className="size-full">
                 <Image {...headshot} alt="" sizes={headshotSizes.nav} preload />
               </Avatar>
             </WobbleBox>

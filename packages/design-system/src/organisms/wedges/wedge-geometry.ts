@@ -46,7 +46,8 @@ type Plane = { n: WedgePoint; c: number };
 
 type Segment =
   | { type: "M" | "L"; to: WedgePoint }
-  | { type: "A"; to: WedgePoint; radius: number; center: WedgePoint };
+  | { type: "A"; to: WedgePoint; radius: number; center: WedgePoint }
+  | { type: "cut"; to: WedgePoint; via: WedgePoint; center: WedgePoint };
 
 type Transform = (p: WedgePoint) => WedgePoint;
 
@@ -59,7 +60,20 @@ const cross = (a: WedgePoint, b: WedgePoint) => a.x * b.y - a.y * b.x;
 const len = (a: WedgePoint) => Math.hypot(a.x, a.y);
 const norm = (a: WedgePoint) => mul(a, 1 / len(a));
 const origin = point(0, 0);
-const chebyshev = (a: WedgePoint) => Math.max(Math.abs(a.x), Math.abs(a.y));
+const turnOf = (p: WedgePoint) => Math.atan2(p.y, p.x);
+const fullTurn = 2 * Math.PI;
+
+const sweepAngle = (from: WedgePoint, to: WedgePoint, turn: number) =>
+  (((turn * (turnOf(to) - turnOf(from))) % fullTurn) + fullTurn) % fullTurn;
+
+const rotate = (p: WedgePoint, angle: number) =>
+  point(
+    p.x * Math.cos(angle) - p.y * Math.sin(angle),
+    p.x * Math.sin(angle) + p.y * Math.cos(angle),
+  );
+
+const arcVia = (from: WedgePoint, to: WedgePoint, turn: number) =>
+  rotate(from, (turn * sweepAngle(from, to, turn)) / 2);
 
 const upright = (degrees: number) =>
   ((((degrees + 90) % 180) + 180) % 180) - 90;
@@ -129,60 +143,34 @@ function contains(poly: WedgePoint[], p: WedgePoint) {
   }, false);
 }
 
-function splitAtSquare(poly: WedgePoint[], R: number): WedgePoint[] {
+function splitAtCircle(poly: WedgePoint[], R: number): WedgePoint[] {
   return poly.flatMap((a, i) => {
     const b = poly[(i + 1) % poly.length];
     const d = sub(b, a);
-    let t0 = 0;
-    let t1 = 1;
-    for (const [p, q] of [
-      [-d.x, a.x + R],
-      [d.x, R - a.x],
-      [-d.y, a.y + R],
-      [d.y, R - a.y],
-    ]) {
-      if (p === 0) {
-        if (q < 0) return [a];
-        continue;
-      }
-      if (p < 0) t0 = Math.max(t0, q / p);
-      else t1 = Math.min(t1, q / p);
-    }
-    if (t0 >= t1) return [a];
+    const A = dot(d, d);
+    const B = dot(a, d);
+    const disc = B * B - A * (dot(a, a) - R * R);
+    if (A === 0 || disc <= 0) return [a];
+    const root = Math.sqrt(disc);
     return [
       a,
-      ...[t0, t1]
+      ...[(-B - root) / A, (-B + root) / A]
         .filter((t) => t > 1e-9 && t < 1 - 1e-9)
         .map((t) => add(a, mul(d, t))),
     ];
   });
 }
 
-function marksBetween(a: WedgePoint, b: WedgePoint, marks: WedgePoint[]) {
-  const d = sub(b, a);
-  const length = len(d);
-  return marks
-    .map((m) => ({ m, t: dot(sub(m, a), d) / (length * length) }))
-    .filter(
-      ({ m, t }) =>
-        t > 1e-6 &&
-        t < 1 - 1e-6 &&
-        Math.abs(cross(sub(m, a), d)) / length < 1e-6,
-    )
-    .sort((p, q) => p.t - q.t)
-    .map(({ m }) => m);
-}
-
-function squareCutPath(
+function circleCutPath(
   source: WedgePoint[],
   R: number,
   r: number,
   marks: WedgePoint[] = [],
 ): Segment[] {
-  const poly = splitAtSquare(source, R);
+  const poly = splitAtCircle(source, R);
   const n = poly.length;
   const inside = poly.map(
-    (a, i) => chebyshev(mul(add(a, poly[(i + 1) % n]), 0.5)) < R - 1e-9,
+    (a, i) => len(mul(add(a, poly[(i + 1) % n]), 0.5)) < R - 1e-9,
   );
   if (inside.every(Boolean)) return [];
   if (!inside.some(Boolean)) return roundedPoly(poly, r);
@@ -193,24 +181,32 @@ function squareCutPath(
   const exit = poly[(m + 1) % n];
   const outside: WedgePoint[] = [];
   for (let i = (m + 1) % n; i !== k; i = (i + 1) % n) outside.push(poly[i]);
-  const corners = [
-    point(-R, -R),
-    point(-R, R),
-    point(R, -R),
-    point(R, R),
-  ]
-    .filter(
-      (c) =>
-        contains(source, c) &&
-        len(sub(c, entry)) > 1e-6 &&
-        len(sub(c, exit)) > 1e-6,
-    )
-    .sort((a, b) => len(sub(a, entry)) - len(sub(b, entry)));
-  const walk = [entry, ...corners, exit];
-  const boundary = walk
-    .slice(0, -1)
-    .flatMap((a, i) => [a, ...marksBetween(a, walk[i + 1], marks)]);
-  return roundedPoly([...outside, ...boundary], r);
+  const chain = [...outside, entry];
+  const turn = contains(source, arcVia(entry, exit, 1)) ? 1 : -1;
+  const sweep = sweepAngle(entry, exit, turn);
+  const along = (p: WedgePoint) => sweepAngle(entry, p, turn);
+  const walk = [
+    entry,
+    ...marks
+      .filter((p) => along(p) > 1e-6 && along(p) < sweep - 1e-6)
+      .sort((a, b) => along(a) - along(b)),
+    exit,
+  ];
+  return [
+    { type: "M", to: exit },
+    ...outside
+      .slice(1)
+      .flatMap((v, i) => corner(v, chain[i], chain[i + 2], r)),
+    { type: "L", to: entry },
+    ...walk.slice(1).map(
+      (to, i): Segment => ({
+        type: "cut",
+        to,
+        via: arcVia(walk[i], to, turn),
+        center: origin,
+      }),
+    ),
+  ];
 }
 
 const wobbleStep = 2;
@@ -230,27 +226,89 @@ function wave(cycles: number, t: number) {
   );
 }
 
-export function wobbleLine(
-  a: WedgePoint,
-  b: WedgePoint,
+const flat: WedgeWobble = { amplitude: 0, wavelength: 1 };
+
+const wavy = (wobble?: WedgeWobble) =>
+  wobble && wobble.amplitude > 0 && wobble.wavelength > 0 ? wobble : null;
+
+function wobbleOffsets(
+  length: number,
   { amplitude, wavelength }: WedgeWobble,
-): WedgePoint[] {
-  const d = sub(b, a);
-  const length = len(d);
-  if (!(amplitude > 0 && wavelength > 0 && length > 0)) return [];
-  const normal = point(-d.y / length, d.x / length);
+) {
   const cycles = length / wavelength;
   const taper = wavelength / 6;
   const n = Math.ceil(length / wobbleStep);
   return Array.from({ length: Math.max(0, n - 1) }, (_, i) => {
     const t = (i + 1) / n;
     const ease = smoothstep((Math.min(t, 1 - t) * length) / taper);
-    const offset = amplitude * ease * wave(cycles, t);
-    return add(add(a, mul(d, t)), mul(normal, offset));
+    return { t, offset: amplitude * ease * wave(cycles, t) };
   });
 }
 
-type Bend = (a: WedgePoint, b: WedgePoint) => WedgePoint[] | null;
+export function wobbleLine(
+  a: WedgePoint,
+  b: WedgePoint,
+  wobble: WedgeWobble,
+): WedgePoint[] {
+  const d = sub(b, a);
+  const length = len(d);
+  const shape = wavy(wobble);
+  if (!shape || !(length > 0)) return [];
+  const normal = point(-d.y / length, d.x / length);
+  return wobbleOffsets(length, shape).map(({ t, offset }) =>
+    add(add(a, mul(d, t)), mul(normal, offset)),
+  );
+}
+
+type Around = { center: WedgePoint; turn: number };
+
+function arcPoints(
+  center: WedgePoint,
+  from: WedgePoint,
+  sweep: number,
+  wobble?: WedgeWobble,
+): WedgePoint[] {
+  const radius = len(from);
+  const turn = Math.sign(sweep);
+  return wobbleOffsets(Math.abs(sweep) * radius, wavy(wobble) ?? flat).map(
+    ({ t, offset }) =>
+      add(
+        center,
+        mul(rotate(norm(from), sweep * t), radius - turn * offset),
+      ),
+  );
+}
+
+function wobbleArc(
+  a: WedgePoint,
+  b: WedgePoint,
+  { center, turn }: Around,
+  wobble?: WedgeWobble,
+): WedgePoint[] {
+  const from = sub(a, center);
+  return arcPoints(
+    center,
+    from,
+    turn * sweepAngle(from, sub(b, center), turn),
+    wobble,
+  );
+}
+
+export function wobbleCircle(
+  center: WedgePoint,
+  radius: number,
+  wobble: WedgeWobble,
+): WedgePoint[] {
+  if (!(radius > 0)) return [];
+  const from = point(radius, 0);
+  return [add(center, from), ...arcPoints(center, from, fullTurn, wobble)];
+}
+
+type Bend = (
+  a: WedgePoint,
+  b: WedgePoint,
+  around?: Around,
+) => WedgePoint[] | null;
 
 function outline(
   segments: Segment[],
@@ -269,8 +327,8 @@ function outline(
     drawing = true;
     current = to;
   };
-  const line = (p: WedgePoint) => {
-    const bent = bend(current, p);
+  const line = (p: WedgePoint, around?: Around) => {
+    const bent = bend(current, p, around);
     const d = [...(bent ?? []), p].map((q) => `L${fmtPoint(q)}`).join("");
     path += d;
     if (bent) {
@@ -288,6 +346,10 @@ function outline(
       const d = `A${fmt(segment.radius)} ${fmt(segment.radius)} 0 0 ${sweep} ${fmtPoint(p)}`;
       path += d;
       draw(d, p);
+    } else if (segment.type === "cut") {
+      const center = transform(segment.center);
+      const via = sub(transform(segment.via), center);
+      line(p, { center, turn: Math.sign(cross(sub(current, center), via)) });
     } else {
       line(p);
     }
@@ -306,13 +368,10 @@ function segmentDistance(p: WedgePoint, a: WedgePoint, b: WedgePoint) {
 
 function clearance(poly: WedgePoint[], R: number, p: WedgePoint) {
   if (!contains(poly, p)) return 0;
-  const square = len(
-    point(Math.max(0, Math.abs(p.x) - R), Math.max(0, Math.abs(p.y) - R)),
-  );
   return poly.reduce(
     (nearest, a, i) =>
       Math.min(nearest, segmentDistance(p, a, poly[(i + 1) % poly.length])),
-    square,
+    Math.max(0, len(p) - R),
   );
 }
 
@@ -344,9 +403,12 @@ function rectFits(
   min: WedgePoint,
   max: WedgePoint,
 ) {
-  const clear = min.x >= R || max.x <= -R || min.y >= R || max.y <= -R;
+  const nearest = point(
+    Math.max(min.x, Math.min(0, max.x)),
+    Math.max(min.y, Math.min(0, max.y)),
+  );
   return (
-    clear &&
+    len(nearest) >= R &&
     [min, point(min.x, max.y), max, point(max.x, min.y)].every((c) =>
       contains(poly, c),
     )
@@ -488,25 +550,27 @@ export function wedgeGeometry({
   const count = fits ? wedgesPerSide : 0;
   const near = (a: number, b: number) => Math.abs(a - b) < 1e-6;
   const edge = (a: number, b: number, at: number) => near(a, at) && near(b, at);
-  const bend: Bend = (a, b) =>
-    edge(a.x, b.x, 0) ||
-    edge(a.x, b.x, width) ||
-    edge(a.y, b.y, 0) ||
-    edge(a.y, b.y, height)
-      ? null
-      : wobble
-        ? wobbleLine(a, b, wobble).map((p) =>
-            point(
-              Math.max(0, Math.min(width, p.x)),
-              Math.max(0, Math.min(height, p.y)),
-            ),
-          )
-        : [];
+  const inFrame = (p: WedgePoint) =>
+    point(
+      Math.max(0, Math.min(width, p.x)),
+      Math.max(0, Math.min(height, p.y)),
+    );
+  const bend: Bend = (a, b, around) =>
+    around
+      ? wobbleArc(a, b, around, wobble).map(inFrame)
+      : edge(a.x, b.x, 0) ||
+          edge(a.x, b.x, width) ||
+          edge(a.y, b.y, 0) ||
+          edge(a.y, b.y, height)
+        ? null
+        : wobble
+          ? wobbleLine(a, b, wobble).map(inFrame)
+          : [];
   const marks = phis
     .slice(0, count)
-    .flatMap((phi, i) => squareCutPath(wedge(phi, phis[i + 1]), cutRadius, 0))
+    .flatMap((phi, i) => circleCutPath(wedge(phi, phis[i + 1]), cutRadius, 0))
     .map((segment) => segment.to)
-    .filter((p) => near(chebyshev(p), cutRadius));
+    .filter((p) => near(len(p), cutRadius));
 
   const frames = sideFrames(orientation, center.x, center.y);
   const centerOutline = (): WedgeCenter | null => {
@@ -522,14 +586,30 @@ export function wedgeGeometry({
     if (ring.length > 1 && len(sub(ring[0], ring[ring.length - 1])) <= 1e-3) {
       ring.pop();
     }
-    if (ring.length < 3) return null;
+    if (ring.length < 2) return null;
     const corner = sub(center, point(cutRadius, cutRadius));
     const local: Transform = (p) => sub(p, corner);
+    const spoke = (p: WedgePoint) => sub(p, center);
     return {
       ...outline(
-        ring.map((to, i) => ({ type: i === 0 ? "M" : "L", to })),
+        [
+          { type: "M", to: ring[0] },
+          ...[...ring.slice(1), ring[0]].map(
+            (to, i): Segment => ({
+              type: "cut",
+              to,
+              via: add(center, arcVia(spoke(ring[i]), spoke(to), 1)),
+              center,
+            }),
+          ),
+        ],
         local,
-        (a, b) => bend(add(a, corner), add(b, corner))?.map(local) ?? null,
+        (a, b, around) =>
+          bend(
+            add(a, corner),
+            add(b, corner),
+            around && { ...around, center: add(around.center, corner) },
+          )?.map(local) ?? null,
       ),
       bounds: {
         x: corner.x,
@@ -548,8 +628,8 @@ export function wedgeGeometry({
       const to = next + (Math.PI - next) * e;
       const poly = wedge(from, to);
       if (poly.length < 3) return [];
-      const beyond = (p: WedgePoint) => chebyshev(p) >= cutRadius;
-      const cut = squareCutPath(poly, cutRadius, cornerRadius, marks);
+      const beyond = (p: WedgePoint) => len(p) >= cutRadius;
+      const cut = circleCutPath(poly, cutRadius, cornerRadius, marks);
       if (cut.length === 0) return [];
       const far = centroid(poly.filter(beyond));
       const anchor = transform(mul(norm(far), (cutRadius + len(far)) / 2));

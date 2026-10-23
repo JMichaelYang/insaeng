@@ -35,9 +35,6 @@ const arcs = (path: string) =>
 const distance = (a: WedgePoint, b: WedgePoint) =>
   Math.hypot(a.x - b.x, a.y - b.y);
 
-const chebyshev = (a: WedgePoint, b: WedgePoint) =>
-  Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
-
 const inside = (p: WedgePoint, poly: WedgePoint[]) =>
   poly.reduce((hit, a, i) => {
     const b = poly[(i + 1) % poly.length];
@@ -67,7 +64,7 @@ function expectSlotInside(
     x: Math.max(slot.x, Math.min(center.x, slot.x + slot.width)),
     y: Math.max(slot.y, Math.min(center.y, slot.y + slot.height)),
   };
-  expect(chebyshev(nearest, center)).toBeGreaterThanOrEqual(
+  expect(distance(nearest, center)).toBeGreaterThanOrEqual(
     cutRadiusOf(options) + slotInset - EPSILON,
   );
   const outline = points(path);
@@ -190,7 +187,7 @@ describe("wedgeGeometry", () => {
         expect(path).not.toMatch(/NaN|Infinity/);
 
         for (const p of points(path)) {
-          expect(chebyshev(p, center)).toBeGreaterThanOrEqual(
+          expect(distance(p, center)).toBeGreaterThanOrEqual(
             cutRadius - EPSILON,
           );
           expect(p.x).toBeGreaterThanOrEqual(-EPSILON);
@@ -527,7 +524,7 @@ describe("wedgeGeometry", () => {
       for (const { path } of side.wedges) {
         expect(path).not.toMatch(/NaN|Infinity/);
         for (const p of points(path)) {
-          expect(chebyshev(p, center)).toBeGreaterThanOrEqual(
+          expect(distance(p, center)).toBeGreaterThanOrEqual(
             geometry.cutRadius - EPSILON,
           );
           expect(p.x).toBeGreaterThanOrEqual(-EPSILON);
@@ -539,7 +536,7 @@ describe("wedgeGeometry", () => {
     }
   });
 
-  it("draws no wedges when the center square does not fit", () => {
+  it("draws no wedges when the center circle does not fit", () => {
     const geometry = wedgeGeometry({
       ...base.column,
       width: 120,
@@ -559,8 +556,13 @@ describe("wedgeGeometry", () => {
         [1, 0],
       ],
     });
+    const center = { x: base[o].width / 2, y: base[o].height / 2 };
+    const R = geometry.cutRadius;
     const corners = (path: string) =>
       parse(path).filter((c, i, all) => {
+        if (c.type !== "Z" && distance(c.to, center) < R + EPSILON) {
+          return false;
+        }
         const prev = all[i - 1];
         const next = all[i + 1];
         if (c.type !== "L" || next?.type !== "L" || !prev || prev.type === "Z") {
@@ -607,7 +609,7 @@ describe("wedgeGeometry with flush wedges", () => {
     ...overrides,
   });
 
-  it.each(orientations)("tiles everything outside the %s square", (o) => {
+  it.each(orientations)("tiles everything outside the %s circle", (o) => {
     const options = flush(o);
     const geometry = wedgeGeometry(options);
     const R = geometry.cutRadius;
@@ -623,14 +625,14 @@ describe("wedgeGeometry with flush wedges", () => {
           x: ((i + 0.5) / steps) * options.width,
           y: ((j + 0.5) / steps) * options.height,
         };
-        if (Math.abs(chebyshev(p, center) - R) < 1) continue;
+        if (Math.abs(distance(p, center) - R) < 1) continue;
         const hits = outlines.filter((outline) => inside(p, outline)).length;
-        expect(hits).toBe(chebyshev(p, center) < R ? 0 : 1);
+        expect(hits).toBe(distance(p, center) < R ? 0 : 1);
       }
     }
   });
 
-  it.each(orientations)("keeps %s wedges and slots outside the square", (o) => {
+  it.each(orientations)("keeps %s wedges and slots outside the circle", (o) => {
     const options = flush(o, {
       centerGap: 8,
       relatedGap: 4,
@@ -645,20 +647,16 @@ describe("wedgeGeometry with flush wedges", () => {
         expect(path).not.toMatch(/NaN|Infinity/);
         expectBoundsAround(bounds, path, options);
         for (const p of points(path)) {
-          expect(chebyshev(p, center)).toBeGreaterThanOrEqual(R - EPSILON);
+          expect(distance(p, center)).toBeGreaterThanOrEqual(R - EPSILON);
         }
         expect(slot).not.toBeNull();
         if (!slot) continue;
-        const gapX = Math.max(
-          slot.x - (center.x + R),
-          center.x - R - (slot.x + slot.width),
-        );
-        const gapY = Math.max(
-          slot.y - (center.y + R),
-          center.y - R - (slot.y + slot.height),
-        );
-        expect(Math.max(gapX, gapY)).toBeGreaterThanOrEqual(
-          options.slotInset - EPSILON,
+        const nearest = {
+          x: Math.max(slot.x, Math.min(center.x, slot.x + slot.width)),
+          y: Math.max(slot.y, Math.min(center.y, slot.y + slot.height)),
+        };
+        expect(distance(nearest, center)).toBeGreaterThanOrEqual(
+          R + options.slotInset - EPSILON,
         );
       }
     }
@@ -674,8 +672,9 @@ describe("wedgeGeometry with flush wedges", () => {
       height: cutRadius * 2,
     });
     for (const p of points(center?.path ?? "")) {
-      expect(chebyshev(p, { x: cutRadius, y: cutRadius })).toBeCloseTo(
+      expect(distance(p, { x: cutRadius, y: cutRadius })).toBeCloseTo(
         cutRadius,
+        1,
       );
     }
   });
