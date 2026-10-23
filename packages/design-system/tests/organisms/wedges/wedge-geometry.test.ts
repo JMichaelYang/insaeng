@@ -733,6 +733,36 @@ describe("wedgeGeometry with flush wedges", () => {
     },
   );
 
+  it.each(orientations)("lets the %s center draw one seamless ring", (o) => {
+    const wobble = { amplitude: 3, wavelength: 48 };
+    const options = flush(o, { wobble });
+    const geometry = wedgeGeometry(options);
+    const R = geometry.cutRadius;
+    const center = geometry.center;
+    expect(center).not.toBeNull();
+    if (!center) return;
+    expect(center.lines).toBe(center.path);
+    expect(center.path.match(/M/g)).toHaveLength(1);
+    const cycles = 2 * Math.round((Math.PI * R) / wobble.wavelength);
+    const ring = (p: WedgePoint, at: WedgePoint) =>
+      R +
+      wobble.amplitude *
+        Math.cos(cycles * Math.atan2(p.y - at.y, p.x - at.x));
+    const local = { x: R, y: R };
+    for (const p of points(center.path)) {
+      expect(distance(p, local)).toBeCloseTo(ring(p, local), 1);
+    }
+    const middle = { x: options.width / 2, y: options.height / 2 };
+    for (const side of geometry.sides) {
+      for (const { lines } of side.wedges) {
+        const onRing = points(lines).filter(
+          (p) => Math.abs(distance(p, middle) - ring(p, middle)) < 0.05,
+        );
+        expect(onRing.length).toBeLessThanOrEqual(2);
+      }
+    }
+  });
+
   it.each(orientations)("leaves %s frame edges straight and undrawn", (o) => {
     const options = flush(o, { wobble: { amplitude: 3, wavelength: 48 } });
     const geometry = wedgeGeometry(options);

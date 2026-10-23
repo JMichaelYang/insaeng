@@ -13,7 +13,7 @@ const points = (d: string) =>
 describe("wobbleCircle", () => {
   it("draws a closed wobbly circle inside the box", () => {
     const { path, lines } = wobbleCircle({ width: 80, height: 80, wobble });
-    expect(path.startsWith("M77 40")).toBe(true);
+    expect(path.startsWith("M80 40")).toBe(true);
     expect(path.endsWith("Z")).toBe(true);
     expect(lines).toBe(path);
     const radii = points(path).map((p) => Math.hypot(p.x - 40, p.y - 40));
@@ -23,6 +23,23 @@ describe("wobbleCircle", () => {
       expect(r).toBeLessThanOrEqual(40 + 0.01);
     }
     expect(Math.max(...radii) - Math.min(...radii)).toBeGreaterThan(1);
+  });
+
+  it("closes the wave with an even number of whole cycles", () => {
+    const { path } = wobbleCircle({ width: 80, height: 80, wobble });
+    const ring = points(path);
+    const radii = ring.map((p) => Math.hypot(p.x - 40, p.y - 40));
+    const n = radii.length;
+    const peaks = radii.filter(
+      (r, i) => r > radii[(i - 1 + n) % n] && r >= radii[(i + 1) % n],
+    ).length;
+    expect(peaks).toBe(2 * Math.round((Math.PI * 37) / wobble.wavelength));
+    for (const p of ring) {
+      const twin = ring.some(
+        (q) => Math.abs(q.x - (80 - p.x)) < 0.05 && Math.abs(q.y - p.y) < 0.05,
+      );
+      expect(twin).toBe(true);
+    }
   });
 
   it("fits the shorter side of the box", () => {
