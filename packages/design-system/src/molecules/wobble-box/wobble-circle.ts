@@ -1,4 +1,4 @@
-import { type WedgePoint, type WedgeWobble, wobbleCircle as wobbleRing } from "../../organisms/wedges/wedge-geometry";
+import { type WedgePoint, type WedgeWobble, wobbleRing } from "../../organisms/wedges/wedge-geometry";
 import type { WobbleRect } from "./wobble-rect";
 
 const fmt = (n: number) => String(Math.round(n * 100) / 100);

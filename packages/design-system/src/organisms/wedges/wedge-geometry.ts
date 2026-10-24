@@ -275,7 +275,7 @@ type Ring = {
   samples: number;
 };
 
-function wobbleRing(radius: number, wobble?: WedgeWobble): Ring {
+function ringOf(radius: number, wobble?: WedgeWobble): Ring {
   const wavy = wobble && wobble.amplitude > 0 && wobble.wavelength > 0;
   return {
     radius,
@@ -323,13 +323,13 @@ function ringArc(
   return points;
 }
 
-export function wobbleCircle(
+export function wobbleRing(
   center: WedgePoint,
   radius: number,
   wobble: WedgeWobble,
 ): WedgePoint[] {
   if (!(radius > 0)) return [];
-  return ringPoints(wobbleRing(radius, wobble), center);
+  return ringPoints(ringOf(radius, wobble), center);
 }
 
 type Bend = (
@@ -546,7 +546,7 @@ export function wedgeGeometry({
   const S = (row ? height : width) / 2;
   const center = point(width / 2, height / 2);
   const cutRadius = avatarRadius + centerGap;
-  const ring = wobbleRing(cutRadius, wobble);
+  const ring = ringOf(cutRadius, wobble);
   const outer = cutRadius + ring.amplitude;
   const fits = cutRadius + cornerRadius < Math.min(E, S);
 
