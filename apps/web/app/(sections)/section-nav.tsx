@@ -7,12 +7,11 @@ import {
   NavMenu,
   WobbleBox,
 } from "@insaeng/design-system";
-import Image from "next/image";
 import Link from "next/link";
 import { useSelectedLayoutSegment } from "next/navigation";
 import { ViewTransition } from "react";
 
-import { headshot, headshotSizes, headshotTransition } from "../headshot";
+import { headshotTransition } from "../headshot";
 import { type Section, sectionHref, sections } from "../sections";
 import { avatarWobble, lgAvatarWobble, lgWobble, wobble } from "../wobble";
 
@@ -61,11 +60,14 @@ export function SectionNav() {
                 lg:size-16
               "
             >
-              <Avatar className="relative size-full">
-                <Image {...headshot} alt="" sizes={headshotSizes.nav} preload />
-                <span className="
-                  absolute inset-0 bg-primary-container/50 backdrop-blur-xs
-                " />
+              <Avatar
+                aria-hidden
+                className="
+                  flex size-full items-center justify-center bg-primary
+                  type-heading-xl text-on-primary
+                "
+              >
+                JY
               </Avatar>
             </WobbleBox>
           </ViewTransition>

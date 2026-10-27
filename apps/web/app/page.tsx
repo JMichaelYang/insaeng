@@ -14,7 +14,6 @@ import {
   headshot,
   headshotSizes,
   headshotTransition,
-  preloadHeadshot,
 } from "./headshot";
 import { LinkedWedges } from "./linked-wedges";
 import { type Section, sectionHref, sections } from "./sections";
@@ -79,7 +78,6 @@ export default function Home() {
       imageSrcSet: image.mode === "raster" ? image.srcSet : undefined,
     });
   }
-  preloadHeadshot(headshotSizes.nav);
   return (
     <main className="flex flex-1 flex-col">
       <LinkedWedges
