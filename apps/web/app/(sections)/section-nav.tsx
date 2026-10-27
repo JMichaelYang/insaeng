@@ -14,7 +14,7 @@ import { ViewTransition } from "react";
 
 import { headshot, headshotSizes, headshotTransition } from "../headshot";
 import { type Section, sectionHref, sections } from "../sections";
-import { lgWobble, wobble } from "../wobble";
+import { avatarWobble, lgAvatarWobble, lgWobble, wobble } from "../wobble";
 
 const bottomEdge = { bottom: true };
 
@@ -50,15 +50,24 @@ export function SectionNav() {
             share="morph"
             default="none"
           >
-            <Avatar className="
-              relative size-12 border-thin border-on-surface
-              lg:size-16 lg:border-thick
-            ">
-              <Image {...headshot} alt="" sizes={headshotSizes.nav} preload />
-              <span className="
-                absolute inset-0 bg-primary-container/20 backdrop-blur-xs
-              " />
-            </Avatar>
+            <WobbleBox
+              wobble={avatarWobble}
+              lgWobble={lgAvatarWobble}
+              shape="circle"
+              strokeWidth={1}
+              lgStrokeWidth={2}
+              className="
+                size-12
+                lg:size-16
+              "
+            >
+              <Avatar className="relative size-full">
+                <Image {...headshot} alt="" sizes={headshotSizes.nav} preload />
+                <span className="
+                  absolute inset-0 bg-primary-container/50 backdrop-blur-xs
+                " />
+              </Avatar>
+            </WobbleBox>
           </ViewTransition>
         </div>
       </WobbleBox>

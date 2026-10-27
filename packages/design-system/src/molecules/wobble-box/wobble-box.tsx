@@ -8,8 +8,6 @@ import type { WedgeWobble } from "../../organisms/wedges/wedge-geometry";
 import { wobbleCircle } from "./wobble-circle";
 import { wobbleRect, type WobbleEdges } from "./wobble-rect";
 
-const strokeWidth = 2;
-const lgStrokeWidth = 3;
 const allEdges: WobbleEdges = {
   top: true,
   right: true,
@@ -23,6 +21,8 @@ export function WobbleBox({
   edges = allEdges,
   shape = "rect",
   lineClassName = "stroke-on-surface",
+  strokeWidth = 2,
+  lgStrokeWidth = 3,
   className,
   children,
   ...props
@@ -32,6 +32,8 @@ export function WobbleBox({
   edges?: WobbleEdges;
   shape?: "rect" | "circle";
   lineClassName?: string;
+  strokeWidth?: number;
+  lgStrokeWidth?: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const frame = useFrame(ref);
