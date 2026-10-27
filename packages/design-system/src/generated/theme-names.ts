@@ -136,6 +136,7 @@ export const themeNames = {
     "xl"
   ],
   "blur": [
+    "xs",
     "sm",
     "md",
     "lg",

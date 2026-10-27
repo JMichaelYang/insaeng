@@ -42,6 +42,7 @@
   },
   "blur": {
     "$type": "dimension",
+    "xs": { "$value": "1px" },
     "sm": { "$value": "4px" },
     "md": { "$value": "8px" },
     "lg": { "$value": "16px" },

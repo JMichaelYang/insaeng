@@ -42,25 +42,23 @@ export function SectionNav() {
         edges={bottomEdge}
         className="absolute inset-0"
       >
-        <div className="flex size-full justify-center bg-primary-container">
+        <div className="
+          flex size-full items-center justify-center bg-primary-container
+        ">
           <ViewTransition
             name={headshotTransition}
             share="morph"
             default="none"
           >
-            <WobbleBox
-              wobble={wobble}
-              lgWobble={lgWobble}
-              shape="circle"
-              className="
-                size-16
-                lg:size-20
-              "
-            >
-              <Avatar className="size-full">
-                <Image {...headshot} alt="" sizes={headshotSizes.nav} preload />
-              </Avatar>
-            </WobbleBox>
+            <Avatar className="
+              relative size-12 border-thin border-on-surface
+              lg:size-16 lg:border-thick
+            ">
+              <Image {...headshot} alt="" sizes={headshotSizes.nav} preload />
+              <span className="
+                absolute inset-0 bg-primary-container/20 backdrop-blur-xs
+              " />
+            </Avatar>
           </ViewTransition>
         </div>
       </WobbleBox>
@@ -94,8 +92,8 @@ export function SectionNav() {
           href="/"
           aria-label="Home"
           className="
-            col-start-2 row-start-1 size-16 self-start
-            lg:size-20
+            col-start-2 row-start-1 size-12 rounded-full
+            lg:size-16
           "
         />
         <NavLinks
