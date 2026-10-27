@@ -7,14 +7,13 @@ import {
   NavMenu,
   WobbleBox,
 } from "@insaeng/design-system";
-import Image from "next/image";
 import Link from "next/link";
 import { useSelectedLayoutSegment } from "next/navigation";
 import { ViewTransition } from "react";
 
-import { headshot, headshotSizes, headshotTransition } from "../headshot";
+import { headshotTransition } from "../headshot";
 import { type Section, sectionHref, sections } from "../sections";
-import { lgWobble, wobble } from "../wobble";
+import { avatarWobble, lgAvatarWobble, lgWobble, wobble } from "../wobble";
 
 const bottomEdge = { bottom: true };
 
@@ -42,23 +41,33 @@ export function SectionNav() {
         edges={bottomEdge}
         className="absolute inset-0"
       >
-        <div className="flex size-full justify-center bg-primary-container">
+        <div className="
+          flex size-full items-center justify-center bg-primary-container
+        ">
           <ViewTransition
             name={headshotTransition}
             share="morph"
             default="none"
           >
             <WobbleBox
-              wobble={wobble}
-              lgWobble={lgWobble}
+              wobble={avatarWobble}
+              lgWobble={lgAvatarWobble}
               shape="circle"
+              strokeWidth={1}
+              lgStrokeWidth={2}
               className="
-                size-16
-                lg:size-20
+                size-12
+                lg:size-16
               "
             >
-              <Avatar className="size-full">
-                <Image {...headshot} alt="" sizes={headshotSizes.nav} preload />
+              <Avatar
+                aria-hidden
+                className="
+                  flex size-full items-center justify-center bg-primary
+                  type-heading-xl text-on-primary
+                "
+              >
+                JY
               </Avatar>
             </WobbleBox>
           </ViewTransition>
@@ -94,8 +103,8 @@ export function SectionNav() {
           href="/"
           aria-label="Home"
           className="
-            col-start-2 row-start-1 size-16 self-start
-            lg:size-20
+            col-start-2 row-start-1 size-12 rounded-full
+            lg:size-16
           "
         />
         <NavLinks
