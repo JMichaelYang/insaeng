@@ -46,8 +46,8 @@ export function SectionNav() {
             lgWobble={lgWobble}
             shape="circle"
             className="
-              size-16
-              lg:size-20
+              mt-2 size-12
+              lg:size-16
             "
           >
             <Avatar className="size-full">
@@ -86,8 +86,8 @@ export function SectionNav() {
           href="/"
           aria-label="Home"
           className="
-            col-start-2 row-start-1 size-16 self-start
-            lg:size-20
+            col-start-2 row-start-1 mt-2 size-12 self-start
+            lg:size-16
           "
         />
         <NavLinks
