@@ -10,14 +10,21 @@ export function ComingSoon({ slug }: { slug: SectionSlug }) {
       lg:-mt-20
     ">
       <div className="
-        relative aspect-square w-full
+        relative aspect-square w-full overflow-hidden
         md:aspect-video
       ">
-        <Image src={photo} alt="" fill sizes="100vw" preload className="
-          object-cover
-        " />
+        <div className="absolute -inset-6">
+          <Image
+            src={photo}
+            alt=""
+            fill
+            sizes="100vw"
+            preload
+            className="object-cover blur-md"
+          />
+        </div>
         <div className="
-          absolute inset-0 bg-linear-to-b from-transparent from-50% to-surface
+          absolute inset-0 bg-linear-to-b from-surface/50 from-50% to-surface
         " />
       </div>
       <div className="
