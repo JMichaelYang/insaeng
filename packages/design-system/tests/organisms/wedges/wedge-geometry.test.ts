@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   wedgeGeometry,
+  wobbleLine,
   type WedgeGeometryOptions,
   type WedgeOrientation,
   type WedgePoint,
@@ -796,4 +797,26 @@ describe("wedgeGeometry with flush wedges", () => {
       }
     }
   });
+});
+
+describe("wobbleLine", () => {
+  const wobble = { amplitude: 3, wavelength: 48 };
+
+  it.each([2.4, 2.5, 2.6, 3.5, 7.5])(
+    "keeps full amplitude in the middle of a %s-wavelength edge",
+    (cycles) => {
+      const length = cycles * wobble.wavelength;
+      const offsets = wobbleLine(
+        { x: 0, y: 0 },
+        { x: length, y: 0 },
+        wobble,
+      ).map((p) => ({ t: p.x / length, offset: Math.abs(p.y) }));
+      const middle = offsets.filter(({ t }) => t > 1 / 3 && t < 2 / 3);
+      const peak = Math.max(...middle.map(({ offset }) => offset));
+      expect(peak).toBeGreaterThan(wobble.amplitude * 0.95);
+      for (const { offset } of offsets) {
+        expect(offset).toBeLessThanOrEqual(wobble.amplitude + EPSILON);
+      }
+    },
+  );
 });

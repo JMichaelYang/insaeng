@@ -232,21 +232,11 @@ function ringCutPath(
 }
 
 const wobbleStep = 2;
-const wobbleBlend = 0.2;
 
 const smoothstep = (x: number) => {
   const t = Math.max(0, Math.min(1, x));
   return t * t * (3 - 2 * t);
 };
-
-function wave(cycles: number, t: number) {
-  const k = Math.floor(cycles);
-  const a = smoothstep((cycles - k - 0.5) / wobbleBlend + 0.5);
-  return (
-    (1 - a) * Math.sin(2 * Math.PI * k * t) +
-    a * Math.sin(2 * Math.PI * (k + 1) * t)
-  );
-}
 
 export function wobbleLine(
   a: WedgePoint,
@@ -257,13 +247,13 @@ export function wobbleLine(
   const length = len(d);
   if (!(amplitude > 0 && wavelength > 0 && length > 0)) return [];
   const normal = point(-d.y / length, d.x / length);
-  const cycles = length / wavelength;
+  const cycles = Math.max(1, Math.round(length / wavelength));
   const taper = wavelength / 6;
   const n = Math.ceil(length / wobbleStep);
   return Array.from({ length: Math.max(0, n - 1) }, (_, i) => {
     const t = (i + 1) / n;
     const ease = smoothstep((Math.min(t, 1 - t) * length) / taper);
-    const offset = amplitude * ease * wave(cycles, t);
+    const offset = amplitude * ease * Math.sin(2 * Math.PI * cycles * t);
     return add(add(a, mul(d, t)), mul(normal, offset));
   });
 }
