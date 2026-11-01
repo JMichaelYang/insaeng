@@ -16,6 +16,8 @@ import { headshot, headshotSizes, headshotTransition } from "../headshot";
 import { type Section, sectionHref, sections } from "../sections";
 import { lgWobble, wobble } from "../wobble";
 
+const navTransition = "section-nav";
+
 function navItems(
   group: readonly Section[],
   current: string | null,
@@ -30,10 +32,13 @@ function navItems(
 export function SectionNav() {
   const current = useSelectedLayoutSegment();
   return (
-    <header className="
-      sticky top-0 z-sticky h-16 text-on-surface
-      lg:h-20
-    ">
+    <header
+      className="
+        sticky top-0 z-sticky h-16 text-on-surface
+        lg:h-20
+      "
+      style={{ viewTransitionName: navTransition }}
+    >
       <div className="absolute inset-0 flex justify-center">
         <ViewTransition name={headshotTransition} share="morph" default="none">
           <WobbleBox

@@ -16,6 +16,19 @@
   z-index: var(--z-index-raised);
 }
 
+::view-transition-group(section-nav) {
+  z-index: var(--z-index-raised);
+  animation: none;
+}
+
+::view-transition-old(section-nav) {
+  display: none;
+}
+
+::view-transition-new(section-nav) {
+  animation: none;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   ::view-transition-old(.fade) {
     animation: var(--transition-duration-normal) var(--ease-exit) both fade-out;
