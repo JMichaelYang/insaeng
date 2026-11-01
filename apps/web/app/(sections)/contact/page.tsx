@@ -1,8 +1,6 @@
 import { BrandIcon } from "@insaeng/design-system";
 import { Mail, Phone, ThumbsUp } from "lucide-react";
 
-import { ContactForm } from "./contact-form";
-
 const email = "jaewonmichael@gmail.com";
 
 const contacts = [
@@ -26,13 +24,10 @@ const profiles = [
 export default function ContactPage() {
   return (
     <main className="
-      mx-auto grid w-full max-w-5xl flex-1 grid-cols-1 content-center gap-12 p-6
-      lg:grid-cols-2 lg:gap-16 lg:p-12
+      mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center p-6
+      lg:p-12
     ">
-      <section className="
-        flex flex-col gap-10
-        lg:justify-between
-      ">
+      <section className="flex flex-col gap-10">
         <div className="flex flex-col gap-4">
           <h1 className="type-display text-tertiary">Get in Touch</h1>
           <p className="type-heading-sm text-tertiary">
@@ -86,7 +81,6 @@ export default function ContactPage() {
           </li>
         </ul>
       </section>
-      <ContactForm to={email} />
     </main>
   );
 }
