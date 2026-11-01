@@ -38,7 +38,7 @@ export function NavMenu({
         aria-label={label}
         className="
           state-layer inline-flex size-10 items-center justify-center
-          rounded-full text-on-primary-container
+          rounded-full
         "
       >
         <MenuIcon />

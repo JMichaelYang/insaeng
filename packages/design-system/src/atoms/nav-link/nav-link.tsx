@@ -29,8 +29,8 @@ export function NavLink({
         `
           state-layer inline-flex h-control-lg -translate-y-0.5 items-center
           rounded-full border-thin border-transparent px-4 type-heading-xl
-          whitespace-nowrap text-on-primary-container
-          aria-[current=page]:border-on-primary-container
+          whitespace-nowrap
+          aria-[current=page]:border-current
           lg:border-thick
         `,
         className,
