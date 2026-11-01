@@ -6,6 +6,7 @@ import { mergeClasses } from "../../utils/merge-classes";
 import { useFrame } from "./use-frame";
 import type { WedgeWobble } from "../../organisms/wedges/wedge-geometry";
 import { wobbleCircle } from "./wobble-circle";
+import { wobblePill } from "./wobble-pill";
 import { wobbleRect, type WobbleEdges } from "./wobble-rect";
 
 const strokeWidth = 2;
@@ -30,7 +31,7 @@ export function WobbleBox({
   wobble: WedgeWobble;
   lgWobble?: WedgeWobble;
   edges?: WobbleEdges;
-  shape?: "rect" | "circle";
+  shape?: "rect" | "circle" | "pill";
   lineClassName?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -43,7 +44,9 @@ export function WobbleBox({
       height: frame.height,
       wobble: frame.lg ? lgWobble : wobble,
     };
-    return shape === "circle" ? wobbleCircle(box) : wobbleRect({ ...box, edges });
+    if (shape === "circle") return wobbleCircle(box);
+    if (shape === "pill") return wobblePill(box);
+    return wobbleRect({ ...box, edges });
   }, [frame, wobble, lgWobble, edges, shape]);
 
   return (

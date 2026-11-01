@@ -76,6 +76,8 @@ export function SectionNav() {
         />
         <NavLinks
           items={navItems(sections[0], current)}
+          wobble={avatarWobble}
+          lgWobble={lgAvatarWobble}
           component={Link}
           className="
             col-start-1 row-start-1 hidden justify-evenly
@@ -92,6 +94,8 @@ export function SectionNav() {
         />
         <NavLinks
           items={navItems(sections[1], current)}
+          wobble={avatarWobble}
+          lgWobble={lgAvatarWobble}
           component={Link}
           className="
             col-start-3 row-start-1 hidden justify-evenly
