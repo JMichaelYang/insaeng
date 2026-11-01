@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, type ComponentProps } from "react";
+import { useMemo, useRef, type ComponentProps, type CSSProperties } from "react";
 
 import { mergeClasses } from "../../utils/merge-classes";
 import { useFrame } from "./use-frame";
@@ -18,12 +18,24 @@ const allEdges: WobbleEdges = {
   left: true,
 };
 
+function clipStyle(
+  clip: "children" | "state-layer",
+  path: string,
+): CSSProperties {
+  const value = `path("${path}")`;
+  return clip === "children"
+    ? { clipPath: value }
+    : ({ "--state-layer-clip": value } as CSSProperties);
+}
+
 export function WobbleBox({
   wobble,
   lgWobble = wobble,
   edges = allEdges,
   shape = "rect",
   lineClassName = "stroke-on-surface",
+  outlined = true,
+  clip = "children",
   className,
   children,
   ...props
@@ -33,6 +45,8 @@ export function WobbleBox({
   edges?: WobbleEdges;
   shape?: "rect" | "circle" | "pill";
   lineClassName?: string;
+  outlined?: boolean;
+  clip?: "children" | "state-layer";
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const frame = useFrame(ref);
@@ -57,11 +71,11 @@ export function WobbleBox({
     >
       <div
         className="size-full"
-        style={outline ? { clipPath: `path("${outline.path}")` } : undefined}
+        style={outline ? clipStyle(clip, outline.path) : undefined}
       >
         {children}
       </div>
-      {outline?.lines && (
+      {outlined && outline?.lines && (
         <svg
           className="
             pointer-events-none absolute inset-0 size-full overflow-visible

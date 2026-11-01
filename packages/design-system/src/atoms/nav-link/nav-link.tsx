@@ -27,11 +27,8 @@ export function NavLink({
       aria-current={current ? "page" : undefined}
       className={mergeClasses(
         `
-          state-layer inline-flex h-control-lg -translate-y-0.5 items-center
-          rounded-full border-thin border-transparent px-4 type-heading-xl
-          whitespace-nowrap
-          aria-[current=page]:border-current
-          lg:border-thick
+          state-layer inline-flex h-control-lg items-center rounded-full px-4
+          type-heading-xl whitespace-nowrap
         `,
         className,
       )}

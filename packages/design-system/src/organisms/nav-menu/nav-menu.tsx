@@ -3,12 +3,9 @@
 import { Fragment, useId, useRef } from "react";
 
 import { MenuIcon } from "../../atoms/menu-icon";
-import {
-  NavLink,
-  type NavItem,
-  type NavLinkComponent,
-} from "../../atoms/nav-link";
+import type { NavItem, NavLinkComponent } from "../../atoms/nav-link";
 import { WobbleBox } from "../../molecules/wobble-box";
+import { WobbleNavLink } from "../../molecules/wobble-nav-link";
 import { mergeClasses } from "../../utils/merge-classes";
 import type { WedgeWobble } from "../wedges/wedge-geometry";
 
@@ -19,12 +16,14 @@ export function NavMenu({
   label,
   groups,
   wobble,
+  linkWobble,
   component,
   className,
 }: {
   label: string;
   groups: readonly (readonly NavItem[])[];
   wobble: WedgeWobble;
+  linkWobble: WedgeWobble;
   component?: NavLinkComponent;
   className?: string;
 }) {
@@ -91,14 +90,14 @@ export function NavMenu({
                   <ul className="flex flex-col gap-1">
                     {group.map((item) => (
                       <li key={item.href}>
-                        <NavLink
+                        <WobbleNavLink
                           href={item.href}
                           current={item.current}
+                          wobble={linkWobble}
                           component={component}
-                          className="flex"
                         >
                           {item.label}
-                        </NavLink>
+                        </WobbleNavLink>
                       </li>
                     ))}
                   </ul>

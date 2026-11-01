@@ -68,6 +68,7 @@ export function SectionNav() {
           label="Sections"
           groups={sections.map((group) => navItems(group, current))}
           wobble={wobble}
+          linkWobble={avatarWobble}
           component={Link}
           className="
             col-start-1 row-start-1

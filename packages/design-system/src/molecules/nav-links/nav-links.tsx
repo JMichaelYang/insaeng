@@ -1,11 +1,7 @@
-import {
-  NavLink,
-  type NavItem,
-  type NavLinkComponent,
-} from "../../atoms/nav-link";
+import type { NavItem, NavLinkComponent } from "../../atoms/nav-link";
 import type { WedgeWobble } from "../../organisms/wedges/wedge-geometry";
 import { mergeClasses } from "../../utils/merge-classes";
-import { WobbleBox } from "../wobble-box";
+import { WobbleNavLink } from "../wobble-nav-link";
 
 export function NavLinks({
   items,
@@ -22,42 +18,19 @@ export function NavLinks({
 }) {
   return (
     <ul className={mergeClasses("flex items-center", className)}>
-      {items.map((item) => {
-        const link = (
-          <NavLink
+      {items.map((item) => (
+        <li key={item.href}>
+          <WobbleNavLink
             href={item.href}
             current={item.current}
+            wobble={wobble}
+            lgWobble={lgWobble}
             component={component}
-            className={
-              item.current
-                ? `
-                  flex translate-y-0
-                  aria-[current=page]:border-transparent
-                `
-                : "flex"
-            }
           >
             {item.label}
-          </NavLink>
-        );
-        return (
-          <li key={item.href}>
-            {item.current ? (
-              <WobbleBox
-                wobble={wobble}
-                lgWobble={lgWobble}
-                shape="pill"
-                lineClassName="stroke-current"
-                className="-translate-y-0.5"
-              >
-                {link}
-              </WobbleBox>
-            ) : (
-              link
-            )}
-          </li>
-        );
-      })}
+          </WobbleNavLink>
+        </li>
+      ))}
     </ul>
   );
 }
