@@ -16,8 +16,6 @@ import { headshot, headshotSizes, headshotTransition } from "../headshot";
 import { type Section, sectionHref, sections } from "../sections";
 import { lgWobble, wobble } from "../wobble";
 
-const bottomEdge = { bottom: true };
-
 function navItems(
   group: readonly Section[],
   current: string | null,
@@ -33,37 +31,26 @@ export function SectionNav() {
   const current = useSelectedLayoutSegment();
   return (
     <header className="
-      sticky top-0 z-sticky h-16
+      sticky top-0 z-sticky h-16 text-on-surface
       lg:h-20
     ">
-      <WobbleBox
-        wobble={wobble}
-        lgWobble={lgWobble}
-        edges={bottomEdge}
-        className="absolute inset-0"
-      >
-        <div className="flex size-full justify-center bg-primary-container">
-          <ViewTransition
-            name={headshotTransition}
-            share="morph"
-            default="none"
+      <div className="absolute inset-0 flex justify-center">
+        <ViewTransition name={headshotTransition} share="morph" default="none">
+          <WobbleBox
+            wobble={wobble}
+            lgWobble={lgWobble}
+            shape="circle"
+            className="
+              size-16
+              lg:size-20
+            "
           >
-            <WobbleBox
-              wobble={wobble}
-              lgWobble={lgWobble}
-              shape="circle"
-              className="
-                size-16
-                lg:size-20
-              "
-            >
-              <Avatar className="size-full">
-                <Image {...headshot} alt="" sizes={headshotSizes.nav} preload />
-              </Avatar>
-            </WobbleBox>
-          </ViewTransition>
-        </div>
-      </WobbleBox>
+            <Avatar className="size-full">
+              <Image {...headshot} alt="" sizes={headshotSizes.nav} preload />
+            </Avatar>
+          </WobbleBox>
+        </ViewTransition>
+      </div>
       <nav
         aria-label="Sections"
         className="
