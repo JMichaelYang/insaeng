@@ -14,7 +14,7 @@ import { ViewTransition } from "react";
 
 import { headshot, headshotSizes, headshotTransition } from "../headshot";
 import { type Section, sectionHref, sections } from "../sections";
-import { lgWobble, wobble } from "../wobble";
+import { avatarWobble, lgAvatarWobble, wobble } from "../wobble";
 
 const navTransition = "section-nav";
 
@@ -42,12 +42,12 @@ export function SectionNav() {
       <div className="absolute inset-0 flex justify-center">
         <ViewTransition name={headshotTransition} share="morph" default="none">
           <WobbleBox
-            wobble={wobble}
-            lgWobble={lgWobble}
+            wobble={avatarWobble}
+            lgWobble={lgAvatarWobble}
             shape="circle"
             className="
-              size-16
-              lg:size-20
+              mt-2 size-12
+              lg:size-16
             "
           >
             <Avatar className="size-full">
@@ -86,8 +86,8 @@ export function SectionNav() {
           href="/"
           aria-label="Home"
           className="
-            col-start-2 row-start-1 size-16 self-start
-            lg:size-20
+            col-start-2 row-start-1 mt-2 size-12 self-start
+            lg:size-16
           "
         />
         <NavLinks
