@@ -231,7 +231,7 @@ function ringCutPath(
   ];
 }
 
-export const wobbleStep = 2;
+const wobbleStep = 2;
 
 const smoothstep = (x: number) => {
   const t = Math.max(0, Math.min(1, x));

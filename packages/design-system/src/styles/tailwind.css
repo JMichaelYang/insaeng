@@ -51,7 +51,6 @@
     inset: 0;
     z-index: -1;
     border-radius: inherit;
-    clip-path: var(--state-layer-clip, none);
     background-color: currentColor;
     opacity: 0;
     pointer-events: none;

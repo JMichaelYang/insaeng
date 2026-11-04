@@ -1,18 +1,16 @@
-import type { NavItem, NavLinkComponent } from "../../atoms/nav-link";
-import type { WedgeWobble } from "../../organisms/wedges/wedge-geometry";
+import {
+  NavLink,
+  type NavItem,
+  type NavLinkComponent,
+} from "../../atoms/nav-link";
 import { mergeClasses } from "../../utils/merge-classes";
-import { WobbleNavLink } from "../wobble-nav-link";
 
 export function NavLinks({
   items,
-  wobble,
-  lgWobble = wobble,
   component,
   className,
 }: {
   items: readonly NavItem[];
-  wobble: WedgeWobble;
-  lgWobble?: WedgeWobble;
   component?: NavLinkComponent;
   className?: string;
 }) {
@@ -20,15 +18,9 @@ export function NavLinks({
     <ul className={mergeClasses("flex items-center", className)}>
       {items.map((item) => (
         <li key={item.href}>
-          <WobbleNavLink
-            href={item.href}
-            current={item.current}
-            wobble={wobble}
-            lgWobble={lgWobble}
-            component={component}
-          >
+          <NavLink href={item.href} current={item.current} component={component}>
             {item.label}
-          </WobbleNavLink>
+          </NavLink>
         </li>
       ))}
     </ul>
