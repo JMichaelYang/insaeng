@@ -1,6 +1,8 @@
 import { BrandIcon } from "@insaeng/design-system";
 import { Mail, Phone, ThumbsUp } from "lucide-react";
 
+import { SectionPhoto } from "../section-photo";
+
 const email = "jaewonmichael@gmail.com";
 
 const contacts = [
@@ -24,10 +26,13 @@ const profiles = [
 export default function ContactPage() {
   return (
     <main className="
-      mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center p-6
-      lg:p-12
+      relative -mt-16 flex flex-1 flex-col justify-center p-6
+      lg:-mt-20 lg:p-12
     ">
-      <section className="flex flex-col gap-10">
+      <SectionPhoto slug="contact" />
+      <section className="
+        relative mx-auto flex w-full max-w-5xl flex-col gap-10
+      ">
         <div className="flex flex-col gap-4">
           <h1 className="type-display text-tertiary">Get in Touch</h1>
           <p className="type-heading-sm text-tertiary">
