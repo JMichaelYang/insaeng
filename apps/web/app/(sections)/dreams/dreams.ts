@@ -1,7 +1,7 @@
-export const heading = "I dream of...";
+export const heading = "In my life I will...";
 
 export const dreams = [
-  "Supporting my family and creating one of my own.",
-  "Starting my own business.",
-  "Remaining healthy, active, and excited by life into old age.",
+  "Support my family, show my appreciation for them, and create one of my own.",
+  "Build a successful technology business that fosters a passionate community of adopters.",
+  "Remain healthy, active, and excited by life into my later years.",
 ];
