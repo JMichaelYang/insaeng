@@ -1,4 +1,4 @@
-import { WobbleBox } from "@insaeng/design-system";
+import { type Brand, BrandIcon, WobbleBox } from "@insaeng/design-system";
 
 import { wobble } from "../../wobble";
 import { SectionBackdrop } from "../section-backdrop";
@@ -16,14 +16,17 @@ const links = [
     value: "(818) 438-5167",
     href: "tel:+18184385167",
   },
+];
+
+const profiles: { brand: Brand; label: string; href: string }[] = [
   {
+    brand: "linkedin",
     label: "LinkedIn",
-    value: "in/jaewon-yang-b988a8153",
     href: "https://www.linkedin.com/in/jaewon-yang-b988a8153/",
   },
   {
+    brand: "github",
     label: "GitHub",
-    value: "JMichaelYang",
     href: "https://github.com/JMichaelYang",
   },
 ];
@@ -48,15 +51,12 @@ export default function ContactPage() {
             </p>
           </header>
           <WobbleBox wobble={wobble}>
-            <ul className="flex flex-col gap-1 bg-surface-container-low p-3">
-              {links.map((link) => {
-                const external = link.href.startsWith("http");
-                return (
+            <div className="flex flex-col gap-1 bg-surface-container-low p-3">
+              <ul className="flex flex-col gap-1">
+                {links.map((link) => (
                   <li key={link.label}>
                     <a
                       href={link.href}
-                      target={external ? "_blank" : undefined}
-                      rel={external ? "noreferrer" : undefined}
                       className="
                         state-layer flex flex-col gap-1 rounded-md p-3
                         text-on-surface
@@ -73,9 +73,27 @@ export default function ContactPage() {
                       </span>
                     </a>
                   </li>
-                );
-              })}
-            </ul>
+                ))}
+              </ul>
+              <ul aria-label="Profiles" className="flex gap-2 p-1">
+                {profiles.map((profile) => (
+                  <li key={profile.brand}>
+                    <a
+                      href={profile.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={profile.label}
+                      className="
+                        state-layer inline-flex size-12 items-center
+                        justify-center rounded-full text-primary
+                      "
+                    >
+                      <BrandIcon brand={profile.brand} />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </WobbleBox>
         </div>
         <WobbleBox wobble={wobble}>
