@@ -1,4 +1,4 @@
-import { WobbleBox } from "@insaeng/design-system";
+import { Card } from "@insaeng/design-system";
 
 import { wobble } from "../../wobble";
 import { impacts } from "./resume";
@@ -14,24 +14,27 @@ export function Impacts() {
     >
       {impacts.map((impact) => (
         <li key={impact.source}>
-          <WobbleBox wobble={wobble} className="h-full">
-            <div className="
-              flex size-full flex-col gap-2 bg-surface-container-lowest p-4
+          <Card
+            wobble={wobble}
+            tone="lowest"
+            className="h-full"
+            contentClassName="
+              gap-2 p-4
               lg:p-6
+            "
+          >
+            <p className="type-display text-primary">
+              {impact.value}
+            </p>
+            <p className="flex-1 type-body-sm text-on-surface">
+              {impact.label}
+            </p>
+            <p className="
+              type-caption tracking-wider text-on-surface-variant uppercase
             ">
-              <p className="type-display text-primary">
-                {impact.value}
-              </p>
-              <p className="flex-1 type-body-sm text-on-surface">
-                {impact.label}
-              </p>
-              <p className="
-                type-caption tracking-wider text-on-surface-variant uppercase
-              ">
-                {impact.source}
-              </p>
-            </div>
-          </WobbleBox>
+              {impact.source}
+            </p>
+          </Card>
         </li>
       ))}
     </ul>
