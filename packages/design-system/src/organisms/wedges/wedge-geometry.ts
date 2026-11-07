@@ -383,41 +383,22 @@ function outline(
 
 type Slot = { min: WedgePoint; max: WedgePoint };
 
-function segmentDistance(p: WedgePoint, a: WedgePoint, b: WedgePoint) {
-  const d = sub(b, a);
-  const t = Math.max(0, Math.min(1, dot(sub(p, a), d) / dot(d, d)));
-  return len(sub(p, add(a, mul(d, t))));
-}
-
-function clearance(poly: WedgePoint[], R: number, p: WedgePoint) {
-  if (!contains(poly, p)) return 0;
-  return poly.reduce(
-    (nearest, a, i) =>
-      Math.min(nearest, segmentDistance(p, a, poly[(i + 1) % poly.length])),
-    Math.max(0, len(p) - R),
-  );
-}
-
-function roomiest(
+function midspan(
   poly: WedgePoint[],
   R: number,
   axis: WedgePoint,
 ): WedgePoint | null {
-  const steps = 48;
-  let best: { t: number; room: number } | null = null;
-  let reach = Math.max(...poly.map(len));
-  let from = 0;
-  for (let pass = 0; pass < 4; pass++) {
-    for (let i = 0; i <= steps; i++) {
-      const t = from + (reach * i) / steps;
-      const room = clearance(poly, R, mul(axis, t));
-      if (room > 0 && (!best || room > best.room)) best = { t, room };
-    }
-    if (!best) return null;
-    reach = (reach * 2) / steps;
-    from = best.t - reach / 2;
-  }
-  return best && mul(axis, best.t);
+  const hits = poly.flatMap((a, i) => {
+    const edge = sub(poly[(i + 1) % poly.length], a);
+    const denom = cross(axis, edge);
+    if (Math.abs(denom) < 1e-9) return [];
+    const s = cross(a, axis) / denom;
+    return s >= -1e-9 && s <= 1 + 1e-9 ? [cross(a, edge) / denom] : [];
+  });
+  if (hits.length === 0) return null;
+  const from = Math.max(R, Math.min(...hits));
+  const to = Math.max(...hits);
+  return to > from ? mul(axis, (from + to) / 2) : null;
 }
 
 function rectFits(
@@ -444,7 +425,7 @@ function centeredSlot(
   axis: WedgePoint,
 ): Slot | null {
   if (poly.length < 3) return null;
-  const at = roomiest(poly, R, axis);
+  const at = midspan(poly, R, axis);
   if (!at) return null;
   const { width, height } = boundsOf(poly);
   const tallest = (w: number) => {
