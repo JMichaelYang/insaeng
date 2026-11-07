@@ -9,7 +9,7 @@ export default function SportsPage() {
     <SectionPage slug="sports" className="max-w-5xl">
       <header className="flex flex-col items-center gap-3 text-center">
         <h1 className="type-display text-on-surface">{title}</h1>
-        <p className="max-w-prose type-body-lg text-on-surface-variant">
+        <p className="max-w-prose type-body-lg text-on-surface">
           {intro}
         </p>
       </header>
