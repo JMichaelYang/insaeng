@@ -1,4 +1,4 @@
-import { WobbleBox } from "@insaeng/design-system";
+import { Card } from "@insaeng/design-system";
 import type { ReactNode } from "react";
 
 import { wobble } from "../../wobble";
@@ -14,16 +14,12 @@ export function Panel({
   children: ReactNode;
 }) {
   return (
-    <WobbleBox wobble={wobble} className={className}>
-      <section className="
-        flex size-full flex-col gap-4 bg-surface-container-low p-6
-      ">
-        <h2 className="type-heading-xl text-on-surface">
-          {title}
-        </h2>
-        {children}
-      </section>
-    </WobbleBox>
+    <Card wobble={wobble} as="section" className={className}>
+      <h2 className="type-heading-xl text-on-surface">
+        {title}
+      </h2>
+      {children}
+    </Card>
   );
 }
 
