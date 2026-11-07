@@ -1,7 +1,7 @@
-import { WobbleBox, WobbleText } from "@insaeng/design-system";
+import { WobbleBox } from "@insaeng/design-system";
 import type { ReactNode } from "react";
 
-import { titleWobble, wobble } from "../../wobble";
+import { wobble } from "../../wobble";
 import type { Entry } from "./resume";
 
 export function Panel({
@@ -19,7 +19,7 @@ export function Panel({
         flex size-full flex-col gap-4 bg-surface-container-low p-6
       ">
         <h2 className="type-heading-xl text-on-surface">
-          <WobbleText text={title} wobble={titleWobble} />
+          {title}
         </h2>
         {children}
       </section>

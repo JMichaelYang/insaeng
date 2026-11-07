@@ -1,6 +1,3 @@
-import { WobbleText } from "@insaeng/design-system";
-
-import { titleWobble } from "../../wobble";
 import { SectionBackdrop } from "../section-backdrop";
 import { Impacts } from "./impacts";
 import { Chips, Dates, Entries, Panel } from "./panel";
@@ -27,7 +24,7 @@ export default function ResumePage() {
       ">
         <header className="flex flex-col items-center gap-3 text-center">
           <h1 className="type-display text-on-surface">
-            <WobbleText text="Resume" wobble={titleWobble} />
+            {headline.name}
           </h1>
           <p className="type-heading-sm text-on-surface">
             {headline.role} · {headline.location}
@@ -49,7 +46,7 @@ export default function ResumePage() {
             "
           >
             <h2 id="experience" className="type-heading-xl text-on-surface">
-              <WobbleText text="Experience" wobble={titleWobble} />
+              Experience
             </h2>
             <Timeline />
           </section>

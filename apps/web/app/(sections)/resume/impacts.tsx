@@ -1,6 +1,6 @@
-import { WobbleBox, WobbleText } from "@insaeng/design-system";
+import { WobbleBox } from "@insaeng/design-system";
 
-import { titleWobble, wobble } from "../../wobble";
+import { wobble } from "../../wobble";
 import { impacts } from "./resume";
 
 export function Impacts() {
@@ -20,7 +20,7 @@ export function Impacts() {
               lg:p-6
             ">
               <p className="type-display text-primary">
-                <WobbleText text={impact.value} wobble={titleWobble} />
+                {impact.value}
               </p>
               <p className="flex-1 type-body-sm text-on-surface">
                 {impact.label}
