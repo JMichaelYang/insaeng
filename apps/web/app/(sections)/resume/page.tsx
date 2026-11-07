@@ -27,7 +27,7 @@ export default function ResumePage() {
             {headline.name}
           </h1>
           <p className="type-heading-sm text-on-surface">
-            {headline.role} · {headline.location}
+            {headline.role}
           </p>
           <p className="max-w-prose type-body-lg text-on-surface-variant">
             {headline.summary}

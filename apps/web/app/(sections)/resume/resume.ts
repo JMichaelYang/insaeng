@@ -4,7 +4,6 @@ export type Role = {
   company: string;
   title: string;
   focus: string;
-  location: string;
   start: string;
   end: string;
   current?: boolean;
@@ -21,9 +20,7 @@ export type Entry = {
 export const headline = {
   name: "Jaewon Yang",
   role: "Senior Software Engineer",
-  summary:
-    "Fullstack and mobile engineer building AI platforms, consumer apps, and the tools that help teams ship them.",
-  location: "Boston, MA",
+  summary: "Fullstack engineer building AI tooling and consumer apps.",
 };
 
 export const impacts: Impact[] = [
@@ -38,7 +35,6 @@ export const roles: Role[] = [
     company: "Whoop",
     title: "Senior Software Engineer",
     focus: "AI Platform, Fullstack/Mobile",
-    location: "Boston, MA",
     start: "Jan 2026",
     end: "Present",
     current: true,
@@ -51,7 +47,6 @@ export const roles: Role[] = [
     company: "DraftKings",
     title: "Software Engineer",
     focus: "Sportsbook, Android",
-    location: "Boston, MA",
     start: "Sep 2022",
     end: "Dec 2025",
     highlights: [
@@ -63,7 +58,6 @@ export const roles: Role[] = [
     company: "Tesla",
     title: "Software Engineer Co-op",
     focus: "Fullstack/Web",
-    location: "Boston, MA",
     start: "Jan 2021",
     end: "Aug 2021",
     highlights: [
@@ -75,7 +69,6 @@ export const roles: Role[] = [
     company: "Campfire Technology",
     title: "Lead Developer Co-op",
     focus: "Fullstack/Web",
-    location: "Boston, MA",
     start: "Jan 2020",
     end: "Aug 2020",
     highlights: [
@@ -89,7 +82,6 @@ export const education = {
   school: "Northeastern University",
   college: "Khoury College of Computer and Information Science",
   degree: "Bachelor of Science in Computer Science",
-  location: "Boston, MA",
   start: "Sep 2017",
   end: "Apr 2022",
   gpa: "3.72",

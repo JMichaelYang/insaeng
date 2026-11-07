@@ -37,7 +37,7 @@ export function Timeline() {
               </div>
               <p className="type-label text-on-surface">{role.title}</p>
               <p className="type-body-sm text-on-surface-variant">
-                {role.focus} · {role.location}
+                {role.focus}
               </p>
             </div>
             <ul className="
