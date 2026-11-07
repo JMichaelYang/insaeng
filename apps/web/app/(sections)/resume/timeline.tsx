@@ -5,8 +5,6 @@ import { Highlighted } from "./highlighted";
 import { Dates } from "./panel";
 import { roles } from "./resume";
 
-const markerWobble = { amplitude: 1, wavelength: 5 };
-
 export function Timeline() {
   return (
     <div className="relative">
@@ -19,20 +17,15 @@ export function Timeline() {
       <ol className="relative flex flex-col gap-10">
         {roles.map((role) => (
           <li key={role.company} className="relative flex flex-col gap-3 pl-10">
-            <WobbleBox
+            <span
               aria-hidden
-              wobble={markerWobble}
-              shape="circle"
-              className="absolute top-0.5 -left-0.5 size-6"
-            >
-              <span
-                className={
-                  role.current
-                    ? "block size-full bg-primary"
-                    : "block size-full bg-surface"
-                }
-              />
-            </WobbleBox>
+              className={`
+                absolute top-0.5 -left-0.5 size-6 rounded-full border-thick
+                border-on-surface
+                lg:border-thicker
+                ${role.current ? "bg-primary" : "bg-surface"}
+              `}
+            />
             <div className="flex flex-col gap-1">
               <div className="
                 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1
