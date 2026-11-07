@@ -6,7 +6,14 @@ import { dreams, heading } from "./dreams";
 
 export default function DreamsPage() {
   return (
-    <SectionPage slug="dreams" className="flex-1 justify-center">
+    <SectionPage
+      slug="dreams"
+      className="
+        flex-1 justify-center px-8
+        md:px-12
+        lg:px-8
+      "
+    >
       <h1 className="text-center type-display text-on-surface">{heading}</h1>
       <ul className="
         grid gap-6
@@ -17,7 +24,7 @@ export default function DreamsPage() {
           <li key={dream}>
             <Card
               wobble={wobble}
-              tone="translucent"
+              tone="none"
               className="h-full"
               contentClassName="
                 justify-center p-6 text-center
