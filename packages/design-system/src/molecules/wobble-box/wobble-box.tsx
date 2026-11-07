@@ -5,9 +5,11 @@ import { useMemo, useRef, type ComponentProps } from "react";
 import { mergeClasses } from "../../utils/merge-classes";
 import { useFrame } from "./use-frame";
 import type { WedgeWobble } from "../../organisms/wedges/wedge-geometry";
+import { wobbleCircle } from "./wobble-circle";
 import { wobbleRect, type WobbleEdges } from "./wobble-rect";
 
-const strokeWidth = 4;
+const strokeWidth = 2;
+const lgStrokeWidth = 3;
 const allEdges: WobbleEdges = {
   top: true,
   right: true,
@@ -19,6 +21,8 @@ export function WobbleBox({
   wobble,
   lgWobble = wobble,
   edges = allEdges,
+  shape = "rect",
+  lineClassName = "stroke-on-surface",
   className,
   children,
   ...props
@@ -26,19 +30,21 @@ export function WobbleBox({
   wobble: WedgeWobble;
   lgWobble?: WedgeWobble;
   edges?: WobbleEdges;
+  shape?: "rect" | "circle";
+  lineClassName?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const frame = useFrame(ref);
 
-  const shape = useMemo(() => {
+  const outline = useMemo(() => {
     if (!frame || frame.width <= 0 || frame.height <= 0) return null;
-    return wobbleRect({
+    const box = {
       width: frame.width,
       height: frame.height,
       wobble: frame.lg ? lgWobble : wobble,
-      edges,
-    });
-  }, [frame, wobble, lgWobble, edges]);
+    };
+    return shape === "circle" ? wobbleCircle(box) : wobbleRect({ ...box, edges });
+  }, [frame, wobble, lgWobble, edges, shape]);
 
   return (
     <div
@@ -48,11 +54,11 @@ export function WobbleBox({
     >
       <div
         className="size-full"
-        style={shape ? { clipPath: `path("${shape.path}")` } : undefined}
+        style={outline ? { clipPath: `path("${outline.path}")` } : undefined}
       >
         {children}
       </div>
-      {shape?.lines && (
+      {outline?.lines && (
         <svg
           className="
             pointer-events-none absolute inset-0 size-full overflow-visible
@@ -60,9 +66,9 @@ export function WobbleBox({
           aria-hidden
         >
           <path
-            className="fill-none stroke-on-surface"
-            d={shape.lines}
-            strokeWidth={strokeWidth}
+            className={mergeClasses("fill-none", lineClassName)}
+            d={outline.lines}
+            strokeWidth={frame?.lg ? lgStrokeWidth : strokeWidth}
             strokeLinejoin="round"
           />
         </svg>

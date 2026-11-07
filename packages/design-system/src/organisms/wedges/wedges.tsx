@@ -202,6 +202,7 @@ export function Wedges({
         className="
           pointer-events-none absolute inset-0 flex items-center justify-center
         "
+        style={{ zIndex: stack.length + 1 }}
       >
         <div className="pointer-events-auto">
           <CenterContext value={center ?? null}>{children}</CenterContext>

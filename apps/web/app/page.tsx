@@ -92,7 +92,7 @@ export default function Home() {
       >
         <ViewTransition name={headshotTransition} share="morph" default="none">
           <WedgesCenter>
-            <Avatar shape="square" className="
+            <Avatar className="
               size-[11.5rem]
               lg:size-[25rem]
             ">

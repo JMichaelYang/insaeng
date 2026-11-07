@@ -14,10 +14,9 @@ import { ViewTransition } from "react";
 
 import { headshot, headshotSizes, headshotTransition } from "../headshot";
 import { type Section, sectionHref, sections } from "../sections";
-import { lgWobble, wobble } from "../wobble";
+import { avatarWobble, lgAvatarWobble, wobble } from "../wobble";
 
-const bottomEdge = { bottom: true };
-const avatarEdges = { right: true, bottom: true, left: true };
+const navTransition = "section-nav";
 
 function navItems(
   group: readonly Section[],
@@ -33,18 +32,30 @@ function navItems(
 export function SectionNav() {
   const current = useSelectedLayoutSegment();
   return (
-    <header className="
-      sticky top-0 z-sticky h-16
-      lg:h-20
-    ">
-      <WobbleBox
-        wobble={wobble}
-        lgWobble={lgWobble}
-        edges={bottomEdge}
-        className="absolute inset-0"
-      >
-        <div className="size-full bg-primary-container" />
-      </WobbleBox>
+    <header
+      className="
+        sticky top-0 z-sticky h-16 text-on-surface
+        lg:h-20
+      "
+      style={{ viewTransitionName: navTransition }}
+    >
+      <div className="absolute inset-0 flex justify-center">
+        <ViewTransition name={headshotTransition} share="morph" default="none">
+          <WobbleBox
+            wobble={avatarWobble}
+            lgWobble={lgAvatarWobble}
+            shape="circle"
+            className="
+              mt-2 size-12
+              lg:size-16
+            "
+          >
+            <Avatar className="size-full">
+              <Image {...headshot} alt="" sizes={headshotSizes.nav} preload />
+            </Avatar>
+          </WobbleBox>
+        </ViewTransition>
+      </div>
       <nav
         aria-label="Sections"
         className="
@@ -55,7 +66,7 @@ export function SectionNav() {
       >
         <NavMenu
           label="Sections"
-          items={navItems(sections.flat(), current)}
+          groups={sections.map((group) => navItems(group, current))}
           wobble={wobble}
           component={Link}
           className="
@@ -74,28 +85,11 @@ export function SectionNav() {
         <Link
           href="/"
           aria-label="Home"
-          className="col-start-2 row-start-1 self-start"
-        >
-          <ViewTransition
-            name={headshotTransition}
-            share="morph"
-            default="none"
-          >
-            <WobbleBox
-              wobble={wobble}
-              lgWobble={lgWobble}
-              edges={avatarEdges}
-              className="
-                size-20
-                lg:size-24
-              "
-            >
-              <Avatar shape="square" className="size-full">
-                <Image {...headshot} alt="" sizes={headshotSizes.nav} preload />
-              </Avatar>
-            </WobbleBox>
-          </ViewTransition>
-        </Link>
+          className="
+            col-start-2 row-start-1 mt-2 size-12 self-start
+            lg:size-16
+          "
+        />
         <NavLinks
           items={navItems(sections[1], current)}
           component={Link}
