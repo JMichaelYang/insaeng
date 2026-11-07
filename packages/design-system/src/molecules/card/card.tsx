@@ -9,6 +9,7 @@ const tones = {
   low: "bg-surface-container-low",
   default: "bg-surface-container",
   high: "bg-surface-container-high",
+  translucent: "bg-surface/75",
 } as const;
 
 export type CardTone = keyof typeof tones;
